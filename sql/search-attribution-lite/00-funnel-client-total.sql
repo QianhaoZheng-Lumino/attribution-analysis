@@ -1,0 +1,4 @@
+-- 00-funnel-client-total | 【已弃用合并版】MCP 易 500
+-- 请改用：
+--   00a-funnel-search-total.sql  +  00b-funnel-precheck-total.sql
+-- Agent 本地合并：查验比 = current_avail_search / current_period_precheck（来自 00a + 00b）
