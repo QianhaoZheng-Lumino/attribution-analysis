@@ -7,7 +7,7 @@ Agent 在跑 lite SQL 前，先按 Phase 1 相同规则计算日期，填入占�
 | 占位符 | 说明 | Agoda 示例 |
 |--------|------|------------|
 | `{client_id}` | 机构 client（Phase 2/3 必填） | `Agoda` |
-| `{sid_list}` | **SH：checklist/08-sh.sql 与 detail/08-sh-hotel-bks-lite.sql**。结构 SID：2b 锁定，或占本案 \|ΔBKS\|≥10%。整数逗号分隔。无结构 SID 时用 02-sid \|change\| Top3。禁止空列表、禁止用 clientid 滤 SH | `26, 95, 61` |
+| `{sid_list}` | **SH**（`checklist/08-sh.sql`、`detail/08-sh-hotel-bks-lite.sql`）、**SS**（`search-attribution-lite/01-ss-supplier.sql`）、**限流**（`rate-limit-lite/01-ss-supplier-window.sql`）共用。结构 SID：2b 锁定，或占本案 \|ΔBKS\|≥10%。整数逗号分隔。无结构 SID 时用 02-sid \|change\| Top3。禁止空列表 `IN ()`。SH 禁止用 clientid | `26, 95, 61` |
 | `{parent_client_id}` | 父 client（仅 resolve 用） | 空或 `Agoda` |
 | `{analysis_date}` | 异动锚点 | `2026-03-20` |
 | `{w_start}` | 配置窗口起 = analysis_date - 1 | `2026-03-19` |

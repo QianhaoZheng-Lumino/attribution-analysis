@@ -33,7 +33,9 @@
 
 ## 何时查（2026-09-04 #18 定稿）
 
-**出数 SID（OR）：** 2b **锁定** SID，或 `02-sid` 占 client **\|ΔBKS\| ≥10%**。未锁定且 \<10% → 不查。SS 无行 → 「未查（SS 无行）」。
+**出数 SID（OR）：** 2b **锁定** SID，或 `02-sid` 占 client **\|ΔBKS\| ≥10%**。把这些 SID 填进 **`{sid_list}`**（与 SH / `01-ss-supplier` 同一套；整数逗号分隔；禁止空 `IN ()`）。未锁定且 \<10% → 不查。SS 无行 → 「未查（SS 无行）」。
+
+**禁止**只跑全表 `ORDER BY ss_rate_limit_pct_delta_pp DESC LIMIT 50` 就写结构 SID「未返回」——涨尾 SID 会被截掉。圈定 `{sid_list}` 后再 `LIMIT 50` 无害。
 
 **SS 有价率 / 请求量 \|WoW\| > 10%：** 只决定解读档（涨跌双向），**不是**出数门。结构 SID 未过 10% **仍出表**，用于排除限流主因。
 
@@ -57,7 +59,7 @@
 | 日期 | `date` | `log_date` |
 | 窗口 | 同 `params-template.md` | **相同** current / compare 窗 |
 
-**推荐顺序：** 先跑 `search-attribution-lite/01-ss-supplier.sql` → 对有价率或请求量 **\|WoW\| > 10%** 的 Top supplier 跑本文件。
+**推荐顺序：** 先按 2b / \|ΔBKS\|≥10% 填好 `{sid_list}`，再跑 `search-attribution-lite/01-ss-supplier.sql` 与本文件（同一 `{sid_list}`）。有价率 / 请求量 \|WoW\| 只决定解读档，不决定出哪些 SID。全表 LIMIT 不能代替结构 SID。
 
 ## 文件
 
@@ -81,4 +83,4 @@
 | `log_date >= '…' AND log_date <= '…'` + `GROUP BY supplierid` | ✅ |
 | `BETWEEN …::date` + `GROUP BY supplierid` | ❌ **500** |
 
-**仍 500 时：** 对 Phase 2 Top SID **一次一个 supplier**，或 current / compare **分两窗**各跑一条简单 `SUM`。
+**仍 500 时：** 对 `{sid_list}` 里的 SID **一次一个 supplier**，或 current / compare **分两窗**各跑一条简单 `SUM`。

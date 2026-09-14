@@ -217,6 +217,8 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 
 未锁定且占变化 \<10% → **不查**该 SID。无 SS 行（Agoda/HBGPKG 窗 empty）→ 写「未查（SS 无行）」。
 
+**SQL（2026-09-14）：** `search-attribution-lite/01-ss-supplier.sql` 与 `rate-limit-lite/01-ss-supplier-window.sql` **必填 `{sid_list}`**（与 SH 同定义）。全表 `ORDER BY`+`LIMIT 50` 会截涨尾 SID（YandexTravel2C 116），禁止据此写「未覆盖/未返回」。
+
 **10% 只决定解读档，不是出数门：**
 
 | SS 有价率或请求量 \|WoW\| | 出表后怎么写 |

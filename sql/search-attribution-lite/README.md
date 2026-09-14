@@ -28,12 +28,12 @@ Skill 里 **funnel** 有两层含义，**不是业务方口头黑话**，来自 
 ## 使用顺序
 
 ```
-Step 0  ../params-template.md 填占位符
+Step 0  ../params-template.md 填占位符（含 **{sid_list}**）
 Step 1  00-client-total.sql            机构总量（ads）
 Step 1' ads 500 时 **分两查**（禁止合并 CTE/标量子查询）：
         00a-funnel-search-total.sql   funnel 查价 + 有价率
         00b-funnel-precheck-total.sql client 验价量 → Agent 本地算查验比
-Step 2  01-ss-supplier.sql            【必跑】Top supplier 结构；**不可替代 Step 1/1'**
+Step 2  01-ss-supplier.sql            【必跑】**必填 {sid_list}**（与 SH 同一套：2b 锁定或 \|ΔBKS\|≥10%；无则 02-sid \|change\| Top3）。禁止空 `IN ()`。禁止只跑全表 `ORDER BY`+`LIMIT 50` 就写「未覆盖涨尾」。**不可替代 Step 1/1'**
 Step 3  02-country.sql 等       对齐 Phase 2c Top 维
 ```
 
@@ -41,7 +41,7 @@ Step 3  02-country.sql 等       对齐 Phase 2c Top 维
 
 | 2b | 优先跑 |
 |----|--------|
-| CS / S | `01-ss-supplier.sql`（Top supplier id） |
+| CS / S | `01-ss-supplier.sql`（**必填 `{sid_list}`**） |
 | C/Dida | `00-client-total` + `02-country` / `03-chain` |
 | 结构维 | `04-los` / `05-leadtime` / `06-nationality` |
 
@@ -65,6 +65,7 @@ Step 3  02-country.sql 等       对齐 Phase 2c Top 维
 | 案例 | 文件 | 结果 |
 |------|------|------|
 | HBGPKG 2026-07-06 | 01-ss-supplier | ✅ Meituan 224 / EPS 116 可查 |
+| YandexTravel2C 2026-08-31 | 01-ss-supplier `{sid_list}=116, 26` | ✅ 结构 SID 必出（全表 ASC LIMIT 50 会截掉 116） |
 | Agoda 2026-03-13~26 | 00-client-total（`dt` 字符串区间） | ✅ 机构 PPS 聚合 |
 | CVCTrend 2026-07-10~23 | 00-client-total（`dt` 字符串区间） | ✅ 与 `dt::date` 口径一致 |
 | Check24App / DidaOpaq | 同上 | ✅ |

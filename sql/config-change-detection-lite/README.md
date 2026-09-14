@@ -9,7 +9,7 @@
 ## 推荐流程
 
 ```
-Step 0  填占位符（client_id, analysis_date, w_start/w_end, 产量窗口；**SH 另填 {sid_list}**）
+Step 0  填占位符（client_id, analysis_date, w_start/w_end, 产量窗口；**SH 必填 {sid_list}**；SS/限流用同一套，见 params-template）
 Step 1  02-client-before-after-bks.sql     → 机构级 before/after（必做）
 Step 2  checklist/01-cs.sql … 14-*.sql     → 14 行清单（逐条 MCP，含 0 也要跑；**Read 文件原文执行，禁止手写**）
 Step 3  event_count > 0 的 level           → 按下表跑明细

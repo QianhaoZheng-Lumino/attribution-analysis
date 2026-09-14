@@ -154,6 +154,7 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 
 1. **先查口径再下结论**：同一指标可能有 checkout/checkin/create 多个版本，务必确认统计周期。
 2. **MCP 硬规则（3a）：一次调用 = 一个 lite 文件。** `execute_sql` 的 SQL **必须**来自 `Read` 对应 `checklist/` 或 `detail/` 原文，只替换占位符。**禁止**手写、凭记忆、抄别的 level 改一改。**禁止**执行 `sql/config-change-detection-lite/03-fourteen-level-checklist.sql`，以及任何 14 路 / 多表 UNION。违反 = 配置结论作废；500 标「未验」，不得写成 0。
+2b. **`{sid_list}` 必填：** SH、SS `01-ss-supplier`、限流 `01-ss-supplier-window` 共用（2b 锁定或 \|ΔBKS\|≥10%；无则 02-sid \|change\| Top3）。禁止空 `IN ()`。禁止只靠全表 `ORDER BY`+`LIMIT 50` 写结构 SID「未覆盖涨尾 / 未返回」。
 3. **权限约束**：`execute_sql` 结果受 `agent_user_key` 对应账号的行级权限影响。无 MCP / 未认证 → 停，不要用别人的 key。
 4. **未支持（不要当已落地）：** #23 机构供应商白名单现为配置快照，**禁止**当 3a 变更证据；#3 DidaBase 专用表**没有**，CS 查价只用 SS 近似。
 5. **Limit 数据量**：`execute_sql` 最多 1 万行，SQL 末尾加 LIMIT。

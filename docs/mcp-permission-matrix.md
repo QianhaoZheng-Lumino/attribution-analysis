@@ -75,9 +75,9 @@
 | 模块 | lite 文件 | MCP | fallback |
 |------|-----------|-----|----------|
 | 3b 机构 PPS | `search-attribution-lite/00-client-total.sql` | ✅ `dt` 为 text，用字符串区间（勿 `stat_date` / `dt::date`）；Agoda/CVCTrend/Check24App/DidaOpaq ✅ | **`00a`+`00b` funnel**（仍 500 或需口径对齐时） |
-| 3b SS supplier | `01-ss-supplier.sql` | ✅ 多数可用 | — |
+| 3b SS supplier | `01-ss-supplier.sql` | ✅ 多数可用；**必填 `{sid_list}`** | 全表 LIMIT 50 会截涨尾；500 再逐 SID |
 | 3b country/chain | `02-didabiz-pps-country.sql` 等 | ⚠️ 待回归 | SS 结构 + 产量 2c |
-| 限流 | `rate-limit-lite/01-ss-supplier-window.sql` | ✅ | Top SID 逐个查 |
+| 限流 | `rate-limit-lite/01-ss-supplier-window.sql` | ✅ **必填 `{sid_list}`** | 仍 500 时 `{sid_list}` 逐个查 |
 | 在线时长 | **`03-window-avg.sql`**（默认）或 `online-hours.sql` | ✅ 等值 `client_id`；开窗 SQL 已复测 | 仍 500 → fetch + **`scripts/test-online-hours.py`**；禁止无 client 全表 |
 | 外部 D | `external-events-lite/01-single-country-window.sql` | ✅ | — |
 | Phase 1 | `anomaly-detection-lite/` 01–03 | ✅ | 勿跑完整 anomaly-detection.sql |
