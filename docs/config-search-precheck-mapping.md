@@ -148,7 +148,7 @@ HBGPKG×Meituan 类问题：**CS scope** 对齐 client + supplier。
 
 ### 何时查（2026-09-04 #18 定稿）
 
-**出数 SID：** 2b 锁定，或占 client \|ΔBKS\| **≥10%** → **必跑** `rate-limit-lite`。  
+**出数 SID：** 2b 锁定，或占 client \|ΔBKS\| **≥10%** → **必跑** `rate-limit-lite`（SQL **必填 `{sid_list}`**，与 SH / `01-ss-supplier` 同一套；禁止全表 LIMIT 代替结构 SID）。  
 **SS 有价率 / 请求量 \|WoW\| > 10%：** 只决定解读档（涨跌双向），结构 SID 未过 10% **仍出表**（排除用）。
 
 | 3b 异动（\|WoW\| > 10%） | 查限流表 | 已定解读 |

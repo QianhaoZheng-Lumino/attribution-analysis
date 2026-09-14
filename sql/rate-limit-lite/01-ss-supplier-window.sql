@@ -1,6 +1,9 @@
 -- 01-ss-supplier-window | SS限流率 + 缓存命中率 + 背景信号（SS通过率 / 命中只吐缓存率）
 -- 占位符与 search-attribution-lite / params-template 一致：
---   {client_id} {analysis_date} {current_end} {compare_start} {compare_end}
+--   {client_id} {sid_list} {analysis_date} {current_end} {compare_start} {compare_end}
+-- {sid_list} = 2b 锁定 SID，或占本案 |ΔBKS|≥10% 的 SID，逗号分隔整数，如 26, 95, 61
+-- 无结构 SID 时填 02-sid |change| Top3。禁止 IN () 空列表
+-- 全表 ORDER BY ss_rate_limit_pct_delta_pp DESC LIMIT 50 会截掉涨尾 SID，禁止据此写「未返回」
 -- 表：dws.dws_hotel_flow_didamonitor_supplier_csa_di（log_date 对齐 SS 查价 date 窗口）
 -- 不筛 biztype；SUM 全部 supplieraccountid
 -- SS限流率 = limit/requests；SS通过率 = pass/requests（背景）；废弃 not_limit_requests_num
@@ -95,6 +98,7 @@ SELECT
     ) AS read_only_cache_pct_delta_pp
 FROM dws.dws_hotel_flow_didamonitor_supplier_csa_di
 WHERE clientid = '{client_id}'
+    AND supplierid IN ({sid_list})
     AND log_date >= '{compare_start}' AND log_date <= '{current_end}'
 GROUP BY supplierid
 HAVING SUM(CASE WHEN log_date >= '{analysis_date}' AND log_date <= '{current_end}' THEN requests_num ELSE 0 END) > 0
