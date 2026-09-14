@@ -1,0 +1,53 @@
+holiday_key,country_code,year,start_date,end_date,duration_days,source,ads_patterns,ads_exclude_patterns,notes
+AU.AUSTRALIA_DAY,AU,2024,2024-01-26,2024-01-26,1,holidays.AU,%Australia Day%,,
+AU.AUSTRALIA_DAY,AU,2025,2025-01-26,2025-01-26,1,holidays.AU,%Australia Day%,,
+AU.AUSTRALIA_DAY,AU,2026,2026-01-26,2026-01-26,1,holidays.AU,%Australia Day%,,
+CN.NATIONAL_DAY,CN,2024,2024-10-01,2024-10-03,3,holidays.CN,%National Day%|%国庆%,,
+CN.NATIONAL_DAY,CN,2025,2025-10-01,2025-10-03,3,holidays.CN,%National Day%|%国庆%,,
+CN.NATIONAL_DAY,CN,2026,2026-10-01,2026-10-03,3,holidays.CN,%National Day%|%国庆%,,
+CN.NATIONAL_DAY,CN,2026,2026-10-05,2026-10-05,1,holidays.CN,%National Day%|%国庆%,,
+CN.SPRING_FESTIVAL,CN,2024,2024-02-10,2024-02-14,5,holidays.CN,%Spring Festival%|%春节%|%Chun%,,Library uses Chinese names; merge consecutive days.
+CN.SPRING_FESTIVAL,CN,2025,2025-01-29,2025-01-31,3,holidays.CN,%Spring Festival%|%春节%|%Chun%,,Library uses Chinese names; merge consecutive days.
+CN.SPRING_FESTIVAL,CN,2026,2026-02-17,2026-02-19,3,holidays.CN,%Spring Festival%|%春节%|%Chun%,,Library uses Chinese names; merge consecutive days.
+GB.MAY_DAY,GB,2024,2024-05-06,2024-05-06,1,holidays.GB,%May Day%|%Early May%|%May Bank%,,
+GB.MAY_DAY,GB,2025,2025-05-05,2025-05-05,1,holidays.GB,%May Day%|%Early May%|%May Bank%,,
+GB.MAY_DAY,GB,2026,2026-05-04,2026-05-04,1,holidays.GB,%May Day%|%Early May%|%May Bank%,,
+ID.IDUL_ADHA,ID,2024,2024-06-17,2024-06-17,1,holidays.ID,%Idul Adha%|%Idul Adha%,Fitri|Waisak,
+ID.IDUL_ADHA,ID,2025,2025-06-06,2025-06-06,1,holidays.ID,%Idul Adha%|%Idul Adha%,Fitri|Waisak,
+ID.IDUL_ADHA,ID,2026,2026-05-27,2026-05-27,1,holidays.ID,%Idul Adha%|%Idul Adha%,Fitri|Waisak,
+ID.IDUL_FITRI,ID,2024,2024-04-10,2024-04-10,1,holidays.ID,%Idul Fitri%|%Hari Raya Idul Fitri%,Adha|Waisak,
+ID.IDUL_FITRI,ID,2025,2025-03-31,2025-03-31,1,holidays.ID,%Idul Fitri%|%Hari Raya Idul Fitri%,Adha|Waisak,
+ID.IDUL_FITRI,ID,2026,2026-03-20,2026-03-20,1,holidays.ID,%Idul Fitri%|%Hari Raya Idul Fitri%,Adha|Waisak,
+JP.GOLDEN_WEEK,JP,2024,2024-04-29,2024-05-06,8,holidays.JP,%Golden Week%|%Showa%|%Constitution%|%Greenery%|%Children%,,Apr 29–May 6 window: all JP public holidays in range merged.
+JP.GOLDEN_WEEK,JP,2025,2025-04-29,2025-05-06,8,holidays.JP,%Golden Week%|%Showa%|%Constitution%|%Greenery%|%Children%,,Apr 29–May 6 window: all JP public holidays in range merged.
+JP.GOLDEN_WEEK,JP,2026,2026-04-29,2026-05-06,8,holidays.JP,%Golden Week%|%Showa%|%Constitution%|%Greenery%|%Children%,,Apr 29–May 6 window: all JP public holidays in range merged.
+MY.HARI_RAYA_HAJI,MY,2024,2024-06-17,2024-06-17,1,holidays.MY,%Hari Raya Haji%|%Hari Raya Qurban%,%Puasa%,Library name: Qurban; ads table often: Haji.
+MY.HARI_RAYA_HAJI,MY,2025,2025-06-07,2025-06-07,1,holidays.MY,%Hari Raya Haji%|%Hari Raya Qurban%,%Puasa%,Library name: Qurban; ads table often: Haji.
+MY.HARI_RAYA_HAJI,MY,2026,2026-05-27,2026-05-27,1,holidays.MY,%Hari Raya Haji%|%Hari Raya Qurban%,%Puasa%,Library name: Qurban; ads table often: Haji.
+MY.HARI_RAYA_PUASA,MY,2024,2024-04-10,2024-04-10,1,holidays.MY,%Hari Raya Puasa%,%Haji%|%Qurban%,Library 2026+ may suffix (anggaran); still included. ads: Puasa / Puasa Holiday.
+MY.HARI_RAYA_PUASA,MY,2025,2025-03-31,2025-03-31,1,holidays.MY,%Hari Raya Puasa%,%Haji%|%Qurban%,Library 2026+ may suffix (anggaran); still included. ads: Puasa / Puasa Holiday.
+MY.HARI_RAYA_PUASA,MY,2026,2026-03-20,2026-03-20,1,holidays.MY,%Hari Raya Puasa%,%Haji%|%Qurban%,Library 2026+ may suffix (anggaran); still included. ads: Puasa / Puasa Holiday.
+PH.HOLY_WEEK,PH,2024,2024-03-28,2024-03-30,3,holidays.PH,%Maundy%|%Good Friday%|%Holy Week%,,Merge consecutive Easter-related days.
+PH.HOLY_WEEK,PH,2025,2025-04-17,2025-04-19,3,holidays.PH,%Maundy%|%Good Friday%|%Holy Week%,,Merge consecutive Easter-related days.
+PH.HOLY_WEEK,PH,2026,2026-04-02,2026-04-04,3,holidays.PH,%Maundy%|%Good Friday%|%Holy Week%,,Merge consecutive Easter-related days.
+SG.CHINESE_NEW_YEAR,SG,2024,2024-02-10,2024-02-12,3,holidays.SG,%Chinese New Year%|%春节%,,
+SG.CHINESE_NEW_YEAR,SG,2025,2025-01-29,2025-01-30,2,holidays.SG,%Chinese New Year%|%春节%,,
+SG.CHINESE_NEW_YEAR,SG,2026,2026-02-17,2026-02-18,2,holidays.SG,%Chinese New Year%|%春节%,,
+SG.HARI_RAYA_PUASA,SG,2024,2024-04-10,2024-04-10,1,holidays.SG,%Hari Raya Puasa%,%Haji%,
+SG.HARI_RAYA_PUASA,SG,2025,2025-03-31,2025-03-31,1,holidays.SG,%Hari Raya Puasa%,%Haji%,
+SG.HARI_RAYA_PUASA,SG,2026,2026-03-20,2026-03-20,1,holidays.SG,%Hari Raya Puasa%,%Haji%,
+TH.SONGKRAN,TH,2024,2024-04-13,2024-04-16,4,holidays.TH,%Songkran%,,
+TH.SONGKRAN,TH,2025,2025-04-13,2025-04-16,4,holidays.TH,%Songkran%,,
+TH.SONGKRAN,TH,2026,2026-04-13,2026-04-15,3,holidays.TH,%Songkran%,,
+US.CHRISTMAS,US,2024,2024-12-25,2024-12-25,1,holidays.US,%Christmas%,,Optional background; weak signal for B2B API.
+US.CHRISTMAS,US,2025,2025-12-25,2025-12-25,1,holidays.US,%Christmas%,,Optional background; weak signal for B2B API.
+US.CHRISTMAS,US,2026,2026-12-25,2026-12-25,1,holidays.US,%Christmas%,,Optional background; weak signal for B2B API.
+US.INDEPENDENCE_DAY,US,2024,2024-07-04,2024-07-04,1,holidays.US,%Independence Day%,Juneteenth,
+US.INDEPENDENCE_DAY,US,2025,2025-07-04,2025-07-04,1,holidays.US,%Independence Day%,Juneteenth,
+US.INDEPENDENCE_DAY,US,2026,2026-07-03,2026-07-04,2,holidays.US,%Independence Day%,Juneteenth,
+US.THANKSGIVING,US,2024,2024-11-28,2024-11-28,1,holidays.US,%Thanksgiving%,,
+US.THANKSGIVING,US,2025,2025-11-27,2025-11-27,1,holidays.US,%Thanksgiving%,,
+US.THANKSGIVING,US,2026,2026-11-26,2026-11-26,1,holidays.US,%Thanksgiving%,,
+VN.LUNAR_NEW_YEAR,VN,2024,2024-04-18,2024-04-18,1,holidays.VN,%Tet%|%Lunar New Year%|%New Year%,,
+VN.LUNAR_NEW_YEAR,VN,2025,2025-04-07,2025-04-07,1,holidays.VN,%Tet%|%Lunar New Year%|%New Year%,,
+VN.LUNAR_NEW_YEAR,VN,2026,2026-04-26,2026-04-27,2,holidays.VN,%Tet%|%Lunar New Year%|%New Year%,,

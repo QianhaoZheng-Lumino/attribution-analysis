@@ -1,0 +1,23 @@
+# 对话导出曾含明文 agent_user_key，禁止再入库
+docs/chat-export-*.md
+docs/export-chat.py
+
+# 分享包排除（本机可留，不推 GitHub）
+docs/briefing/
+docs/superpowers/
+.superpowers/
+docs/mcp-config-tables-error-report.md
+docs/plan-26-config-operation-rating.md
+docs/backlog.md
+examples/hbgpkg-rerun-20260706.md
+examples/phase3-signal-test-agoda.md
+examples/phase3-fourteen-level-didaopaq-20260206.md
+
+.DS_Store
+Thumbs.db
+*.pem
+.env
+.env.*
+mcp.json
+__pycache__/
+*.pyc
