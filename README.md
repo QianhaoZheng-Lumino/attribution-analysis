@@ -10,11 +10,11 @@
 把下面整段发给你的 Cursor / Claude Code / Codex Agent：
 
 ```text
-请把 GitHub 仓库 https://github.com/QianhaoZheng-Lumino/attribution-analysis 安装为 attribution-analysis Skill。
+请把公开 GitHub 仓库 https://github.com/QianhaoZheng-Lumino/attribution-analysis 安装为 attribution-analysis Skill（Public，无需登录即可 clone）。
 - Cursor：克隆到 ~/.cursor/skills/attribution-analysis/（Windows 为 %USERPROFILE%\.cursor\skills\attribution-analysis）
 - Claude Code：克隆到 ~/.claude/skills/attribution-analysis/
 - Codex：克隆到 ~/.agents/skills/attribution-analysis/
-要求该目录根下直接有 SKILL.md（不要多套一层文件夹）。仓库是 Private，如 clone 失败请用已登录 gh/git 的账号。
+要求该目录根下直接有 SKILL.md（不要多套一层文件夹）。
 我已配置 user-data-mcp（自己的 key）。安装后用于酒店 Overseas API 产量异动归因；先读 README.md「使用前注意事项」，再按 SKILL.md 执行模式跑。
 ```
 
