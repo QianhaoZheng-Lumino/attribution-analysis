@@ -160,8 +160,8 @@ Phase 1 进度:
 
 | 阶段 | 输入 | 输出 | 文件与硬规则 |
 |------|------|------|----------------|
-| Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
-| Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite。** 3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
+| Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。MCP lite 分批；BI 全量 1 次。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
+| Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite**：Read 对应 `checklist/` 或 `detail/` 原文只填占位符。3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
 | Phase 4 报告 | Phase 1–3 结论 | 成品报告 | 复制 [04-report-skeleton.md](phases/04-report-skeleton.md) 只填空；SOP [04-report.md](phases/04-report.md)。标题/表头锁定（#27）。ES 后续动作只按 [es-cause-catalog.md](docs/es-cause-catalog.md) |
 
 SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（2b 锁定或 \|ΔBKS\|≥10%；无则 `02-sid` Top3）。
