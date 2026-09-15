@@ -69,14 +69,12 @@ def check() -> list[str]:
         errs.append("README 缺 Cursor UI「From GitHub Repository」不可用的说明")
     if "不要把本仓库当普通项目打开" not in readme:
         errs.append("README 缺「不要当普通项目打开」")
-    if "打包排除" not in readme:
-        errs.append("README 缺「打包排除」清单（SKILL.md 改本 Skill 指向此处）")
+    if "分享包排除" not in read(".gitignore"):
+        errs.append(".gitignore 缺「分享包排除」")
+    gitignore = read(".gitignore")
     for item in PACK_EXCLUDE:
-        name = item.rstrip("/")
-        if "打包排除" in readme and name.split("/")[-1] not in readme and item not in readme:
-            # packing section must mention each excluded path or basename
-            if "打包排除" in readme:
-                errs.append(f"README 打包排除清单未列出 {item}")
+        if item not in gitignore:
+            errs.append(f".gitignore 分享包排除未列出 {item}")
 
     # --- metadata is not query ---
     if "不是查数" not in skill:
@@ -89,8 +87,8 @@ def check() -> list[str]:
         errs.append("tables.md SOP 未要求直接 execute_sql")
 
     # --- ES follow-up ---
-    if "目录 **B2**" not in skill:
-        errs.append("SKILL.md 缺 ES 后续动作目录句式")
+    if "es-cause-catalog.md" not in skill:
+        errs.append("SKILL.md 未指向 es-cause-catalog.md")
     for gold in sorted((ROOT / "examples").glob("gold-*.md")):
         text = gold.read_text(encoding="utf-8")
         if re.search(r"^-\s+\*\*Phase 4 P0：\*\*", text, re.M):
@@ -99,10 +97,13 @@ def check() -> list[str]:
             errs.append(f"{gold.name} ES 后续动作未引用目录编号")
 
     # --- fourteen-level trap ---
+    union_sql = ROOT / "sql/config-change-detection-lite/03-fourteen-level-checklist.sql"
+    if union_sql.exists():
+        errs.append("应删除 03-fourteen-level-checklist.sql，不要留在仓里给 Agent 去跑")
     if re.search(r"必须先跑.*03-fourteen-level-checklist", cfg):
         errs.append("sql/config-change-detection/README.md 仍要求 MCP 先跑 fourteen-level-checklist")
-    if "禁止" not in cfg_lite or "03-fourteen-level-checklist" not in cfg_lite:
-        errs.append("config-change-detection-lite/README.md 须明确禁止 MCP 跑 fourteen-level")
+    if "禁止" not in cfg_lite or "14 路" not in cfg_lite:
+        errs.append("config-change-detection-lite/README.md 须禁止 14 路 UNION")
 
     # --- lite placeholders ---
     if re.search(r"替换[^\n]*\{hist_end\}", sql02) or re.search(

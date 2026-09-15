@@ -1,8 +1,8 @@
 # Phase 3 Lite：配置检测分批 SQL（MCP 稳定版）
 
-完整版 `../config-change-detection.sql` 与 `03-fourteen-level-checklist.sql`（14 路 UNION）在 MCP 上易 **500**。
+完整版 `../config-change-detection.sql` 在 MCP 上易 **500**。
 
-**MCP 一律走本目录：一次调用 = 一个文件。禁止 `execute_sql` 跑 `03-fourteen-level-checklist.sql`。** 该文件仅 BI；违反 = 配置结论作废。
+**MCP 一律走本目录：一次调用 = 一个文件。禁止 14 路 / 多表 UNION。**
 
 参数说明见 [../params-template.md](../params-template.md)。
 
@@ -102,7 +102,7 @@ lite 的 `event_count` 可能**略高于**真实变更数（含重复快照）�
 | checklist/11-cslrc.sql | ✅ COUNT；明细按 SID 聚合（DidaOpaq 7 SID 全出） |
 | checklist/07-cdh.sql（hotel_log + clientid） | ⚠️ 条件可用（CVCTrend 7/17 n=92,485 ✅；1 行=1 酒店） |
 | search/01 按日 | ✅ CVCTrend 07-16～18 |
-| **03-fourteen-level-checklist.sql（UNION 14）** | ❌ **禁止** |
+| **14 路 UNION** | ❌ **禁止（仓内已无此文件）** |
 | **多表 UNION 批量（L2L～Configuration）** | ❌ **禁止** |
 
 ## 信号强度速查

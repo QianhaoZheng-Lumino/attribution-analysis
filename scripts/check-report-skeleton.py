@@ -307,7 +307,7 @@ def check_file(path: Path) -> list[str]:
     ):
         errs.append(
             "ES 后续动作须含「目录」+ 编号（A1–A7 / B1–B4 / C1–C3 / D1–D5 / E1）；"
-            "禁止空问流量/促销，禁止抄 gold「Phase 4 P0」。先 Read docs/es-cause-catalog.md"
+            "先 Read docs/es-cause-catalog.md"
         )
 
     # Table headers + required row labels

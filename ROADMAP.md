@@ -53,7 +53,7 @@ Phase 4  报告收口（合成 1→3d；数据说不清 → 查 es-cause-catalog
 - MCP 权限矩阵、在线时长开窗 SQL（#1/#20，Python 仅 fallback）、限流 lite + 出数规则（#2/#18）
 - 涨产 2b + 3b 机构级必跑、报告收口模板 + gold
 
-**未完成项只看维护者本机 backlog（见 README 打包排除，不进 GitHub）。** 禁止在本文件再开 checkbox / #N 表（#21）。新想法追加 backlog「扩展项」。
+**未完成项只看维护者本机 backlog。** 禁止在本文件再开 checkbox / #N 表（#21）。新想法追加 backlog「扩展项」。
 
 ## 已定方案（2026-07-28）
 

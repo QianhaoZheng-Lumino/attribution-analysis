@@ -17,7 +17,7 @@
 
 ## 14 类配置 level（均为 Dida 内部）
 
-见 [phases/03-evidence-verification.md](../../phases/03-evidence-verification.md)。**MCP 禁止**跑 [03-fourteen-level-checklist.sql](../config-change-detection-lite/03-fourteen-level-checklist.sql)（14 路 UNION 必 500；该文件仅 BI）。MCP 填满 14 行：走 [config-change-detection-lite](../config-change-detection-lite/) 的 `checklist/01`–`14`，一次一个文件。本目录完整 SQL 仅 BI / 本地库。
+见 [phases/03-evidence-verification.md](../../phases/03-evidence-verification.md)。MCP 填满 14 行：走 [config-change-detection-lite](../config-change-detection-lite/) 的 `checklist/01`–`14`，一次一个文件。**禁止** 14 路 UNION。本目录完整 SQL 仅 BI / 本地库。
 
 第 14 类 **Configuration** 来源：`configuration.client_configuration_change_log`（Wolf2.0 系统参数）。
 

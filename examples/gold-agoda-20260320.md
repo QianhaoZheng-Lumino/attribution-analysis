@@ -1,7 +1,7 @@
 # Agoda @ 2026-03-20 归因分析报告（Gold · 跌产 + C/Dida 主路径）
 
 > **执行模式：** 本案例 `need_attribution=否`，**仅因完整型 / gold 回归才跑 Phase 2–4**。日常归因型对话门禁否应停在 Phase 1。  
-> **金样例用途：** 跌产路径回归；2b **门 2：家数同向 ≥70% 且无单 SID≥50%** 才写死 C/Dida（本案 70.7%，Top SID 29.6%/28.5%）；3a 14/14 排除配置主因；3b 查价稳/产量降 → **倾向 C**；Top supplier **并列 S**；D 线 **MY 开斋节弱并列**。成品格式以 [04-report-skeleton.md](../phases/04-report-skeleton.md) 为准，本文 3a 表头不要抄。ES 键名是 **后续动作**（不要抄「Phase 4 P0」）。  
+> **金样例用途：** 跌产路径回归；2b **门 2：家数同向 ≥70% 且无单 SID≥50%** 才写死 C/Dida（本案 70.7%，Top SID 29.6%/28.5%）；3a 14/14 排除配置主因；3b 查价稳/产量降 → **倾向 C**；Top supplier **并列 S**；D 线 **MY 开斋节弱并列**。成品格式以 [04-report-skeleton.md](../phases/04-report-skeleton.md) 为准，本文 3a 表头不要抄。  
 > 模板：[phases/04-report.md](../phases/04-report.md) · lite 分批重跑 · `client_id = Agoda`
 
 ---

@@ -53,7 +53,7 @@
 **禁止写法：**
 
 - ❌ **手写 SQL 替代 checklist**（MCP 的 `sql` 必须来自 `Read checklist/NN-*.sql` 填参后的原文）
-- ❌ `03-fourteen-level-checklist.sql`（14 UNION）→ **必 500**
+- ❌ 14 路 UNION → **必 500**
 - ❌ 6 表 UNION 一次查 L2L～Configuration → **必 500**
 - ❌ 500 当 `event_count=0` → **禁止「已排除 Dida」**
 - ❌ 未 Read checklist 就把 500 标「MCP 未验」（常见假 500：`bottom_margin_log.clientid`、`configuration.updatedate`）
