@@ -75,6 +75,20 @@ description: >-
 
 渠道每日在线时长：MCP 默认 `sql/online-hours-lite/03-window-avg.sql`（两窗日均）或 `sql/online-hours.sql`（日表）；须 `{client_id}`。禁止手算日均。仅当开窗 SQL 仍 500 才拉 log 跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。
 
+## 失败模式（触发 → 一线 → 仍失败）
+
+| 触发 | 一线修复 | 仍失败兜底 |
+|------|----------|------------|
+| `user-data-mcp` 不可用 / 未认证 | 停。禁止手写 SQL、禁止编造产量/配置结论 | 告诉用户去配 MCP + 自己的 `agent_user_key`，本轮结束 |
+| `execute_sql` 返回 500 / 超时 | 确认 SQL 来自 **一个** lite 原文、只换了占位符；`timeout_seconds=30` 再跑同一文件一次 | 该步标「未验」。禁止写成 0、禁止改口「已排除」 |
+| 查询成功但 0 行 | 记「有表权限、当前过滤下 0 行」。禁止当无权限，禁止改分析范围换别的 client 凑数 | 权限自测同表 `SELECT 1` 有行 → 才可写业务 0；否则写「本账号看不到该范围」 |
+| `search_meta_data` 搜不到表 | **不要**据此判无权限；改 `execute_sql` `SELECT 1 LIMIT 1` | 仍失败按上一行 500/0 行分支 |
+| Phase 1 lite 任一步失败 | **串行**重跑该步（必须 01→02→03，禁止三步并行） | 缺哪步就缺哪项分数；禁止用单一环比凑结论 |
+| 探查型却准备进 2–4 | 停。输出 Phase 1 报告 | 问是否继续；用户未明确同意 → 结束 |
+| 归因型门禁是但范围仍是大盘 / 仅 parent、无 focus `client_id` | 停。列出异动 | 问指定 `client_id`；禁止自动 3a / 在线时长 / 限流 |
+| SH / SS / 限流 SQL 的 `{sid_list}` 为空 | 用 2b 锁定 SID，或 `02-sid` \|change\| Top3 填上 | 禁止空 `IN ()`，该查询标「未验」 |
+| 准备手写 SQL 或 14 路 UNION | 停。改 Read **一个** lite 原文 | 已发出的结果作废，不得写入报告 |
+
 ## Phase 1：异动识别
 
 详细流程见 [phases/01-anomaly-detection.md](phases/01-anomaly-detection.md)。
