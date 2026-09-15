@@ -1,7 +1,7 @@
 # Phase 3：内部证据验证
 
 > 状态：SQL 已定稿；**14 类逐项必查**为强制 SOP。Phase 2 完成后执行。**无 `client_id`（大盘）禁止进入** 3a / 在线 / 限流。  
-> **MCP 硬规则：** 禁止手写 SQL 替代 checklist/detail；禁止跑 `03-fourteen-level-checklist.sql` 及任何 14 路 / 多表 UNION。一次 MCP = 一个文件原文。
+> **MCP 硬规则：** 禁止手写 SQL 替代 checklist/detail；禁止 14 路 / 多表 UNION。一次 MCP = 一个文件原文。
 
 ## 目标
 
@@ -81,7 +81,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 
 1. Phase 3 **必须输出 14 行清单**，每一 level **一行**；`event_count=0` 也要写「无」并标 ✓，**禁止只报 CS/C/CDH**。
 2. **执行顺序（MCP 分批）：**
-   - **Step A** 逐条跑 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`（**禁止** UNION 版 `03-fourteen-level-checklist.sql`）
+   - **Step A** 逐条跑 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`（**禁止** 14 路 UNION）
    - **Step A'** 跑 `02-client-before-after-bks.sql` 取机构级产量
    - **Step B** 对 `event_count > 0` 的 level，按 `sql/config-change-detection-lite/README.md` Step 3 表跑列出的 detail 路径（**CBD 必跑** `detail/05-cbd-detail.sql`，**必须读 `remark` + 比 last_margin**；**S Bottom 必跑** `detail/13-s-bottom-detail.sql`，**禁止抄 C Bottom**）。10/11/04 必须 Read `detail/10-l2l-detail.sql`、`detail/11-cslrc-detail.sql`、`detail/04-csa-detail.sql`；禁止手写 last_level 列。
    - **Step B'（CDH/LCDH/SH 必跑）** CDH/LCDH：`event_count > 0` 跑 **`detail/07-cdh-hotel-bks-lite.sql`** / **`detail/09-lcdh-hotel-bks-lite.sql`**。SH：`event_count ≥ 10` 跑 **`detail/08-sh-hotel-bks-lite.sql`**（JOIN `supplierid`+`supplierhotelid`，禁止 `didahotelid` / `clientid` 滤日志；`<10` 不跑不解读；`>50000` 或 MCP 500 → BI）。均为 WITH 酒店清单 join 订单，按 SID/`didahotelid` 聚合 `before/after_hotel_bks`。

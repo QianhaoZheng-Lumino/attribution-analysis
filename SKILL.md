@@ -71,9 +71,7 @@ description: >-
 | `get_analyse_dimension` | Phase 2 指标平台下钻维度（BKS 下钻仍走 dimension-contribution-lite） |
 | `search_meta_data` | **不是查数。** 禁止用它代替 `execute_sql`、禁止当权限探测、禁止「先搜有没有这张表」 |
 
-**查数硬规则：** SOP 表名已知 → 直接 `execute_sql`。`search_meta_data` 搜不到 ≠ 没表 ≠ 没权限。仅当用户要探 **tables.md / lite 都没有的未知表** 才允许搜元数据，搜完仍须 `execute_sql` 才能下结论。
-
-常用指标见 [metrics.md](metrics.md)。表名见 [tables.md](tables.md)，直接 `execute_sql`，不要先搜元数据。
+常用指标见 [metrics.md](metrics.md)。表名见 [tables.md](tables.md)。
 
 渠道每日在线时长：MCP 默认 `sql/online-hours-lite/03-window-avg.sql`（两窗日均）或 `sql/online-hours.sql`（日表）；须 `{client_id}`。禁止手算日均。仅当开窗 SQL 仍 500 才拉 log 跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。
 
@@ -148,16 +146,14 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 | Phase 1 异动识别 | phases/01-anomaly-detection.md + sql/anomaly-detection-lite/ | ✅ |
 | Phase 2 定责下钻 | [phases/02-dimension-drilldown.md](phases/02-dimension-drilldown.md) | ✅ 2a→2b→2c（MCP lite 分批；BI 全量 1 次）。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
 | Phase 3 内部证据 | phases/03-evidence-verification.md | ✅ 3a/3b/3c/3d + 限流。**3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。MCP：禁止手写 SQL、禁止 14 路 UNION** |
-| Phase 4 报告收口 | [phases/04-report.md](phases/04-report.md) + [04-report-skeleton.md](phases/04-report-skeleton.md) | ✅ 标题/表头锁定（#27）；ES **后续动作**须 `目录 **B2**` 句式（#5），禁止抄 gold「Phase 4 P0」 |
+| Phase 4 报告收口 | [phases/04-report.md](phases/04-report.md) + [04-report-skeleton.md](phases/04-report-skeleton.md) | ✅ 标题/表头锁定（#27）；ES 后续动作见 [es-cause-catalog.md](docs/es-cause-catalog.md) |
 
 外部事件库：Phase 3d — [docs/external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/`。
 
 ## 注意事项
 
-0. **禁止用元数据代替查数。** Phase 1–3 一律 `execute_sql` + lite 原文。不要 `search_meta_data` 搜「订单/配置/在线」再决定能不能查。搜不到仍可能有 `execute_sql` 权限。
-0b. **ES 后续动作（#5）：** 写之前 **必须 Read** [docs/es-cause-catalog.md](docs/es-cause-catalog.md)。句式：`目录 **B2**（多数 SID 同降、无强配置）→ 可能渠道侧加价/摘量，运营问客户；禁止写成已确认`。必须出现 `目录` + 编号（A1–A7 / B1–B4 / C1–C3 / D1–D5 / E1），一案 1–2 条。D 组兑现 → 对内，禁止再套 B2 问渠道。**禁止**空问流量/促销；**禁止**抄 gold/case 的「Phase 4 P0」或未标编号的「问 XX 是否加权」。主因仍走 2b/3d，目录不改定责。
 1. **先查口径再下结论**：同一指标可能有 checkout/checkin/create 多个版本，务必确认统计周期。
-2. **MCP 硬规则（3a）：一次调用 = 一个 lite 文件。** `execute_sql` 的 SQL **必须**来自 `Read` 对应 `checklist/` 或 `detail/` 原文，只替换占位符。**禁止**手写、凭记忆、抄别的 level 改一改。**禁止**执行 `sql/config-change-detection-lite/03-fourteen-level-checklist.sql`，以及任何 14 路 / 多表 UNION。违反 = 配置结论作废；500 标「未验」，不得写成 0。
+2. **MCP 硬规则（3a）：一次调用 = 一个 lite 文件。** `execute_sql` 的 SQL **必须**来自 `Read` 对应 `checklist/` 或 `detail/` 原文，只替换占位符。**禁止**手写、凭记忆、抄别的 level 改一改。**禁止** 14 路 / 多表 UNION。违反 = 配置结论作废；500 标「未验」，不得写成 0。
 2b. **`{sid_list}` 必填：** SH、SS `01-ss-supplier`、限流 `01-ss-supplier-window` 共用（2b 锁定或 \|ΔBKS\|≥10%；无则 02-sid \|change\| Top3）。禁止空 `IN ()`。禁止只靠全表 `ORDER BY`+`LIMIT 50` 写结构 SID「未覆盖涨尾 / 未返回」。
 3. **权限约束**：`execute_sql` 结果受 `agent_user_key` 对应账号的行级权限影响。无 MCP / 未认证 → 停，不要用别人的 key。同事装完先按 [README.md](README.md)「权限自测」逐表 `SELECT 1 LIMIT 1`。500 ≠ 无权限；空结果可能是行级过滤；`search_meta_data` 搜不到仍可能有 `execute_sql` 权限。缺表标「未验」，不得写成 0。
 4. **未支持（不要当已落地）：** #23 机构供应商白名单现为配置快照，**禁止**当 3a 变更证据；#3 DidaBase 专用表**没有**，CS 查价只用 SS 近似。
@@ -167,7 +163,7 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 
 ## 示例
 
-意图判定见 [examples.md](examples.md)。回归定责只用 `examples/gold-*.md`。**ES 后续动作不要抄 gold「Phase 4 P0」**，以 [docs/es-cause-catalog.md](docs/es-cause-catalog.md) 句式为准。禁止把 `hbgpkg-rerun-*`、`phase3-signal-test-*`、`phase3-fourteen-level-*` 当 SOP。
+意图判定见 [examples.md](examples.md)。回归定责只用 `examples/gold-*.md`。ES 后续动作只按 [docs/es-cause-catalog.md](docs/es-cause-catalog.md)。
 
 ## 归因口径（Phase 3–4 必读）
 
@@ -181,9 +177,9 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 
 ## 改本 Skill（跑归因跳过）
 
-- [README.md](README.md) — 同事第一天 + **打包排除清单（以此为准）**
+- [README.md](README.md) — 同事第一天
 - [docs/decisions-summary.md](docs/decisions-summary.md) — 已拍板决策
-- 维护待办：本机 backlog（见 README 打包排除，**不进 GitHub**；跑归因不要 Read）
-- 改完验收：`python scripts/check-first-day.py`（安装/坏链/MCP 陷阱）+ `python scripts/check-report-skeleton.py`（ES 目录编号 + 骨架）
+- 维护待办仅本机（`.gitignore` 分享包排除；跑归因不要 Read）
+- 改完验收：`python scripts/check-first-day.py` + `python scripts/check-report-skeleton.py`
 
 禁止把 `mcp.json`、对话导出、真实 `agent_user_key` 写入仓库。

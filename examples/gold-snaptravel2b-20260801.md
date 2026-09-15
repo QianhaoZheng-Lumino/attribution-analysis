@@ -1,8 +1,7 @@
 # SnapTravel2B @ 2026-08-01 归因分析报告（Gold · 涨产 + S 主因）
 
 > **金样例用途：** 涨产路径回归测试；2b S 成分 + C 放大并列；3b 机构级必跑；3a 14/14；**D 线现行 SOP 因 S+验证 B 强而不查**（旧跑数仅对照）；限流双向触发报数。  
-> 模板：[phases/04-report.md](../phases/04-report.md) · lite 分批重跑 · `client_id = SnapTravel2B`  
-> **ES：** 成品键名是 **后续动作**（不是 Phase 4 P0）；编号以 [es-cause-catalog.md](../docs/es-cause-catalog.md) 为准。
+> 模板：[phases/04-report.md](../phases/04-report.md) · lite 分批重跑 · `client_id = SnapTravel2B`
 
 ---
 

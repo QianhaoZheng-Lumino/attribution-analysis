@@ -49,4 +49,4 @@ w_end          = analysis_date + 1 day
 }
 ```
 
-**规则：一次 MCP 调用 = 一个 SELECT 文件。禁止 UNION / 多层 CTE / LAG() 批量。禁止手写替代 checklist。`03-fourteen-level-checklist.sql` 禁止 MCP。**
+**规则：一次 MCP 调用 = 一个 SELECT 文件。禁止 UNION / 多层 CTE / LAG() 批量。禁止手写替代 checklist。禁止 14 路 UNION。**
