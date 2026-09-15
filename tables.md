@@ -1,5 +1,7 @@
 # 归因分析数据表清单
 
+**装完先测权限：** 探测 SQL 与缺表影响见 [README.md](README.md)「权限自测」。`search_meta_data` 搜不到仍可能有 `execute_sql` 权限。
+
 ## 使用方式
 
 1. **MCP 指标平台有注册的** → 用 `analyse_query`
