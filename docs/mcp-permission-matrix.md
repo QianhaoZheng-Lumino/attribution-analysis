@@ -46,8 +46,8 @@
 | 9 | LCDH | `checklist/09-lcdh.sql` | ⚠️ 大表 | **`detail/09-lcdh-hotel-bks-lite.sql`** | 同 CDH |
 | 10 | L2L | `checklist/10-l2l.sql` | COUNT ✅ | `detail/10-l2l-detail.sql` | 明细走 `detail/10-l2l-detail.sql` |
 | 11 | CSLRC | `checklist/11-cslrc.sql` | COUNT ✅ | `detail/11-cslrc-detail.sql` | 明细走 `detail/11-cslrc-detail.sql` |
-| 12 | C Bottom | `checklist/12-c-bottom.sql` | ✅ 稳定 | — | 过滤字段 **`item`**（非 clientid） |
-| 13 | S Bottom | `checklist/13-s-bottom.sql` | ✅ COUNT 稳定 | **`detail/13-s-bottom-detail.sql`** | 抄 C Bottom 用 `update_by` → 500；`item` = 供应商 |
+| 12 | C Bottom | `checklist/12-c-bottom.sql` | ✅ 稳定 | **`detail/12-c-bottom-detail.sql`** | `item`=client_id；操作人 **`update_user`**（没有 `update_by`） |
+| 13 | S Bottom | `checklist/13-s-bottom.sql` | ✅ COUNT 稳定 | **`detail/13-s-bottom-detail.sql`** | 操作人 `update_user`（与 C 相同）；`item` = 供应商 |
 | 14 | Configuration | `checklist/14-configuration.sql` | ✅ 稳定 | `detail/14-configuration-detail.sql`；`search/01-didabiz-pps-daily.sql` | 用 **`created_at`** + **14 key**；mandatory fees 是 **`DidaHotelMandatoryFeesConfig`**（`Confg` 表内 0 行） |
 
 **禁止写法：**

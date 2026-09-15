@@ -90,7 +90,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 4. MCP 分步探测时，**按下面 14 行表逐条打勾**，不得合并为「其他无」。
 5. **禁止手写替代 checklist（硬规则）：** MCP `execute_sql` 的 `sql` 参数 **必须** 来自 `Read checklist/NN-*.sql` → 替换 `{client_id}` 等占位符后的 **原文**；**禁止**凭记忆、类比其他 level、或「看起来差不多」自行写 SQL。
    - **错例（CVCTrend 回归）：** #12 手写 `clientid='…'`（`bottom_margin_log` 应为 **`item`**）；#14 手写 `updatedate`（应为 **`created_at`** + 14 key）；6 表 UNION 批量查 9–14 → 假 500。
-   - **错例（S Bottom）：** 抄 `12-c-bottom-detail.sql` 用 `update_by` → **必 500**。必须 Read `detail/13-s-bottom-detail.sql`（`update_user`；`item` = 供应商号）。
+   - **错例（S Bottom）：** 抄 `12-c-bottom-detail.sql` 会把 `item` 当成 client。必须 Read `detail/13-s-bottom-detail.sql`（`item` = 供应商号；操作人两边都是 `update_user`）。
    - **500 时：** 先 **Read 对应 checklist 文件** → 用原文 **重试 1 次**（可缩窗）→ 仍 500 才标 **「MCP 500 · 未验」**；**禁止**未读文件就把失败归因于「MCP 不稳定」。
    - **成品报告：** 3a **不写**来源文件列、**不开附录**。执行仍必须 Read checklist 原文（本规则）；MCP 500 写在对应节解读，不单独开附录。
 
@@ -131,8 +131,8 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 
 **S Bottom 特别提示：**
 
-- 与 C Bottom **同表**，列不同。`item` = **供应商号**（不是 client）。操作人 = **`update_user`**（不是 `update_by`）。
-- `event_count > 0` 必跑 **`detail/13-s-bottom-detail.sql`**。**禁止**抄 `12-c-bottom-detail.sql`（Check24 / DidaOpaq 曾因此 500）。
+- 与 C Bottom **同表**。`item` = **供应商号**（不是 client）。操作人两边都是 **`update_user`**（没有 `update_by`）。
+- `event_count > 0` 必跑 **`detail/13-s-bottom-detail.sql`**。**禁止**抄 `12-c-bottom-detail.sql`（item 口径不同）。
 - checklist 仍为 **全局 Supplier**（不加 client、不加 `{sid_list}`）。明细 `LIMIT 30`。
 
 **C Bottom 特别提示（高优先级）：**
