@@ -1,22 +1,24 @@
 # attribution-analysis
 
-酒店 Overseas API 产量异动归因（Cursor / Claude Code / Codex Skill）。  
+酒店 Overseas API 产量异动归因（Agent Skill，多 runtime）。  
 仓库：<https://github.com/QianhaoZheng-Lumino/attribution-analysis>
 
 **前提：** 你已有查数 MCP（`user-data-mcp`）和自己的 `agent_user_key`。本仓库不发 key、不开通权限。
 
 ## 给同事 Agent 的安装提示词（复制即用）
 
-把下面整段发给你的 Cursor / Claude Code / Codex Agent：
+把下面整段发给你的 skills-aware agent（Cursor / Claude Code / Codex 等均可）：
 
 ```text
 请把公开 GitHub 仓库 https://github.com/QianhaoZheng-Lumino/attribution-analysis 安装为 attribution-analysis Skill（Public，无需登录即可 clone）。
-- Cursor：克隆到 ~/.cursor/skills/attribution-analysis/（Windows 为 %USERPROFILE%\.cursor\skills\attribution-analysis）
-- Claude Code：克隆到 ~/.claude/skills/attribution-analysis/
-- Codex：克隆到 ~/.agents/skills/attribution-analysis/
-要求该目录根下直接有 SKILL.md（不要多套一层文件夹）。
+按当前 runtime 的 skills 目录克隆，根下必须直接有 SKILL.md（不要多套一层文件夹）：
+- Cursor：$HOME/.cursor/skills/attribution-analysis/（Windows 为 %USERPROFILE%\.cursor\skills\attribution-analysis）
+- Claude Code：$HOME/.claude/skills/attribution-analysis/
+- Codex：$HOME/.agents/skills/attribution-analysis/
 我已配置 user-data-mcp（自己的 key）。安装后用于酒店 Overseas API 产量异动归因；先读 README.md「使用前注意事项」并完成「权限自测」，再按 SKILL.md 执行模式跑。
 ```
+
+当前 runtime 没有 skills 目录时：把本仓库 `SKILL.md` 作为参考资料贴进对话即可（MCP 仍要自备）。
 
 也可自己执行（Cursor / Windows）。**不要**用 Customize → From GitHub Repository / Remote Rule：本仓没有 `.cursor-plugin/marketplace.json`，`SKILL.md` 在仓库根，UI 导入不会当成 Skill。
 
