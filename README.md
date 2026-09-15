@@ -18,27 +18,52 @@
 我已配置 user-data-mcp（自己的 key）。安装后用于酒店 Overseas API 产量异动归因；先读 README.md「使用前注意事项」并完成「权限自测」，再按 SKILL.md 执行模式跑。
 ```
 
-也可自己执行（Cursor 示例）：
+也可自己执行（Cursor / Windows）。**不要**用 Customize → From GitHub Repository / Remote Rule：本仓没有 `.cursor-plugin/marketplace.json`，`SKILL.md` 在仓库根，UI 导入不会当成 Skill。
+
+Git 常常不在 PATH。目录已存在时用 `pull`，不要再 `clone`。ZIP 解压不要多一层 `attribution-analysis-main`（最终必须是 `...\attribution-analysis\SKILL.md`）。
 
 ```powershell
-git clone https://github.com/QianhaoZheng-Lumino/attribution-analysis.git "$env:USERPROFILE\.cursor\skills\attribution-analysis"
+$git = "C:\Program Files\Git\cmd\git.exe"
+if (-not (Test-Path $git)) { $git = "git" }  # 已在 PATH 则用 git
+$dest = "$env:USERPROFILE\.cursor\skills\attribution-analysis"
+if (Test-Path (Join-Path $dest "SKILL.md")) {
+  & $git -C $dest pull --ff-only
+} else {
+  & $git clone https://github.com/QianhaoZheng-Lumino/attribution-analysis.git $dest
+}
 ```
 
-装完请**新开一轮对话**。不要把本仓库当普通项目打开就指望自动生效。
+MCP：Cursor Settings → MCP，或自己的 `~/.cursor/mcp.json`。URL / `agent_user_key` 向数据平台要；本仓只有占位符，不发 key。
+
+装完请**新开一轮对话**（必要时重启 Cursor）。不要把本仓库当普通项目打开就指望自动生效。
 
 ## 使用前注意事项
 
-1. MCP 必须已连上，且工具含 `execute_sql` / `analyse_query` / `search_meta_data` 等。不可用或未认证 → **停**，禁止手写 SQL。
+1. MCP 必须已连上，且工具含 `execute_sql`（查数主入口）/ `analyse_query` 等。不可用或未认证 → **停**，禁止手写 SQL。`search_meta_data` **不是**查数，禁止用它代替 `execute_sql`。
 2. 用**自己的** `agent_user_key`。不要把 `mcp.json` 或 key 写进本仓库。
 3. 探查（「有没有掉」「看看本周」）**只跑 Phase 1**，问一句是否继续。
 4. 「为什么掉 / 归因」且门禁过，**并且有 `client_id`**（或 parent 下已锁定 focus）才自动 Phase 2–4。大盘禁止自动 3a / 在线时长 / 限流。
-5. 报告：复制 `phases/04-report-skeleton.md` 只填空，跑 `python scripts/check-report-skeleton.py 报告.md`。不要抄 gold 的旧 3a 表头。
+5. 报告：复制 `phases/04-report-skeleton.md` 只填空，跑 `python scripts/check-report-skeleton.py 报告.md`。不要抄 gold 的旧 3a 表头、也不要抄 gold「Phase 4 P0」。ES **后续动作**须 `目录 **B2**` 句式，先 Read `docs/es-cause-catalog.md`。
 6. `execute_sql` 只 Read lite 原文填占位符；一次调用一个文件。禁止 MCP 跑 `03-fourteen-level-checklist.sql`。SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（结构 SID；禁止空 `IN ()`）。SH 禁止 `clientid`。禁止全表 LIMIT 50 写结构 SID「未覆盖/未返回」。
 7. 未支持：#23 机构供应商白名单快照禁止当 3a 证据；#3 DidaBase 没有，CS 查价用 SS 近似。LCDH 叫击穿兜底名单，不是白名单。
 8. 口径入口是 `SKILL.md`，不是 backlog。回归只用 `examples/gold-*.md`。
 9. **装完先做「权限自测」**（下一节）。不同账号表权限不同；缺表就缺对应证据线，不要等跑到 Phase 3 才发现。
 
 口径细节见 `SKILL.md`。表字段见 `tables.md`。
+
+## 打包排除清单
+
+GitHub 分享包 **不含** 下列路径（维护者本机可留，不推远程）。Agent 不要 `Read` 这些文件当 SOP：
+
+- `docs/backlog.md`
+- `docs/briefing/`
+- `docs/superpowers/`
+- `.superpowers/`
+- `docs/mcp-config-tables-error-report.md`
+- `docs/plan-26-config-operation-rating.md`
+- `examples/hbgpkg-rerun-20260706.md`
+- `examples/phase3-signal-test-agoda.md`
+- `examples/phase3-fourteen-level-didaopaq-20260206.md`
 
 ## 权限自测（每人必做）
 

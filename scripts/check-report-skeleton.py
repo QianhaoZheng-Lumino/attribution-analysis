@@ -290,6 +290,26 @@ def check_file(path: Path) -> list[str]:
     if extra_es:
                 errs.append(f"ES 多余键（禁止改成「并列 S」「后续动作 P0」等）: {extra_es}")
 
+    # #5：ES 后续动作须目录编号；skeleton 占位符豁免
+    es_follow = ""
+    for line in es.splitlines():
+        m = re.match(r"^-\s+\*\*后续动作：\*\*\s*(.*)$", line.strip())
+        if m:
+            es_follow = m.group(1).strip()
+            break
+    if not es_follow:
+        errs.append("ES 缺「后续动作」内容")
+    elif re.search(r"\{A#", es_follow):
+        pass
+    elif not re.search(
+        r"目录\s+\*?\*?(?:A[1-7]|B[1-4]|C[1-3]|D[1-5]|E1)\*?\*?",
+        es_follow,
+    ):
+        errs.append(
+            "ES 后续动作须含「目录」+ 编号（A1–A7 / B1–B4 / C1–C3 / D1–D5 / E1）；"
+            "禁止空问流量/促销，禁止抄 gold「Phase 4 P0」。先 Read docs/es-cause-catalog.md"
+        )
+
     # Table headers + required row labels
     def expect_header(section_heading: str, key: str) -> list[list[str]]:
         sec = section_after(text, section_heading)

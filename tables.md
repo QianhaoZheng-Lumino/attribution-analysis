@@ -4,9 +4,10 @@
 
 ## 使用方式
 
-1. **MCP 指标平台有注册的** → 用 `analyse_query`
-2. **MCP 元数据能搜到的** → `search_meta_data` + `execute_sql`
-3. **元数据搜不到但已知表名的** → 直接 `execute_sql`（见下方清单）
+1. **SOP 路径（默认）：** 表名已在本清单 / lite SQL → **直接 `execute_sql`**（Read 原文填占位符）。Phase 1–3 都是这条。
+2. **指标平台口径：** 用 `analyse_query` / `search_metrics`（与 `npd_booking_view` 不是同一口径）。
+3. **禁止：** 用 `search_meta_data` 当查数、当权限探测、当「先搜有没有表」。搜不到 ≠ 没权限 ≠ 不能查。
+4. **例外：** 用户要探 **本清单和 lite 都没有的未知表** 才允许 `search_meta_data`；搜完仍须 `execute_sql` 才能下结论。
 
 `execute_sql` 调用格式：
 
@@ -26,9 +27,9 @@
 | content.dida_hotel_view | Phase 2 酒店属性 | hotel_id, country_code, parent_chain_name | JOIN 用 |
 | configuration.wolf_rateadjust_hotel_log | 酒店调价日志 | clientid, didahotelid, margin, level, status, updatedate, username | updatedate 为毫秒时间戳；元数据未收录 |
 
-## 常用明细表（MCP 可搜到）
+## 常用明细表（指标底层，非 SOP 默认）
 
-用 `search_meta_data` 按关键词检索，常见关键词：
+Phase 1 默认仍 `public.npd_booking_view` + `execute_sql`。不要先搜元数据再找这些表。若只是对照指标口径，可用 `analyse_query`。关键词仅在用户明确要探未知表时才给 `search_meta_data`：
 
 | 关键词 | 预期表 |
 |--------|--------|

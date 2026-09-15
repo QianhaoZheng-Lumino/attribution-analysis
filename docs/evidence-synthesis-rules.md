@@ -150,7 +150,7 @@
 
 ## 8. 报告收口移交条件
 
-满足 **任一** 且 BKS 异动需归因。问法按 [es-cause-catalog.md](./es-cause-catalog.md)，禁止空问「流量/促销/API」。
+满足 **任一** 且 BKS 异动需归因。问法按 [es-cause-catalog.md](./es-cause-catalog.md) 写成 `目录 **B2**（现象）→ 可能原因`，禁止空问「流量/促销/API」，禁止抄 gold「Phase 4 P0」。
 
 | 条件 | 建议动作 |
 |------|---------|

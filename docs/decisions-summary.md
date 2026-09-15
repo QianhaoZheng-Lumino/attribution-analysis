@@ -28,7 +28,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 | 决策 | 内容 |
 |------|------|
 | 主数据源 | `user-data-mcp`（`~/.cursor/mcp.json`） |
-| 查任意 Hologres 表 | `search_meta_data` + `execute_sql`（SELECT，≤1 万行，行级权限） |
+| 查任意 Hologres 表 | **默认直接 `execute_sql`**（SELECT，≤1 万行，行级权限）。`search_meta_data` 不是查数，禁止代替 SQL |
 | 查指标趋势 | `analyse_query` / `search_metrics` |
 | MCP「不稳定」含义 | **非权限问题**；复杂/长 SQL（多层 CTE、PERCENTILE_CONT、FILTER）易 **HTTP 500** |
 | 应对策略 | **拆分 lite 版 SQL**，完整 SQL 作 source of truth，MCP 跑短查询。**禁止手写 SQL、禁止 14 路 UNION**（`03-fourteen-level-checklist.sql` 仅 BI） |
@@ -302,7 +302,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - 阶段标题是 **报告收口**；报告里跟进节叫 **后续动作**（不要把阶段名写进 H2）
 - 2b=C/Dida 且 Phase 3 无强信号 → **倾向 C**；后续动作按 [es-cause-catalog.md](./es-cause-catalog.md)（B2），禁止空问流量
 - **报告骨架（#27）：** 复制 `phases/04-report-skeleton.md` 只填空；验收 `scripts/check-report-skeleton.py`。只锁格式，不改定责口径。
-- **#5（2026-09-14 ✅）：** ES 后续动作查目录。主因不改。A6：QPS/PPS 上限只打有价。D 组兑现禁止套 B2 问渠道。不强制回改 gold。
+- **#5（2026-09-14 ✅）：** ES 后续动作查目录，句式 `目录 **B2**（现象）→ 可能原因`。主因不改。A6：QPS/PPS 上限只打有价。D 组兑现禁止套 B2 问渠道。gold 3a 表头 / 主因不强制回改；**禁止抄 gold「Phase 4 P0」当后续动作。**
 
 ---
 
@@ -331,8 +331,8 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 2. 新 Agent 对话，首条消息示例：
 
 ```
-请读 attribution-analysis skill（SKILL.md + docs/backlog.md + docs/decisions-summary.md），
+请读 attribution-analysis skill（SKILL.md + docs/decisions-summary.md）。维护待办仅本机 backlog（不进 GitHub，见 README 打包排除）。
 我们要做 backlog #N：[标题]。
 ```
 
-3. 关键文件：`SKILL.md`（跑归因入口）、`docs/backlog.md`（维护待办）、本文（已拍板）、`ROADMAP.md`（架构，非待办）。不要再寻找对话导出。
+3. 关键文件：`SKILL.md`（跑归因入口）、本文（已拍板）、`ROADMAP.md`（架构，非待办）。维护待办仅本机 backlog（不进 GitHub）。不要再寻找对话导出。

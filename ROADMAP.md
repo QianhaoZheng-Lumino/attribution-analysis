@@ -53,7 +53,7 @@ Phase 4  报告收口（合成 1→3d；数据说不清 → 查 es-cause-catalog
 - MCP 权限矩阵、在线时长开窗 SQL（#1/#20，Python 仅 fallback）、限流 lite + 出数规则（#2/#18）
 - 涨产 2b + 3b 机构级必跑、报告收口模板 + gold
 
-**未完成项只看 [docs/backlog.md](docs/backlog.md)。** 禁止在本文件再开 checkbox / #N 表（#21）。新想法追加 backlog「扩展项」。
+**未完成项只看维护者本机 backlog（见 README 打包排除，不进 GitHub）。** 禁止在本文件再开 checkbox / #N 表（#21）。新想法追加 backlog「扩展项」。
 
 ## 已定方案（2026-07-28）
 
@@ -71,6 +71,6 @@ Phase 4  报告收口（合成 1→3d；数据说不清 → 查 es-cause-catalog
 | 2026-07-28 | **定稿**：先定责(C×S) → 自动下钻；取消全维度宽交叉 |
 | 2026-08-14 | Agoda gold：`examples/gold-agoda-20260320.md`（跌产/C/Dida + 14/14 + D TH） |
 | 2026-08-18 | **D 线仅 HOLIDAY**（Top30 城）；FAIR/CONCERT 退出归因；`01-single-country-window.sql` 已更新 |
-| 2026-09-04 | 创建 [docs/backlog.md](docs/backlog.md)；记录在线时长/限流/DidaBase/SH/Phase4解释/封装权限等 #1–#6 |
+| 2026-09-04 | 创建本机 backlog（不进 GitHub 分享包）；记录在线时长/限流/DidaBase/SH/Phase4解释/封装权限等 #1–#6 |
 | 2026-09-04 | **#13** 2c 叙事：BI 全量 1 次 / MCP lite 必跑路径；禁止「MCP 0 额外 SQL」 |
 | 2026-09-05 | **#21** 待办只留 backlog；本文与 decisions-summary §8 不再另列清单 |

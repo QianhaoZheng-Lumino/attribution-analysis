@@ -1,7 +1,8 @@
 # SnapTravel2B @ 2026-08-01 归因分析报告（Gold · 涨产 + S 主因）
 
 > **金样例用途：** 涨产路径回归测试；2b S 成分 + C 放大并列；3b 机构级必跑；3a 14/14；**D 线现行 SOP 因 S+验证 B 强而不查**（旧跑数仅对照）；限流双向触发报数。  
-> 模板：[phases/04-report.md](../phases/04-report.md) · lite 分批重跑 · `client_id = SnapTravel2B`
+> 模板：[phases/04-report.md](../phases/04-report.md) · lite 分批重跑 · `client_id = SnapTravel2B`  
+> **ES：** 成品键名是 **后续动作**（不是 Phase 4 P0）；编号以 [es-cause-catalog.md](../docs/es-cause-catalog.md) 为准。
 
 ---
 
@@ -14,7 +15,7 @@ SnapTravel2B 在 2026-08-01 起 7 天窗口预订量 **+73.5%**（4,294→7,450�
 - **已排除：** Dida 机构配置（14/14 无 C/CDH/Configuration 强信号）；限流主因（26 **SS限流率**降、116≈0）。
 - **并列 C（查价段）：** 机构查价 **-19.6%** 与在线日均 **-2.55h**（邮件解析）同向 → 在线缩短 **只解释查价↓**，产量涨由转化/S 驱动。
 - **D 线：** 现行 SOP **不查**（2b=S 且验证 B 平台共涨已强）。2026-08-18 曾跑 US 地方节，**极弱、不进主因**；回归 **不必重跑 D**。
-- **Phase 4 P0：** 问 SnapTravel 8/1 前后 US 流量源、campaign、API 策略；对照同涨 client 区分 S uplift vs C 独有放大。
+- **后续动作：** 目录 **A4**（查价总量降且查验比缩小、产量升）+ **C3**（26-Agoda 上本 client ΔBKS 全平台最大）→ 拆「少查原因 + 价优」并问为何吃最多；禁止写成已确认；禁止「少查所以少产」
 
 ---
 

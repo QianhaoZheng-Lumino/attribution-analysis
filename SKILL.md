@@ -39,7 +39,7 @@ description: >-
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
-| analysis_date | 分析锚点日期 | 7 天前 |
+| analysis_date | 分析锚点日期 | 7 天前。用户说「本周」= 本周一，「上周」= 上周一 |
 | 分析范围 | client_id / parent_client_id / 大盘 | 大盘（Overseas API） |
 | n_days | 对比窗口（≥7 走新逻辑） | NULL（原逻辑 7 天） |
 | 指标 | 默认 create 口径预订量 | `npd_booking_view` 日预订量 |
@@ -65,13 +65,15 @@ description: >-
 
 | 工具 | 用途 |
 |------|------|
-| `search_metrics` | 按名称/编码查找指标 |
-| `analyse_query` | 查指标趋势、环比/同比、指标卡 |
-| `get_analyse_dimension` | Phase 2 用：获取可下钻维度 |
-| `search_meta_data` | 搜索表元数据 |
-| `execute_sql` | 查明细表（Phase 3 用，需已知表名） |
+| `execute_sql` | **Phase 1–3 查明细的唯一入口。** 表名来自 lite SQL / [tables.md](tables.md)，Read 原文只填占位符 |
+| `analyse_query` | 指标平台趋势（口径与 `npd_booking_view` 不同；Phase 1 默认仍走 lite SQL） |
+| `search_metrics` | 按名称/编码查找指标编码 |
+| `get_analyse_dimension` | Phase 2 指标平台下钻维度（BKS 下钻仍走 dimension-contribution-lite） |
+| `search_meta_data` | **不是查数。** 禁止用它代替 `execute_sql`、禁止当权限探测、禁止「先搜有没有这张表」 |
 
-常用指标见 [metrics.md](metrics.md)。MCP 搜不到的表见 [tables.md](tables.md)。
+**查数硬规则：** SOP 表名已知 → 直接 `execute_sql`。`search_meta_data` 搜不到 ≠ 没表 ≠ 没权限。仅当用户要探 **tables.md / lite 都没有的未知表** 才允许搜元数据，搜完仍须 `execute_sql` 才能下结论。
+
+常用指标见 [metrics.md](metrics.md)。表名见 [tables.md](tables.md)，直接 `execute_sql`，不要先搜元数据。
 
 渠道每日在线时长：MCP 默认 `sql/online-hours-lite/03-window-avg.sql`（两窗日均）或 `sql/online-hours.sql`（日表）；须 `{client_id}`。禁止手算日均。仅当开窗 SQL 仍 500 才拉 log 跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。
 
@@ -146,12 +148,14 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 | Phase 1 异动识别 | phases/01-anomaly-detection.md + sql/anomaly-detection-lite/ | ✅ |
 | Phase 2 定责下钻 | [phases/02-dimension-drilldown.md](phases/02-dimension-drilldown.md) | ✅ 2a→2b→2c（MCP lite 分批；BI 全量 1 次）。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
 | Phase 3 内部证据 | phases/03-evidence-verification.md | ✅ 3a/3b/3c/3d + 限流。**3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。MCP：禁止手写 SQL、禁止 14 路 UNION** |
-| Phase 4 报告收口 | [phases/04-report.md](phases/04-report.md) + [04-report-skeleton.md](phases/04-report-skeleton.md) | ✅ 标题/表头锁定（#27）；ES 后续动作查 [es-cause-catalog.md](docs/es-cause-catalog.md)（#5） |
+| Phase 4 报告收口 | [phases/04-report.md](phases/04-report.md) + [04-report-skeleton.md](phases/04-report-skeleton.md) | ✅ 标题/表头锁定（#27）；ES **后续动作**须 `目录 **B2**` 句式（#5），禁止抄 gold「Phase 4 P0」 |
 
 外部事件库：Phase 3d — [docs/external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/`。
 
 ## 注意事项
 
+0. **禁止用元数据代替查数。** Phase 1–3 一律 `execute_sql` + lite 原文。不要 `search_meta_data` 搜「订单/配置/在线」再决定能不能查。搜不到仍可能有 `execute_sql` 权限。
+0b. **ES 后续动作（#5）：** 写之前 **必须 Read** [docs/es-cause-catalog.md](docs/es-cause-catalog.md)。句式：`目录 **B2**（多数 SID 同降、无强配置）→ 可能渠道侧加价/摘量，运营问客户；禁止写成已确认`。必须出现 `目录` + 编号（A1–A7 / B1–B4 / C1–C3 / D1–D5 / E1），一案 1–2 条。D 组兑现 → 对内，禁止再套 B2 问渠道。**禁止**空问流量/促销；**禁止**抄 gold/case 的「Phase 4 P0」或未标编号的「问 XX 是否加权」。主因仍走 2b/3d，目录不改定责。
 1. **先查口径再下结论**：同一指标可能有 checkout/checkin/create 多个版本，务必确认统计周期。
 2. **MCP 硬规则（3a）：一次调用 = 一个 lite 文件。** `execute_sql` 的 SQL **必须**来自 `Read` 对应 `checklist/` 或 `detail/` 原文，只替换占位符。**禁止**手写、凭记忆、抄别的 level 改一改。**禁止**执行 `sql/config-change-detection-lite/03-fourteen-level-checklist.sql`，以及任何 14 路 / 多表 UNION。违反 = 配置结论作废；500 标「未验」，不得写成 0。
 2b. **`{sid_list}` 必填：** SH、SS `01-ss-supplier`、限流 `01-ss-supplier-window` 共用（2b 锁定或 \|ΔBKS\|≥10%；无则 02-sid \|change\| Top3）。禁止空 `IN ()`。禁止只靠全表 `ORDER BY`+`LIMIT 50` 写结构 SID「未覆盖涨尾 / 未返回」。
@@ -163,7 +167,7 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 
 ## 示例
 
-意图判定见 [examples.md](examples.md)。回归只用 `examples/gold-*.md`。禁止把 `hbgpkg-rerun-*`、`phase3-signal-test-*`、`phase3-fourteen-level-*` 当 SOP。
+意图判定见 [examples.md](examples.md)。回归定责只用 `examples/gold-*.md`。**ES 后续动作不要抄 gold「Phase 4 P0」**，以 [docs/es-cause-catalog.md](docs/es-cause-catalog.md) 句式为准。禁止把 `hbgpkg-rerun-*`、`phase3-signal-test-*`、`phase3-fourteen-level-*` 当 SOP。
 
 ## 归因口径（Phase 3–4 必读）
 
@@ -179,7 +183,7 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 
 - [README.md](README.md) — 同事第一天 + **打包排除清单（以此为准）**
 - [docs/decisions-summary.md](docs/decisions-summary.md) — 已拍板决策
-- [docs/backlog.md](docs/backlog.md) — 维护待办
-- [ROADMAP.md](ROADMAP.md) — 架构与里程碑（非待办）
+- 维护待办：本机 backlog（见 README 打包排除，**不进 GitHub**；跑归因不要 Read）
+- 改完验收：`python scripts/check-first-day.py`（安装/坏链/MCP 陷阱）+ `python scripts/check-report-skeleton.py`（ES 目录编号 + 骨架）
 
 禁止把 `mcp.json`、对话导出、真实 `agent_user_key` 写入仓库。
