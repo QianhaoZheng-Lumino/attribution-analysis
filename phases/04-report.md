@@ -31,7 +31,7 @@
 - [ ] 3. 3d 综合判断：对照 evidence-synthesis-rules.md 输出置信度
 - [ ] 3b. **3a 表为 7 列 14 行**（操作枚举+作用域，不写 SQL 路径）；**出门禁**写在 §4（通过 / 不通过+哪条）
 - [ ] 4. 根因结论：主因 1 条写清楚 + 并列因素 + 非主因（已排除）
-- [ ] 5. 后续动作：查 [docs/es-cause-catalog.md](../docs/es-cause-catalog.md)，命中 **1–2 条**写入 ES（可能原因，禁止已确认）。D 组兑现 → 对内，禁止问渠道猜
+- [ ] 5. 后续动作：先 Read [docs/es-cause-catalog.md](../docs/es-cause-catalog.md)，ES 写成 `目录 **B2**（现象）→ 可能原因；禁止已确认`（1–2 条）。禁止抄 gold「Phase 4 P0」或空问流量/促销。D 组兑现 → 对内，禁止问渠道猜
 - [ ] 6. （可选）写入 examples/ 作金样例
 ```
 
@@ -83,11 +83,13 @@
 
 ### 应做
 
-1. 命中目录 **1–2 条**，把「可能原因」写进 ES 后续动作
-2. 3a 无对应配置时才问渠道（加价、分销、匹配、缓存、请求逻辑、账号切流）
-3. 节日（E1）只辅助
+1. **先 Read** `docs/es-cause-catalog.md`，再写 ES「后续动作」
+2. 句式（键名必须是 **后续动作**，不是「Phase 4 P0」）：
+   `目录 **B2**（多数 SID 同降、无强配置）→ 可能渠道侧加价/摘量，运营问客户；禁止写成已确认`
+3. 必须出现 `目录` + 编号（A1–A7 / B1–B4 / C1–C3 / D1–D5 / E1），一案 1–2 条
+4. 3a 无对应配置时才问渠道；节日（E1）只辅助
 
-对照 gold：`examples/gold-*.md`。Agent 以本仓库 `docs/es-cause-catalog.md` 为准。
+gold 的 3a 表头 / 旧「Phase 4 P0」键名不要抄。对照句：`examples/case-expediapkg-20260901.md`、`examples/case-yandextravel2c-20260831.md`。目录正文以 `docs/es-cause-catalog.md` 为准。
 
 ---
 

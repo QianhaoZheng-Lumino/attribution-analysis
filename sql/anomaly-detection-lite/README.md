@@ -29,10 +29,11 @@ compare_start  = analysis_date - n_days   （新逻辑）
                或 analysis_date - 7 起对齐（原逻辑，见 methodology §3.1）
 
 hist_start     = analysis_date - 42
-hist_end       = analysis_date - 1        （不含 analysis_date 当天）
+hist_end       = analysis_date - 1        （推算值；不含 analysis_date 当天）
 ```
 
-将计算结果代入下面 SQL 中的 `{current_start}` 等占位符。
+将计算结果代入下面 SQL 中的 `{current_start}` 等占位符。  
+**02/03 填 `{analysis_date}` 作开区间上界，不要填 `{hist_end}`。** `{hist_end}` 只用于本地理解窗口，SQL 里没有这个占位符。
 
 ## 参数占位符
 
@@ -78,6 +79,7 @@ AND (
 - 不用 `PERCENTILE_CONT`（易 500）；Q1/Q3 由 Step 3 日序列在 Agent 侧计算
 - 不用多层 CTE 嵌套；每文件单条 SELECT
 - 若某步仍 500，缩小日期范围后重试
+- MCP 可能打乱 `ORDER BY`。Q1/Q3：把 42 个 `daily_bookings` **自行按值升序**；趋势表：**自行按 booking_date 再排**。不要假设返回顺序 = SQL 顺序。
 
 ## Agent 评分
 

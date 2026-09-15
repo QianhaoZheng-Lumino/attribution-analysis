@@ -1,6 +1,7 @@
 # 示例（意图，不是把 gold 当 SOP）
 
-成品报告复制 [phases/04-report-skeleton.md](phases/04-report-skeleton.md) 只填空。gold / case 用来回归定责口径；其中 3a 表头可能是旧列，**不要抄表头**。
+成品报告复制 [phases/04-report-skeleton.md](phases/04-report-skeleton.md) 只填空。gold / case 用来回归 **定责口径**；3a 表头可能是旧列，**不要抄表头**。  
+ES **后续动作**不要抄 gold「Phase 4 P0」或未标目录编号的「问 XX 是否促销」。句式与对照：`docs/es-cause-catalog.md`、[expediapkg](examples/case-expediapkg-20260901.md)、[yandextravel2c](examples/case-yandextravel2c-20260831.md)。
 
 ## 示例 1：探查（只 Phase 1）
 
@@ -29,8 +30,4 @@
 | **Agoda @ 2026-03-20** | 跌产 | [examples/gold-agoda-20260320.md](examples/gold-agoda-20260320.md) | 门禁否；2b 双门写死 C/Dida（70.7% 且无 SID≥50%） |
 | **SnapTravel2B @ 2026-08-01** | 涨产 | [examples/gold-snaptravel2b-20260801.md](examples/gold-snaptravel2b-20260801.md) | S 主因 + C 放大 |
 
-旧稿不要当 SOP（分享包可排除）：
-
-- [examples/hbgpkg-rerun-20260706.md](examples/hbgpkg-rerun-20260706.md)
-- [examples/phase3-signal-test-agoda.md](examples/phase3-signal-test-agoda.md)
-- [examples/phase3-fourteen-level-didaopaq-20260206.md](examples/phase3-fourteen-level-didaopaq-20260206.md)
+旧稿不要当 SOP（分享包已排除，GitHub clone **没有**这些文件）：`hbgpkg-rerun-20260706.md`、`phase3-signal-test-agoda.md`、`phase3-fourteen-level-didaopaq-20260206.md`。

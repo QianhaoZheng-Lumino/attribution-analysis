@@ -21,7 +21,9 @@
 **默认理解：**
 - 「掉产 / 预订量异常」→ 日预订量，`npd_booking_view`
 - 未指定客户 → 大盘（`clientgroup = 'Overseas API'`）
-- 未指定日期 → `analysis_date = 7 天前`，原逻辑 7 天窗口
+- **「本周」** → `analysis_date` = **本周一**（北京时间），当前期到 `min(昨天, 本周日)`；仍是探查型。不是默认「7 天前」
+- **「上周」** → `analysis_date` = 上周一
+- 未指定日期（也没说本周/上周）→ `analysis_date = 7 天前`，原逻辑 7 天窗口
 - 指定了 parent_client（如 Agoda）→ 按 parent_client_id 过滤
 
 ## Step 2：确认数据口径
@@ -54,7 +56,7 @@
 | 2 | `02-historical-baseline.sql` | hist_avg, hist_std |
 | 3 | `03-daily-series.sql` | 42 天日序列 → Agent 算 Q1/Q3 |
 
-每步替换占位符后 `execute_sql`，`tables: ["public.npd_booking_view"]`。
+每步替换占位符后 `execute_sql`，`tables: ["public.npd_booking_view"]`。表名已知，**禁止**先 `search_meta_data`。
 
 ### 路径 B：完整 SQL（非 MCP 或本地 DB）
 

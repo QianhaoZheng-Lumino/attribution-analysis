@@ -435,7 +435,7 @@ Lite：`sql/external-events-lite/`
 ### MCP 注意
 
 - 完整 config SQL 层数多，易 500 → 按 level 或拆段执行
-- `configuration.*`：`search_meta_data` 常无收录，直接 `execute_sql`
+- 表名来自 lite / [tables.md](../tables.md) → **直接 `execute_sql`**。`configuration.*` 元数据常无收录。**禁止**用 `search_meta_data` 代替查数或当权限探测
 - **500 ≠ 无配置**：必查 [docs/mcp-permission-matrix.md](../docs/mcp-permission-matrix.md)；500 标 **「MCP 500 · 未验」**，禁止写 event_count=0
 - **500 也可能是错 SQL**：列名/表结构不对（如 #12 用 `clientid`、#14 用 `updatedate`）会先 500；**必须 Read checklist 原文重试**，不得直接标未验
 - **14/14 必须逐个跑** checklist/01–14；禁止 UNION 批量；**禁止手写替代**；未验 level 计入 `checklist_progress`（如 11/14）
