@@ -5,18 +5,17 @@ description: >-
   识别 GP/TTV/订单量/BKS/预订量/create 口径产量等指标的异常波动。
   适用于用户提到异动归因、掉产归因、涨产归因、指标波动、GP下降、产量异常、BKS波动、
   client产量变化、环比/同比分析、完整归因、指定 client_id 与 analysis_date 深查、
-  渠道在线时长、渠道下线等场景。执行顺序以 SKILL.md 正文「触发与执行模式」为准，禁止只凭本 description 连跑 Phase 1→4。
+  渠道在线时长、渠道下线，以及 attribution / yield drop / GP drop / BKS anomaly。
+  执行顺序以 SKILL.md 正文「触发与执行模式」为准，禁止只凭本 description 连跑 Phase 1→4。
 ---
 
 # 归因分析 Skill
 
-分阶段执行。**Phase 1→4 SOP + lite SQL + 4 个 gold 已可用**。复杂 SQL 一律走 lite 分批。跑归因先看下文执行模式，不要一律 1→4。改本 Skill 才读 [docs/decisions-summary.md](docs/decisions-summary.md)。
-
-设计详见 [cross-validation-design.md](cross-validation-design.md)。
+先判意图，再跑 Phase。复杂 SQL 一律 lite 分批。改本 Skill 才读 [docs/decisions-summary.md](docs/decisions-summary.md)。
 
 ## 触发与执行模式
 
-**自动触发：** 对话含异动/掉产/涨产/归因/BKS/产量/GP/环比 等词，且涉及酒店 API 指标。
+**自动触发：** 对话含异动/掉产/涨产/归因/BKS/产量/GP/环比，且涉及酒店 API 指标。
 
 **意图判定（先判意图，再跑 Phase 1）：**
 
@@ -27,30 +26,56 @@ description: >-
 | **归因型** | 同上 | **否** | 🛑 STOP 停在 Phase 1。须用户再要「完整归因 / gold」才继续 |
 | **完整型** | 「完整归因」「按 gold 回归」「Phase 1→4」 | 任意 | **Phase 1→4 全跑**；门禁否须声明「按完整归因执行」 |
 
-**范围硬约束：** Phase 2–4（含 3a 配置、在线时长、限流）**必须有 `client_id`**（或 parent 下已锁定的 focus client）。**大盘 Phase 1 不得自动进 3a / 在线 / 限流。** 归因型门禁过但范围仍是大盘 → 🔴 CHECKPOINT：Phase 1 结束，列出异动，**问用户指定 client 后再 2–4**。
+**范围硬约束：** Phase 2–4（含 3a、在线时长、限流）**必须有 `client_id`**（或 parent 下已锁定的 focus client）。**大盘 Phase 1 不得自动进 3a / 在线 / 限流。** 归因型门禁过但范围仍是大盘 → 🔴 CHECKPOINT：列出异动，**问指定 client 后再 2–4**。
 
 禁止把「确认参数后默认只跑 Phase 1」套到归因型（门禁过）或完整型。
 
-**Gold 回归：** [gold-snaptravel2b](examples/gold-snaptravel2b-20260801.md)（涨/S）、[gold-agoda](examples/gold-agoda-20260320.md)（跌/C，门禁否）、[gold-hbgpkg-0706](examples/gold-hbgpkg-20260706.md)（边界/CS）、[gold-hbgpkg-0710](examples/gold-hbgpkg-20260710.md)（CS 崩量，门禁否）。后三份仅因完整型/gold 才跑 2–4。
+**Gold 回归（定责口径，不抄旧 3a 表头）：** [gold-snaptravel2b](examples/gold-snaptravel2b-20260801.md)（涨/S）、[gold-agoda](examples/gold-agoda-20260320.md)（跌/C，门禁否）、[gold-hbgpkg-0706](examples/gold-hbgpkg-20260706.md)（边界/CS）、[gold-hbgpkg-0710](examples/gold-hbgpkg-20260710.md)（CS 崩量，门禁否）。后三份仅因完整型/gold 才跑 2–4。意图示例见 [examples.md](examples.md)。
+
+## 不要做什么
+
+- 无 MCP / 未认证：手写 SQL、编造产量或配置结论、借用别人的 `agent_user_key`
+- 用 `search_meta_data` 查数、探权限、或「先搜有没有这张表」
+- 探查型自动进 Phase 2–4；大盘/仅 parent 无 focus 时自动跑 3a / 在线时长 / 限流
+- `execute_sql` 手写、凭记忆、抄别的 level 改一改；一次调用里塞 14 路 / 多表 UNION
+- `{sid_list}` 留空 `IN ()`；只靠全表 `ORDER BY`+`LIMIT 50` 写结构 SID「未覆盖涨尾 / 未返回」
+- MCP 500 写成 event_count=0 或「已排除」；权限未证就把 0 行当成业务 0
+- 把 #23 机构供应商白名单快照当 3a 变更证据；把 LCDH 叫白名单；当已有 #3 DidaBase 专用表
+- 抄 gold / case 的旧 3a 表头；ES 后续动作不按 [es-cause-catalog.md](docs/es-cause-catalog.md) 自编
+- 把 `mcp.json`、对话导出、真实 key 写入仓库
+
+## 失败模式（触发 → 一线 → 仍失败）
+
+| 触发 | 一线修复 | 仍失败兜底 |
+|------|----------|------------|
+| `user-data-mcp` 不可用 / 未认证 | 🛑 STOP。禁止手写 SQL、禁止编造结论 | 告诉用户去配 MCP + 自己的 `agent_user_key`，本轮结束 |
+| `execute_sql` 返回 500 / 超时 | 确认 SQL 来自 **一个** lite 原文、只换占位符；`timeout_seconds=30` 再跑同一文件一次 | 该步标「未验」。禁止写成 0、禁止改口「已排除」 |
+| 查询成功但 0 行 | 记「有表权限、当前过滤下 0 行」。禁止当无权限，禁止换别的 client 凑数 | 权限自测同表 `SELECT 1` 有行 → 才可写业务 0；否则写「本账号看不到该范围」 |
+| `search_meta_data` 搜不到表 | 改 `execute_sql` `SELECT 1 LIMIT 1` | 仍失败按上一行 500/0 行分支 |
+| Phase 1 lite 任一步失败 | **串行**重跑该步（必须 01→02→03，禁止三步并行） | 缺哪步就缺哪项分数；禁止用单一环比凑结论 |
+| 探查型却准备进 2–4 | 停。输出 Phase 1 报告 | 🔴 CHECKPOINT 问是否继续；用户未明确同意 → 结束 |
+| 归因型门禁是但大盘 / 仅 parent、无 focus `client_id` | 停。列出异动 | 🔴 CHECKPOINT 问指定 `client_id`；禁止自动 3a / 在线 / 限流 |
+| SH / SS / 限流 `{sid_list}` 为空 | 用 2b 锁定 SID，或 `02-sid` \|change\| Top3 | 禁止空 `IN ()`，该查询标「未验」 |
+| 准备手写 SQL 或 14 路 UNION | 停。改 Read **一个** lite 原文 | 已发出的结果作废，不得写入报告 |
 
 ## 快速开始
 
-先确认参数（缺失则询问或用默认），再按上表执行，不要一律停在 Phase 1。
+先确认参数（缺失则询问或用默认），再按意图表执行。
 
 | 参数 | 说明 | 默认值 |
 |------|------|--------|
-| analysis_date | 分析锚点日期 | 7 天前。用户说「本周」= 本周一，「上周」= 上周一 |
+| analysis_date | 分析锚点日期 | 7 天前。「本周」= 本周一，「上周」= 上周一 |
 | 分析范围 | client_id / parent_client_id / 大盘 | 大盘（Overseas API） |
 | n_days | 对比窗口（≥7 走新逻辑） | NULL（原逻辑 7 天） |
 | 指标 | 默认 create 口径预订量 | `npd_booking_view` 日预订量 |
 
-**判定方法论见 [methodology.md](methodology.md)**（WoW + Z-score + 历史 42 天基准 + 综合评分）。
+同一指标可能有 checkout / checkin / create，先确认口径再下结论。方法论：[methodology.md](methodology.md)。
 
 ## 数据源
 
-**必须**已配置 `user-data-mcp`（同事自备 `~/.cursor/mcp.json` + 自己的 `agent_user_key`）。工具不可用或未认证 → 🛑 STOP，禁止手写 SQL、禁止编造配置/产量结论。
+**必须**已配置 `user-data-mcp`（同事自备自己 runtime 的 MCP 配置 + `agent_user_key`）。工具不可用或未认证 → 🛑 STOP。
 
-配置样例（占位符，禁止把真实 key 写入本仓库）：
+配置样例（占位符，禁止写入真实 key）：
 
 ```json
 {
@@ -65,50 +90,28 @@ description: >-
 
 | 工具 | 用途 |
 |------|------|
-| `execute_sql` | **Phase 1–3 查明细的唯一入口。** 表名来自 lite SQL / [tables.md](tables.md)，Read 原文只填占位符 |
-| `analyse_query` | 指标平台趋势（口径与 `npd_booking_view` 不同；Phase 1 默认仍走 lite SQL） |
+| `execute_sql` | **Phase 1–3 查明细的唯一入口。** 表名来自 lite SQL / [tables.md](tables.md)，Read 原文只填占位符。末尾 LIMIT，最多 1 万行 |
+| `analyse_query` | 指标平台趋势（口径与 `npd_booking_view` 不同；Phase 1 默认仍走 lite SQL）。`begin_time`/`end_time` 用 ISO，自动转北京时间。`date_group_type`：1小时 2天 3周 4月 5分钟 6年 |
 | `search_metrics` | 按名称/编码查找指标编码 |
-| `get_analyse_dimension` | Phase 2 指标平台下钻维度（BKS 下钻仍走 dimension-contribution-lite） |
-| `search_meta_data` | **不是查数。** 禁止用它代替 `execute_sql`、禁止当权限探测、禁止「先搜有没有这张表」 |
+| `get_analyse_dimension` | Phase 2 指标平台下钻（BKS 下钻仍走 dimension-contribution-lite） |
+| `search_meta_data` | **不是查数** |
 
-常用指标见 [metrics.md](metrics.md)。表名见 [tables.md](tables.md)。
+常用指标 [metrics.md](metrics.md)。装完先按 [README.md](README.md)「权限自测」逐表 `SELECT 1 LIMIT 1`。500 ≠ 无权限。
 
-渠道每日在线时长：MCP 默认 `sql/online-hours-lite/03-window-avg.sql`（两窗日均）或 `sql/online-hours.sql`（日表）；须 `{client_id}`。禁止手算日均。仅当开窗 SQL 仍 500 才拉 log 跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。
-
-## 失败模式（触发 → 一线 → 仍失败）
-
-| 触发 | 一线修复 | 仍失败兜底 |
-|------|----------|------------|
-| `user-data-mcp` 不可用 / 未认证 | 🛑 STOP。禁止手写 SQL、禁止编造产量/配置结论 | 告诉用户去配 MCP + 自己的 `agent_user_key`，本轮结束 |
-| `execute_sql` 返回 500 / 超时 | 确认 SQL 来自 **一个** lite 原文、只换了占位符；`timeout_seconds=30` 再跑同一文件一次 | 该步标「未验」。禁止写成 0、禁止改口「已排除」 |
-| 查询成功但 0 行 | 记「有表权限、当前过滤下 0 行」。禁止当无权限，禁止改分析范围换别的 client 凑数 | 权限自测同表 `SELECT 1` 有行 → 才可写业务 0；否则写「本账号看不到该范围」 |
-| `search_meta_data` 搜不到表 | **不要**据此判无权限；改 `execute_sql` `SELECT 1 LIMIT 1` | 仍失败按上一行 500/0 行分支 |
-| Phase 1 lite 任一步失败 | **串行**重跑该步（必须 01→02→03，禁止三步并行） | 缺哪步就缺哪项分数；禁止用单一环比凑结论 |
-| 探查型却准备进 2–4 | 停。输出 Phase 1 报告 | 问是否继续；用户未明确同意 → 结束 |
-| 归因型门禁是但范围仍是大盘 / 仅 parent、无 focus `client_id` | 停。列出异动 | 问指定 `client_id`；禁止自动 3a / 在线时长 / 限流 |
-| SH / SS / 限流 SQL 的 `{sid_list}` 为空 | 用 2b 锁定 SID，或 `02-sid` \|change\| Top3 填上 | 禁止空 `IN ()`，该查询标「未验」 |
-| 准备手写 SQL 或 14 路 UNION | 停。改 Read **一个** lite 原文 | 已发出的结果作废，不得写入报告 |
+渠道在线时长：须 `{client_id}`，默认 `sql/online-hours-lite/03-window-avg.sql`（两窗日均）或 `sql/online-hours.sql`。禁止手算日均。仅当开窗 SQL 仍 500 才跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。#3 DidaBase 专用表没有，CS 查价只用 SS 近似。
 
 ## Phase 1：异动识别
 
-详细流程见 [phases/01-anomaly-detection.md](phases/01-anomaly-detection.md)。
-
-### 执行清单
+**输入：** 上表四个参数。**输出：** 异动识别报告 + 是否过归因门禁。**不做维度归因。** SOP：[phases/01-anomaly-detection.md](phases/01-anomaly-detection.md)。
 
 ```
 Phase 1 进度:
-- [ ] 1. 解析参数，计算日期窗口（见 anomaly-detection-lite/README.md）
-- [ ] 2. lite 三步 SQL：01 → 02 → 03
+- [ ] 1. 解析参数，计算日期窗口（见 sql/anomaly-detection-lite/README.md）
+- [ ] 2. lite 三步 SQL 串行：01 → 02 → 03（勿跑完整 anomaly-detection.sql）
 - [ ] 3. Agent 本地算 Q1/Q3 + 按 methodology 评分
 - [ ] 4. 输出异动识别报告
-- [ ] 5. 🔴 CHECKPOINT 按「执行模式」表决定停或进 Phase 2（勿一律自动、勿一律只停 Phase 1）
+- [ ] 5. 🔴 CHECKPOINT 按「执行模式」表决定停或进 Phase 2
 ```
-
-Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
-
-### 异动判定规则（摘要）
-
-完整规则见 [methodology.md](methodology.md)。核心：**三维评分，不是单一环比阈值**。
 
 | 维度 | 权重 | 关键阈值 |
 |------|------|---------|
@@ -153,47 +156,27 @@ Phase 1 MCP **用 lite 三步**，勿直接跑完整 `anomaly-detection.sql`。
 - {探查型 / 归因型门禁否：问是否继续；归因型门禁是且已有 client：直接 Phase 2；大盘：先指定 client}
 ```
 
-## 后续阶段
+## Phase 2–4（有 `client_id` / focus 才进）
 
-| 阶段 | 文件 | 状态 |
-|------|------|------|
-| Phase 1 异动识别 | phases/01-anomaly-detection.md + sql/anomaly-detection-lite/ | ✅ |
-| Phase 2 定责下钻 | [phases/02-dimension-drilldown.md](phases/02-dimension-drilldown.md) | ✅ 2a→2b→2c（MCP lite 分批；BI 全量 1 次）。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
-| Phase 3 内部证据 | phases/03-evidence-verification.md | ✅ 3a/3b/3c/3d + 限流。**3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。MCP：禁止手写 SQL、禁止 14 路 UNION** |
-| Phase 4 报告收口 | [phases/04-report.md](phases/04-report.md) + [04-report-skeleton.md](phases/04-report-skeleton.md) | ✅ 标题/表头锁定（#27）；ES 后续动作见 [es-cause-catalog.md](docs/es-cause-catalog.md) |
+| 阶段 | 输入 | 输出 | 文件与硬规则 |
+|------|------|------|----------------|
+| Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
+| Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite。** 3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
+| Phase 4 报告 | Phase 1–3 结论 | 成品报告 | 复制 [04-report-skeleton.md](phases/04-report-skeleton.md) 只填空；SOP [04-report.md](phases/04-report.md)。标题/表头锁定（#27）。ES 后续动作只按 [es-cause-catalog.md](docs/es-cause-catalog.md) |
 
-外部事件库：Phase 3d — [docs/external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/`。
-
-## 注意事项
-
-1. **先查口径再下结论**：同一指标可能有 checkout/checkin/create 多个版本，务必确认统计周期。
-2. **MCP 硬规则（3a）：一次调用 = 一个 lite 文件。** `execute_sql` 的 SQL **必须**来自 `Read` 对应 `checklist/` 或 `detail/` 原文，只替换占位符。**禁止**手写、凭记忆、抄别的 level 改一改。**禁止** 14 路 / 多表 UNION。违反 = 配置结论作废；500 标「未验」，不得写成 0。
-2b. **`{sid_list}` 必填：** SH、SS `01-ss-supplier`、限流 `01-ss-supplier-window` 共用（2b 锁定或 \|ΔBKS\|≥10%；无则 02-sid \|change\| Top3）。禁止空 `IN ()`。禁止只靠全表 `ORDER BY`+`LIMIT 50` 写结构 SID「未覆盖涨尾 / 未返回」。
-3. **权限约束**：`execute_sql` 结果受 `agent_user_key` 对应账号的行级权限影响。无 MCP / 未认证 → 停，不要用别人的 key。同事装完先按 [README.md](README.md)「权限自测」逐表 `SELECT 1 LIMIT 1`。500 ≠ 无权限；空结果可能是行级过滤；`search_meta_data` 搜不到仍可能有 `execute_sql` 权限。缺表标「未验」，不得写成 0。
-4. **未支持（不要当已落地）：** #23 机构供应商白名单现为配置快照，**禁止**当 3a 变更证据；#3 DidaBase 专用表**没有**，CS 查价只用 SS 近似。
-5. **Limit 数据量**：`execute_sql` 最多 1 万行，SQL 末尾加 LIMIT。
-6. **时间格式**：`analyse_query` 的 begin_time/end_time 支持 ISO 格式，自动转北京时间。
-7. **date_group_type**：1=小时，2=天，3=周，4=月，5=分钟，6=年。
-
-## 示例
-
-意图判定见 [examples.md](examples.md)。回归定责只用 `examples/gold-*.md`。ES 后续动作只按 [docs/es-cause-catalog.md](docs/es-cause-catalog.md)。
+SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（2b 锁定或 \|ΔBKS\|≥10%；无则 `02-sid` Top3）。
 
 ## 归因口径（Phase 3–4 必读）
 
 - [docs/es-cause-catalog.md](docs/es-cause-catalog.md) — **#5 ES 后续动作**
 - [docs/evidence-synthesis-rules.md](docs/evidence-synthesis-rules.md) — **A+B+C 综合判断**
 - [docs/accuracy-issue-mapping.md](docs/accuracy-issue-mapping.md) — 准确率下钻（与配置分离）
-- [docs/external-events-mapping.md](docs/external-events-mapping.md) — Phase 3d 营销日历
 - [docs/mcp-permission-matrix.md](docs/mcp-permission-matrix.md) — MCP 500 ≠ 无配置；14/14 fallback
 - [docs/config-search-precheck-mapping.md](docs/config-search-precheck-mapping.md) — 配置 → 查价/验价预期
-- [docs/online-hours-mapping.md](docs/online-hours-mapping.md) — 在线时长触发与解读
 
 ## 改本 Skill（跑归因跳过）
 
 - [README.md](README.md) — 同事第一天
-- [docs/decisions-summary.md](docs/decisions-summary.md) — 已拍板决策
-- 维护待办仅本机（`.gitignore` 分享包排除；跑归因不要 Read）
+- [cross-validation-design.md](cross-validation-design.md) — 交叉验证设计
+- 维护待办仅本机（跑归因不要 Read）
 - 改完验收：`python scripts/check-first-day.py` + `python scripts/check-report-skeleton.py`
-
-禁止把 `mcp.json`、对话导出、真实 `agent_user_key` 写入仓库。
