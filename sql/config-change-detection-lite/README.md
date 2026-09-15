@@ -83,9 +83,7 @@ Phase 3 checklist 进度:
 
 lite 的 `event_count` 可能**略高于**真实变更数（含重复快照）；有条目时以 detail 明细 + 产量验证为准。
 
-**C Bottom 注意：** 过滤字段为 **`item`**（= client_id），勿写 `clientid`（会 500 或查错）。操作人列 **`update_by`**。
-
-**S Bottom 注意：** `event_count > 0` 跑 **`detail/13-s-bottom-detail.sql`**。`item` = 供应商号；操作人列 **`update_user`**。禁止抄 C Bottom（`update_by` → 500）。
+**C Bottom / S Bottom：** 同表 `bottom_margin_log`，操作人列都是 **`update_user`**（没有 `update_by`，选了会 500）。差别：C 的 `item` = client_id；S 的 `item` = 供应商号。过滤勿写 `clientid`。
 
 ## MCP 稳定性
 
