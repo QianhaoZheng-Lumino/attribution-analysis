@@ -89,6 +89,8 @@ def check() -> list[str]:
     # --- ES follow-up ---
     if "es-cause-catalog.md" not in skill:
         errs.append("SKILL.md 未指向 es-cause-catalog.md")
+    if "es-writing.md" not in skill:
+        errs.append("SKILL.md 未指向 es-writing.md（ES 人话）")
     for gold in sorted((ROOT / "examples").glob("gold-*.md")):
         text = gold.read_text(encoding="utf-8")
         if re.search(r"^-\s+\*\*Phase 4 P0：\*\*", text, re.M):
