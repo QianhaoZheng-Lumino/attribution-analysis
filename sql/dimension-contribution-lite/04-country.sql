@@ -1,5 +1,7 @@
 -- 04-country.sql | 4_Country — 2c C/Dida 路径
 -- 占位符见 ../params-template.md
+-- 2c 结构：两窗任一 ≥10（含新建/清零）；报告 Top3 按 |占总量|，含反向
+-- 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500）
 
 SELECT
     COALESCE(b.country_code, 'Unknown') AS country_code,
@@ -14,6 +16,10 @@ WHERE a.channel_status IN ('Confirmed', 'Canceled')
     AND a.clientid = '{client_id}'
     AND a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{current_end}'::date
 GROUP BY COALESCE(b.country_code, 'Unknown')
-HAVING SUM(CASE WHEN a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{compare_end}'::date THEN 1 ELSE 0 END) > 10
-ORDER BY booking_change ASC
+HAVING SUM(CASE WHEN a.channel_createdate::date BETWEEN '{current_start}'::date AND '{current_end}'::date THEN 1 ELSE 0 END) >= 10
+    OR SUM(CASE WHEN a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{compare_end}'::date THEN 1 ELSE 0 END) >= 10
+ORDER BY ABS(
+    SUM(CASE WHEN a.channel_createdate::date BETWEEN '{current_start}'::date AND '{current_end}'::date THEN 1 ELSE 0 END)
+      - SUM(CASE WHEN a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{compare_end}'::date THEN 1 ELSE 0 END)
+) DESC
 LIMIT 20;

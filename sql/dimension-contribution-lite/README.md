@@ -35,7 +35,18 @@ Step 4  Agent 本地算贡献%（分母见下，禁止一律 / total_change）
 | C/Dida | 04-country, 06-chain, 08-lt, 10-los, 12-nationality |
 | S/CS | 03-sid-account, 05-sid-country, 07-sid-chain, 09-sid-lt, 11-sid-los, 13-sid-nationality |
 
-Account 行仅当 **占该 SID 变化** `ABS(contribution_pct) >= 10%` 写入报告（分母 = `02-sid` 的 sid `booking_change`）。
+Account 行当 **占该 SID 变化** `|contribution_pct| >= 10%` 写入报告（分母 = `02-sid` 的 sid `booking_change`），**含新建/清零**。
+
+### 2c 结构过滤（与定责分离）
+
+| 层 | 文件 | 留行规则 |
+|----|------|---------|
+| **定责** | `02-sid`、`14-sid-client-validation` | **对比期 ≥ 5**，不动 |
+| **2c 结构** | `03/05/07/13` | 当前 ≥3 **或** 对比 ≥3 |
+| **2c 结构** | `04/06/12` | 当前 ≥10 **或** 对比 ≥10 |
+| **LT / LOS** | `08/09/10/11` | 不按对比期卡新建 |
+
+SQL：`ORDER BY ABS(SUM(当前窗) - SUM(对比窗)) DESC`。**禁止** `ORDER BY ABS(booking_change)`——Hologres 对别名套 ABS 会 500。报告按 `|贡献%|` 进表，含反向。MCP 可能打乱顺序，Agent 本地再排。
 
 ### 贡献% 分母（2026-09-04 #14）
 
