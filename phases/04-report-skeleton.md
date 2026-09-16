@@ -95,7 +95,7 @@
 |---|---|---|---|
 | | | | |
 
-#### Account（仅 S/CS · 占 {SID} 变化 ≥10%）
+#### Account（仅 S/CS · |占 {SID} 变化| ≥10%）
 
 | Account | prev → cur | change | 占 {SID} 变化 |
 |---|---|---|---|

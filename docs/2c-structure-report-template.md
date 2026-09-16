@@ -26,7 +26,7 @@
 |------|-----|--------|
 | **SID+Country** | `05-sid-country.sql` | **表 Top 3** |
 | **SID+Chain** | `07-sid-chain.sql` | **表 Top 3** |
-| **SID+Account** | `03-sid-account.sql` | 小表，仅 **占 {SID} 变化 ≥10%** |
+| **SID+Account** | `03-sid-account.sql` | 小表，**\|占 {SID} 变化\| ≥10%**（含新建/清零、含反向） |
 | **SID+LT / LOS / Nationality** | `09` / `11` / `13` | 各 **1 段落** |
 
 **LT / LOS / Nationality 整段可省略**（一行「无单维主导」）当：Top1 `|贡献%| < 5%` 且 Top3 累计 **< 15%**（贡献% 用 **本路径分母**，S/CS 为 sid）。  
@@ -54,11 +54,11 @@ S/CS 贡献%   = booking_change / sid_booking_change × 100
 
 `sid_booking_change` = 锁定 supplier 在 `02-sid` 的 `booking_change`（例：SnapTravel2B 的 26-Agoda **+2,588**，不是 client **+3,156**）。
 
-**SID+Account ≥10%：** 分母同样是 **`sid_booking_change`**（不是 client 总量）。否则小 SID 上的大账号过不了门槛。
+**SID+Account ≥10%：** 分母同样是 **`sid_booking_change`**（不是 client 总量）。按 **`|贡献%|`** 进表，**含反向**（清零/对冲）。`0→N` 只写贡献%，不写环比%。否则小 SID 上的大账号过不了门槛。
 
 **BI 注意：** 完整 `dimension-contribution.sql` 的 `contribution_percentage` **不是** sid 分母。S/CS 写入报告前 **必须按上式重算**，禁止直接贴 SQL 列。
 
-同向 = 与异动同符号（跌产看负向 Top，涨产看正向 Top）。
+**进表排序（2c 结构）：** 按 `|booking_change / 分母|` 降序。与异动同号仍叫「同向」，用于解读，**不再作为进表过滤器**。SQL 必须 `ORDER BY ABS(SUM差)`，禁止 `ABS(booking_change)` 别名（Hologres 500）。MCP 仍可能打乱顺序，Agent 必须按绝对值本地再排。
 
 ### 2.2 表 vs 段落
 
@@ -66,10 +66,11 @@ S/CS 贡献%   = booking_change / sid_booking_change × 100
 |------|------|------|
 | **Country / Chain**（及 SID+ 版） | ✅ **3 列表** + footnote | 固定 **Top 3**（同 Country 样式） |
 | **LT / LOS / Nationality** | ❌ **1 段话** | Top **2–3** 项 + 集中度一句 |
-| **SID+Account** | 小表 | 仅 **占 {SID} 变化** ≥10% |
+| **SID+Account** | 小表 | **\|占 {SID} 变化\| ≥10%**，含新建/清零 |
 
-**Country / Chain 表 footnote：** `*Top3 占 ~X%；{一句解读}。*`  
-若 Top3 内混有 **反向小项**：表仍只列 \|Δ\| 最大的 3 个同向项；反向写在 footnote（如 `*Centre point +36 反向，小。*`）。
+**Country / Chain 表：** 固定 Top 3，按 **`|贡献%|`**，**含反向**。footnote：`*Top3 占 ~X%；{一句解读}。*` 含反向时写明（如 `*含 Hyatt −13 反向。*`）。排不进 Top3 的小反向一句带过。
+
+**Account：** `|贡献%| ≥ 10%` 的都进表（正负都算）。`0→N` 在 `prev → cur` 标「新建」，`N→0` 标「清零」。切走与接量对冲时贡献可超过 100%，footnote 写明，禁止当算错改分母。
 
 ### 2.3 段落维度 · 集中度（LT / LOS / Nationality）
 
@@ -194,7 +195,8 @@ S/CS 贡献%   = booking_change / sid_booking_change × 100
 - ❌ 结构维 Top1 写成主因  
 - ❌ Country 与 Nationality 混为一列  
 - ❌ S/CS 表用 client 总量作分母，或列名写「占总量」实际除的是 sid  
-- ❌ Account ≥10% 用 client 总量当门槛  
+- ❌ Account ≥10% 用 client 总量当门槛
+- ❌ 涨产把清零/反向踢出 Country、Chain、Account 表（只写 footnote）  
 
 ---
 

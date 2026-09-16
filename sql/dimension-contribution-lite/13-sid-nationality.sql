@@ -1,4 +1,6 @@
 -- 13-sid-nationality.sql | 13_SID+Nationality — S/CS 结构
+-- 2c 结构：两窗任一 ≥3（含新建/清零）；报告仍写段落，按 |占 SID 变化| 取 Top2–3
+-- 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500）
 
 SELECT
     COALESCE(a.channel_nationality::text, '(empty)') AS nationality,
@@ -13,6 +15,10 @@ WHERE a.channel_status IN ('Confirmed', 'Canceled')
     AND a.sid = '{sid}'
     AND a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{current_end}'::date
 GROUP BY COALESCE(a.channel_nationality::text, '(empty)')
-HAVING SUM(CASE WHEN a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{compare_end}'::date THEN 1 ELSE 0 END) > 3
-ORDER BY booking_change ASC
+HAVING SUM(CASE WHEN a.channel_createdate::date BETWEEN '{current_start}'::date AND '{current_end}'::date THEN 1 ELSE 0 END) >= 3
+    OR SUM(CASE WHEN a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{compare_end}'::date THEN 1 ELSE 0 END) >= 3
+ORDER BY ABS(
+    SUM(CASE WHEN a.channel_createdate::date BETWEEN '{current_start}'::date AND '{current_end}'::date THEN 1 ELSE 0 END)
+      - SUM(CASE WHEN a.channel_createdate::date BETWEEN '{compare_start}'::date AND '{compare_end}'::date THEN 1 ELSE 0 END)
+) DESC
 LIMIT 20;

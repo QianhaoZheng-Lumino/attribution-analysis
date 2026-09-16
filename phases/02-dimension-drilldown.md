@@ -69,7 +69,7 @@
 | 2b 结论 | 下钻层级 |
 |---------|---------|
 | C/Dida | 4_Country, 6_Chain, 8_LT, 10_LOS, 12_Nationality |
-| S/CS | 5_SID+Country, 7_SID+Chain, 3_SID+Account（占 SID 变化 ≥10%）, 9/11/13 |
+| S/CS | 5_SID+Country, 7_SID+Chain, 3_SID+Account（**\|占 SID 变化\| ≥10%**，含反向）, 9/11/13 |
 
 ---
 

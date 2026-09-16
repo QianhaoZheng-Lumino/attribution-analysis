@@ -40,12 +40,12 @@
 |-----------|---------|
 | `5_SID+Country` | country_code |
 | `7_SID+Chain` | chain |
-| `3_SID+Account` | supplieraccountid（**仅占该 SID 变化 ≥10%**） |
+| `3_SID+Account` | supplieraccountid（**\|占该 SID 变化\| ≥10%**，含新建/清零） |
 | `9_SID+LT` | lt |
 | `11_SID+LOS` | los |
 | `13_SID+Nationality` | nationality |
 
-每个 hierarchy 内 Top 3；**表头列名：占 {SID} 变化**（禁止「占总量」）。**Country / Chain 写表**；**LT / LOS / Nationality 写段落**。
+每个 hierarchy 内按 `|贡献%|` 取 Top 3（Account 为全部过 10% 的行）；**表头列名：占 {SID} 变化**（禁止「占总量」）。**Country / Chain 写表，含反向**；**LT / LOS / Nationality 写段落**。
 
 ## 输出模板
 
@@ -65,7 +65,8 @@
 - ❌ **MCP 上**只跑 `02-sid`（或再加 Country）就写完整 2c；Chain / LT / LOS / Nationality **缺文件 = 未达标**
 - ❌ 把「BI 全量 1 次、2c 0 额外 SQL」套用到 MCP
 - ❌ C/Dida 路径强行写 Supplier Account
-- ❌ Account 贡献（**占 SID 变化**）<10% 仍展开长表
+- ❌ Account 贡献（**占 SID 变化**）`|pct|` <10% 仍展开长表
+- ❌ 涨产把清零/反向踢出 Country、Chain、Account 表（只写 footnote）
 - ❌ S/CS 2c 用 client 总量作分母，或列名与分母不一致
 - ❌ **Chain / LT / LOS 全表贴报告**（Chain 仅 Top3 表；LT/LOS 仅段落，见 structure-report-template）
 - ❌ 把下钻 Top1 直接写成最终根因（Phase 3 未验证前标「初步」）
