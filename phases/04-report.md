@@ -17,7 +17,7 @@
 
 1. **H2 八节**与骨架逐字、同序。路径/✅/日期写进正文，不写进 H2。阶段名是 **报告收口**；报告里的跟进节叫 **后续动作**。**成品不要附录。**
 2. **必填 H3**与骨架相同。只有两处可替换：`### 2b 定责 → **{结论}**`、`### 3a 配置（checklist **{N}/14** {✅/⚠️}，窗口 {w}）`。`### 2c 下钻` 无后缀。**2b=C/Dida 填 4_/6_ 单维；2b=S/CS 填 5_/7_/03 复合维**，只留一条路径。
-3. **Executive Summary 六键**逐字、同序：`异动` / `结构` / `主因` / `并列` / `已排除` / `后续动作`。
+3. **Executive Summary：** 先写 **业务导语 3～5 句**（[es-writing.md](../docs/es-writing.md)），再写 **六键**逐字、同序：`异动` / `结构` / `主因` / `并列` / `已排除` / `后续动作`。六键正文用人话，内部代号放括号。机构查价 `|WoW|>10%` 必须进导语或并列。后续动作末尾仍须目录编号。
 4. **表头逐字**。3a = **7 列 14 行**（`#` / `Level` / `n` / `操作(枚举)` / `作用域` / `Δmargin / remark` / `信号`），**不写**来源 lite 文件。§4 责任修正四行 = `Phase 2b 初判` / `修正后主因` / `并列` / `非主因（已排除）`。证据对照表七行不变。
 5. **在线时长、准确率先探测再按触发填。** 在线：必填 PPS/QPS WoW 与是否触发；\|WoW\|>10% 才填日均/异动≥2h。准确率：每案 `01-total`；\|Δpp\|≥5 才填「启动后下钻」，未启动行内 —。
 6. 单元格和数据行可填可增；**标题和表头不可改**。MCP 500 写在对应节解读。SQL 原文仍须 Read 后执行，但路径不进成品报告。
@@ -31,7 +31,7 @@
 - [ ] 3. 3d 综合判断：对照 evidence-synthesis-rules.md 输出置信度
 - [ ] 3b. **3a 表为 7 列 14 行**（操作枚举+作用域，不写 SQL 路径）；**出门禁**写在 §4（通过 / 不通过+哪条）
 - [ ] 4. 根因结论：主因 1 条写清楚 + 并列因素 + 非主因（已排除）
-- [ ] 5. 后续动作：Read [docs/es-cause-catalog.md](../docs/es-cause-catalog.md)，写成 `目录 **B2**（现象）→ 可能原因`（1–2 条）。D 组兑现 → 对内
+- [ ] 5. ES：Read [docs/es-writing.md](../docs/es-writing.md) 写导语+人话六键；Read [docs/es-cause-catalog.md](../docs/es-cause-catalog.md)，后续动作先问人、末尾 `目录 **B2**`（1–2 条）。D 组兑现 → 对内
 - [ ] 6. （可选）写入 examples/ 作金样例
 ```
 
@@ -83,9 +83,10 @@
 
 ### 应做
 
-1. Read `docs/es-cause-catalog.md`，再写 ES「后续动作」
-2. 句式：`目录 **B2**（现象）→ 可能原因；禁止写成已确认`
+1. Read `docs/es-writing.md`，先写业务导语和人话六键（禁止导语堆内部代号）
+2. Read `docs/es-cause-catalog.md`，再写 ES「后续动作」：先问谁、问什么，末尾 `目录 **B2**（现象）→ 可能原因；禁止写成已确认`
 3. `目录` + 编号，一案 1–2 条；3a 无对应配置才问渠道；节日（E1）只辅助
+4. 机构查价 `|WoW|>10%` 必须出现在导语或并列，禁止为了好读删掉
 
 ---
 
@@ -107,4 +108,5 @@
 - 合成规则：[docs/evidence-synthesis-rules.md](../docs/evidence-synthesis-rules.md)
 - 外部事件 D：[docs/external-events-mapping.md](../docs/external-events-mapping.md)
 - Phase 3 SOP：[phases/03-evidence-verification.md](03-evidence-verification.md)
+- ES 人话：[docs/es-writing.md](../docs/es-writing.md)
 - 数据现象目录（#5）：[docs/es-cause-catalog.md](../docs/es-cause-catalog.md)

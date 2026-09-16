@@ -487,7 +487,7 @@ Lite：`sql/external-events-lite/`
 
 ## 未解释部分
 
-→ 报告收口：ES 查 [es-cause-catalog.md](../docs/es-cause-catalog.md)
+→ 报告收口：ES 人话 [es-writing.md](../docs/es-writing.md)；后续动作 [es-cause-catalog.md](../docs/es-cause-catalog.md)
 
 ## 综合判断（Phase 3d）
 

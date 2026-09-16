@@ -1,6 +1,6 @@
 # 示例（意图，不是把 gold 当 SOP）
 
-成品报告复制 [phases/04-report-skeleton.md](phases/04-report-skeleton.md) 只填空。gold / case 用来回归 **定责口径**；3a 表头可能是旧列，**不要抄表头**。ES 后续动作只按 [docs/es-cause-catalog.md](docs/es-cause-catalog.md)。
+成品报告复制 [phases/04-report-skeleton.md](phases/04-report-skeleton.md) 只填空。gold / case 用来回归 **定责口径**；3a 表头可能是旧列，**不要抄表头**。ES 人话按 [docs/es-writing.md](docs/es-writing.md)；后续动作编号只按 [docs/es-cause-catalog.md](docs/es-cause-catalog.md)。ES 口吻样例：[examples/case-hoppercap1tps-20260915.md](examples/case-hoppercap1tps-20260915.md)（不回改 gold）。
 
 ## 示例 1：探查（只 Phase 1）
 

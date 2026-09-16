@@ -42,6 +42,7 @@ description: >-
 - MCP 500 写成 event_count=0 或「已排除」；权限未证就把 0 行当成业务 0
 - 把 #23 机构供应商白名单快照当 3a 变更证据；把 LCDH 叫白名单；当已有 #3 DidaBase 专用表
 - 抄 gold / case 的旧 3a 表头；ES 后续动作不按 [es-cause-catalog.md](docs/es-cause-catalog.md) 自编
+- ES 导语堆 `parent`/`WoW`/`SID`/`验证 B`/`CS`/`PPS`；或把机构查价 `|WoW|>10%` 从 ES 删掉。写法见 [docs/es-writing.md](docs/es-writing.md)
 - 把 `mcp.json`、对话导出、真实 key 写入仓库
 
 ## 失败模式（触发 → 一线 → 仍失败）
@@ -162,12 +163,13 @@ Phase 1 进度:
 |------|------|------|----------------|
 | Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。MCP lite 分批；BI 全量 1 次。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
 | Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite**：Read 对应 `checklist/` 或 `detail/` 原文只填占位符。3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
-| Phase 4 报告 | Phase 1–3 结论 | 成品报告 | 复制 [04-report-skeleton.md](phases/04-report-skeleton.md) 只填空；SOP [04-report.md](phases/04-report.md)。标题/表头锁定（#27）。ES 后续动作只按 [es-cause-catalog.md](docs/es-cause-catalog.md) |
+| Phase 4 报告 | Phase 1–3 结论 | 成品报告 | 复制 [04-report-skeleton.md](phases/04-report-skeleton.md) 只填空；SOP [04-report.md](phases/04-report.md)。标题/表头锁定（#27）。**ES 先业务导语、六键人话**（[es-writing.md](docs/es-writing.md)）；后续动作编号只按 [es-cause-catalog.md](docs/es-cause-catalog.md) |
 
 SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（2b 锁定或 \|ΔBKS\|≥10%；无则 `02-sid` Top3）。
 
 ## 归因口径（Phase 3–4 必读）
 
+- [docs/es-writing.md](docs/es-writing.md) — **ES 人话**（导语给业务，六键代号后置）
 - [docs/es-cause-catalog.md](docs/es-cause-catalog.md) — **#5 ES 后续动作**
 - [docs/evidence-synthesis-rules.md](docs/evidence-synthesis-rules.md) — **A+B+C 综合判断**
 - [docs/accuracy-issue-mapping.md](docs/accuracy-issue-mapping.md) — 准确率下钻（与配置分离）

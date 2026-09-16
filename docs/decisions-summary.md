@@ -303,6 +303,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - 2b=C/Dida 且 Phase 3 无强信号 → **倾向 C**；后续动作按 [es-cause-catalog.md](./es-cause-catalog.md)（B2），禁止空问流量
 - **报告骨架（#27）：** 复制 `phases/04-report-skeleton.md` 只填空；验收 `scripts/check-report-skeleton.py`。只锁格式，不改定责口径。
 - **#5（2026-09-14 ✅）：** ES 后续动作查 [es-cause-catalog.md](./es-cause-catalog.md)。主因不改。A6：QPS/PPS 上限只打有价。D 组兑现禁止套 B2 问渠道。
+- **ES 人话（2026-09-16 ✅）：** 导语给业务、六键人话、代号后置；机构查价 `|WoW|>10%` 不得从 ES 删掉。写法 [es-writing.md](./es-writing.md)。不回改 gold。
 
 ---
 
