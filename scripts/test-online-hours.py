@@ -156,7 +156,7 @@ def main() -> int:
     prev_avg, _ = avg_hours(daily, compare_start, compare_end)
     diff = round(cur_avg - prev_avg, 2)
     wow = round(100.0 * diff / prev_avg, 1) if prev_avg else None
-    anomaly = diff <= -2
+    anomaly = diff <= -1.5
 
     win_start = datetime(calc_start.year, calc_start.month, calc_start.day, tzinfo=BJ)
     win_end = datetime(calc_end.year, calc_end.month, calc_end.day, tzinfo=BJ)
@@ -176,7 +176,7 @@ def main() -> int:
         "current": {"start": str(current_start), "end": str(current_end), "avg_hours": cur_avg},
         "delta_h": diff,
         "wow_pct": wow,
-        "anomaly_ge_2h": anomaly,
+        "anomaly_ge_1_5h": anomaly,
         "source_in_window": dict(src_cnt),
         "dominant_source": dom,
         "remarks_offline": remarks_off,
@@ -188,7 +188,7 @@ def main() -> int:
     print(f"对比窗日均 ({compare_start}~{compare_end}): {prev_avg} h")
     print(f"当前窗日均 ({current_start}~{current_end}): {cur_avg} h")
     print(f"差值: {diff} h | WoW: {wow}%")
-    print(f"异动 (少>=2h): {'YES' if anomaly else 'NO'}")
+    print(f"异动 (少>=1.5h): {'YES' if anomaly else 'NO'}")
     print(f"窗口内 source: {dict(src_cnt)}")
     print(f"主导 source: {dom or '(无动作)'}")
     if remarks_off:

@@ -1,100 +1,72 @@
 -- 03-window-avg | 单 client 两窗日均在线时长（Phase 3 默认）
 -- MCP tables: ["rateaccuracy.channel_online_states_new"]
--- 一次调用出对比窗 / 当前窗日均。口径与 ../online-hours.sql 相同。
+-- 一次调用出对比窗 / 当前窗日均。口径与 scripts/test-online-hours.py 相同。
 -- {client_id} 必填。原始日志不要加时间过滤。
--- {start_date} = compare_start（含）；{end_date} = current_end+1（不含）
--- {n_days} = end_date - start_date
--- 对比/当前窗止日均为含。
+-- {compare_start}/{compare_end}、{current_start}/{current_end} 止日均为含。
+-- {compare_n_days} = compare_end - compare_start + 1（填整数，如 3）
+-- {current_n_days} = current_end - current_start + 1（填整数，如 3）
+--
+-- MCP 禁区（2026-09-21 复测）：
+--   对 channel_operation_time 写 AT TIME ZONE / 除以 1000 → 网关 500
+--   params CTE CROSS JOIN、generate_series 按日切开、ROW_NUMBER 去重 CTE → 易 500
+-- 本文件：EXTRACT(EPOCH FROM col) + CASE 裁窗 + TIMESTAMPTZ '...+08'
+-- 禁止 to_timestamp(col/1000)（那是 MCP JSON 毫秒的 Python 算法）。
+-- 2026-09-21 复测：SnapEBK 24.0/22.07/−1.93；SnapTravel2B gold 23.45/20.9/−2.55。
 
-WITH params AS (
+WITH raw AS (
     SELECT
-        TIMESTAMP '{start_date} 00:00:00' AS start_ts,
-        TIMESTAMP '{end_date} 00:00:00' AS end_ts
-),
-days AS (
-    SELECT (DATE '{start_date}' + i) AS dt
-    FROM generate_series(0, {n_days} - 1) AS i
-),
-raw AS (
-    SELECT
-        s.client_id,
-        s.status::int AS status,
-        s.id,
-        (s.channel_operation_time AT TIME ZONE 'Asia/Shanghai') AS op_ts
-    FROM rateaccuracy.channel_online_states_new s
-    WHERE s.client_id = '{client_id}'
-),
-dedup AS (
-    SELECT client_id, status, op_ts, id
-    FROM (
-        SELECT
-            client_id, status, op_ts, id,
-            ROW_NUMBER() OVER (
-                PARTITION BY client_id, op_ts
-                ORDER BY id DESC
-            ) AS rn
-        FROM raw
-    ) t
-    WHERE rn = 1
+        status::int AS status,
+        id,
+        EXTRACT(EPOCH FROM channel_operation_time) AS op_epoch
+    FROM rateaccuracy.channel_online_states_new
+    WHERE client_id = '{client_id}'
 ),
 ordered AS (
     SELECT
-        client_id, status, op_ts, id,
-        LAG(status) OVER (
-            PARTITION BY client_id
-            ORDER BY op_ts, id
-        ) AS prev_status
-    FROM dedup
+        status, op_epoch, id,
+        LAG(status) OVER (ORDER BY op_epoch, id) AS prev_status
+    FROM raw
 ),
 changes AS (
-    SELECT client_id, status, op_ts
+    SELECT status, op_epoch
     FROM ordered
-    WHERE prev_status IS NULL
-       OR status <> prev_status
+    WHERE prev_status IS NULL OR status <> prev_status
 ),
 spans AS (
     SELECT
-        client_id,
         status,
-        op_ts AS span_start,
-        LEAD(op_ts) OVER (
-            PARTITION BY client_id
-            ORDER BY op_ts
-        ) AS next_op_ts
+        op_epoch AS span_start,
+        COALESCE(
+            LEAD(op_epoch) OVER (ORDER BY op_epoch),
+            EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_end} 00:00:00+08') + 86400.0
+        ) AS span_end
     FROM changes
 ),
-clipped AS (
+clip AS (
     SELECT
-        s.client_id,
-        GREATEST(s.span_start, p.start_ts) AS span_start,
-        LEAST(COALESCE(s.next_op_ts, p.end_ts), p.end_ts) AS span_end
-    FROM spans s
-    CROSS JOIN params p
-    WHERE s.status = 1
-      AND s.span_start < p.end_ts
-      AND COALESCE(s.next_op_ts, p.end_ts) > p.start_ts
-      AND LEAST(COALESCE(s.next_op_ts, p.end_ts), p.end_ts)
-          > GREATEST(s.span_start, p.start_ts)
-),
-daily AS (
-    SELECT
-        d.dt,
-        ROUND(LEAST(COALESCE(SUM(EXTRACT(EPOCH FROM (
-            LEAST(c.span_end, d.dt + INTERVAL '1 day')
-            - GREATEST(c.span_start, d.dt::timestamp)
-        )) / 3600.0), 0), 24)::numeric, 2) AS online_hours
-    FROM days d
-    LEFT JOIN clipped c
-        ON c.span_start < d.dt + INTERVAL '1 day'
-       AND c.span_end > d.dt::timestamp
-    GROUP BY d.dt
+        CASE
+            WHEN span_end <= EXTRACT(EPOCH FROM TIMESTAMPTZ '{compare_start} 00:00:00+08') THEN 0
+            WHEN span_start >= EXTRACT(EPOCH FROM TIMESTAMPTZ '{compare_end} 00:00:00+08') + 86400.0 THEN 0
+            ELSE
+                (CASE WHEN span_end < EXTRACT(EPOCH FROM TIMESTAMPTZ '{compare_end} 00:00:00+08') + 86400.0 THEN span_end ELSE EXTRACT(EPOCH FROM TIMESTAMPTZ '{compare_end} 00:00:00+08') + 86400.0 END)
+              - (CASE WHEN span_start > EXTRACT(EPOCH FROM TIMESTAMPTZ '{compare_start} 00:00:00+08') THEN span_start ELSE EXTRACT(EPOCH FROM TIMESTAMPTZ '{compare_start} 00:00:00+08') END)
+        END AS prev_sec,
+        CASE
+            WHEN span_end <= EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_start} 00:00:00+08') THEN 0
+            WHEN span_start >= EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_end} 00:00:00+08') + 86400.0 THEN 0
+            ELSE
+                (CASE WHEN span_end < EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_end} 00:00:00+08') + 86400.0 THEN span_end ELSE EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_end} 00:00:00+08') + 86400.0 END)
+              - (CASE WHEN span_start > EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_start} 00:00:00+08') THEN span_start ELSE EXTRACT(EPOCH FROM TIMESTAMPTZ '{current_start} 00:00:00+08') END)
+        END AS curr_sec
+    FROM spans
+    WHERE status = 1
 )
 SELECT
     '{client_id}' AS client_id,
-    ROUND(AVG(CASE WHEN dt >= DATE '{compare_start}' AND dt <= DATE '{compare_end}' THEN online_hours END)::numeric, 2) AS avg_online_hours_previous,
-    ROUND(AVG(CASE WHEN dt >= DATE '{current_start}' AND dt <= DATE '{current_end}' THEN online_hours END)::numeric, 2) AS avg_online_hours_current,
+    ROUND((SUM(GREATEST(0.0, prev_sec)) / 3600.0 / {compare_n_days})::numeric, 2) AS avg_online_hours_previous,
+    ROUND((SUM(GREATEST(0.0, curr_sec)) / 3600.0 / {current_n_days})::numeric, 2) AS avg_online_hours_current,
     ROUND((
-        AVG(CASE WHEN dt >= DATE '{current_start}' AND dt <= DATE '{current_end}' THEN online_hours END)
-        - AVG(CASE WHEN dt >= DATE '{compare_start}' AND dt <= DATE '{compare_end}' THEN online_hours END)
+        SUM(GREATEST(0.0, curr_sec)) / 3600.0 / {current_n_days}
+      - SUM(GREATEST(0.0, prev_sec)) / 3600.0 / {compare_n_days}
     )::numeric, 2) AS delta_h
-FROM daily;
+FROM clip;

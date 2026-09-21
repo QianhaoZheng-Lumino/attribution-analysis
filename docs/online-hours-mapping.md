@@ -1,7 +1,7 @@
 # 渠道在线时长 — 触发、口径与解读
 
-> **2026-09-04 定稿口径**；**2026-09-09 计算路径改为 MCP 开窗 SQL**。表：`rateaccuracy.channel_online_states_new`  
-> SQL：`sql/online-hours-lite/03-window-avg.sql`（MCP 默认）· `sql/online-hours.sql`（日表，MCP/Hologres）· 全客户批处理仅 Hologres
+> **2026-09-04 定稿口径**；**2026-09-21 MCP 默认改为 EXTRACT(EPOCH) + CASE 裁窗**（禁止 `AT TIME ZONE`）。表：`rateaccuracy.channel_online_states_new`  
+> SQL：`sql/online-hours-lite/03-window-avg.sql`（MCP 默认）· `sql/online-hours.sql`（日表，Hologres）· 全客户批处理仅 Hologres
 
 ---
 
@@ -73,7 +73,7 @@
 
 | 字段 | 规则 |
 |------|------|
-| `channel_operation_time` | **动作发生时间**（库内 timestamptz；MCP 拉原始 log 时序列化为毫秒）。SQL 用 `AT TIME ZONE 'Asia/Shanghai'`，**不用** `log_time`，**不要** `to_timestamp(col/1000)` |
+| `channel_operation_time` | **动作发生时间**（库内 timestamptz；MCP 拉原始 log 时序列化为毫秒）。MCP SQL 用 `EXTRACT(EPOCH FROM col)`，**禁止** `AT TIME ZONE` / `col/1000`。**不用** `log_time`，**不要** `to_timestamp(col/1000)` |
 | **`status = 0`** | **下线动作** — 从该时刻起进入下线状态 |
 | **`status = 1`** | **上线动作** — 从该时刻起进入在线状态 |
 | `source` | 动作来源；**决定信号可信度**（见 §5） |
@@ -91,7 +91,7 @@
 3. 窗口开始前 **最后一次有效动作** 决定窗口起点 0 点时的初始在线/离线状态  
 4. 按 **北京时间自然日 0 点** 切开，单日 cap **24h**  
 5. 输出：`client_id, dt, online_hours, online_pct`  
-**MCP 默认实现 = `sql/online-hours-lite/03-window-avg.sql`（禁止手算）。** 日表明细用 `sql/online-hours.sql`。仅当二者 MCP 仍 500 才用 `scripts/test-online-hours.py`（JSON 毫秒 → Python）。
+**MCP 默认实现 = `sql/online-hours-lite/03-window-avg.sql`（禁止手算；禁止改回 AT TIME ZONE）。** 日表明细走 fetch + `scripts/test-online-hours.py`，或 Hologres `sql/online-hours.sql`。仅当 03 仍 500 才用 Python 算两窗日均。
 
 **时间窗口：** 必须与 **Phase 1 当前期 / 对比期完全对齐**（`compare_start` ~ `current_end`，见 `params-template.md`）。
 
@@ -166,12 +166,13 @@
 
 | 条件 | 判定 |
 |------|------|
-| 当前窗 **日均 online_hours 比对比窗少 ≥ 2 小时** | **在线时长有异动的** |
-| 少 < 2h | 正常波动，不单报 |
+| 当前窗 **日均 online_hours 比对比窗少 ≥ 1.5 小时** | **在线时长有异动的** |
+| 少 < 1.5h | 正常波动，不单报 |
 | 当前窗日均接近 0（如 < 2h）且对比窗 ≥ 10h | **强信号**（疑似长期下线） |
 
 与 QPS 10% 触发 **独立**：  
-- 可先因 QPS↓>10% 触发查询，再用 **2h 规则** 判断在线是否「异动」。
+- 可先因 QPS↓>10% 触发查询，再用 **1.5h 规则** 判断在线是否「异动」。  
+- **2026-09-21：** 异动阈值由 2h 下调至 **1.5h**（SnapEBK −1.93h 与查价 −11.9% 同向；产量仍看转化）。
 
 ---
 
@@ -179,8 +180,8 @@
 
 | 观察到… | 且 source 以… | 则… | 强度 |
 |---------|--------------|-----|------|
-| QPS↓>10% + 日均在线 **↓≥2h** | **邮件解析** 有明确上/下线动作 | **倾向 C（渠道下线/在线缩短）** | 中～强 |
-| QPS↓>10% + 日均在线 **↓≥2h** | **仅数据库分析** | **辅助参考**；写「疑似下线，待渠道确认」 | 弱 |
+| QPS↓>10% + 日均在线 **↓≥1.5h** | **邮件解析** 有明确上/下线动作 | **倾向 C（渠道下线/在线缩短）** | 中～强 |
+| QPS↓>10% + 日均在线 **↓≥1.5h** | **仅数据库分析** | **辅助参考**；写「疑似下线，待渠道确认」 | 弱 |
 | 在线 **≈24h**，QPS 仍↓ | 任意 | **不是下线** → 需求 / 其他 C（A6：上限不打总量） | — |
 | 在线正常，BKS↓ 且 **转化≈** | — | 在线缩短 **不能解释** BKS；查其他 C/S 因素 | inconclusive |
 | 在线↓，查价↓，BKS↑ | — | 在线 **只解释查价**；产量由 **转化↑** 驱动（§2） | — |
@@ -192,15 +193,15 @@
 
 ---
 
-## 9. MCP 执行（2026-09-09）
+## 9. MCP 执行（2026-09-21）
 
 ```
 Step 0  client_id = Phase 1 分析对象（必填；禁止扫全表）
 Step 1  03-window-avg.sql
-        {start_date}=compare_start  {end_date}=current_end+1
-        {n_days}=end-start  两窗起止与 Phase 1 对齐
+        compare/current 起止（止日含）+ compare_n_days / current_n_days
+        禁止 AT TIME ZONE、禁止 col/1000、禁止 generate_series 日切
 Step 1b （可选）02-email-source-clients.sql
-Step 2  04-window-source.sql（窗内 source / 下线 remark；允许时间过滤）
+Step 2  04-window-source.sql（窗内 source / 下线 remark；TIMESTAMPTZ '...+08' 直接比较）
 Step 3  对照 §6 触发 + §7 异动 + §8 解读
 Step F  仅 Step 1 仍 500：00-count → 01-fetch-logs 拉全 → test-online-hours.py
 ```
@@ -220,7 +221,7 @@ Step F  仅 Step 1 仍 500：00-count → 01-fetch-logs 拉全 → test-online-h
 
 ## 11. #22 已收口（2026-09-09）
 
-归因 **不再等** 全客户物化表。MCP 默认对单 client 跑 `03-window-avg.sql` / `online-hours.sql`。
+归因 **不再等** 全客户物化表。MCP 默认对单 client 跑 `03-window-avg.sql`。日表走 Python 或 Hologres。
 
-全客户 × 日的 Hologres SQL（`sql/channel_daily_online_hours.sql`）仍可选用，**不阻塞** Skill。触发 / 2h / source / 只解释查价 **不变**。
+全客户 × 日的 Hologres SQL（`sql/channel_daily_online_hours.sql`）仍可选用，**不阻塞** Skill。触发 / 1.5h / source / 只解释查价 **不变**。
 

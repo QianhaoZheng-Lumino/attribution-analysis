@@ -410,7 +410,7 @@ Lite：`sql/external-events-lite/`
    d. 机构级 precheck 总量：rate_accuracy client 聚合（与 00 同窗，手算查验比）
 5. 【3c 准确率】**每案**先 `rate-accuracy-contribution-lite/01-total.sql`。`\|item_accuracy_delta_pp\| ≥ 5`（pp）→ 按 2c 路径跑维 + `issue/01` + `issue/02`；未过线写「已探测、未启动」。禁止用 precheck 量代替。独立，不混配置。见 [accuracy-issue-mapping.md](../docs/accuracy-issue-mapping.md)
 6. 辅助（限流/缓存）：**结构 SID 必出数**（2b 锁定或占 \|ΔBKS\|≥10%）→ `rate-limit-lite/01-ss-supplier-window.sql` **必填 `{sid_list}`**（与 SH / `01-ss-supplier` 同一套）。禁止全表 `ORDER BY`+`LIMIT 50` 代替结构 SID。SS 有价/请求 \|WoW\|>10% 只决定解读档。见 §5.10（涨方向/请求↓产量↑ **待研究**，仅报数；未过 10% 仍出表作排除）
-6b. 辅助（在线时长）：**DidaBiz QPS/PPS \|WoW\| > 10%**（涨跌双向）或需排除渠道下线 → `online-hours-lite/03-window-avg.sql`（**必填 client_id**；窗口 = Phase 1）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥2h**。source/remark 用 `04-window-source.sql`。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
+6b. 辅助（在线时长）：**DidaBiz QPS/PPS \|WoW\| > 10%**（涨跌双向）或需排除渠道下线 → `online-hours-lite/03-window-avg.sql`（**必填 client_id**；窗口 = Phase 1；**禁止 `AT TIME ZONE`**）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥1.5h**。source/remark 用 `04-window-source.sql`（`TIMESTAMPTZ '...+08'` 直接比较）。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
 7. 【3d 外部事件 D】若 [external-events-mapping.md](../docs/external-events-mapping.md) §5 触发（**A/B 已强 → 跳过，写「未查」**）：
    - **取国：** C/Dida → 2c `4_Country` Top1–3；**S/CS → `5_SID+Country`**（锁定 2b 主 SID，该 SID 内 Top1–3）。禁止 S/CS 用 `4_Country`。
    - 一国一调用 `external-events-lite/01-single-country-window.sql`

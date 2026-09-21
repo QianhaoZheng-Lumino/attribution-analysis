@@ -78,7 +78,7 @@
 | 3b SS supplier | `01-ss-supplier.sql` | ✅ 多数可用；**必填 `{sid_list}`** | 全表 LIMIT 50 会截涨尾；500 再逐 SID |
 | 3b country/chain | `02-didabiz-pps-country.sql` 等 | ⚠️ 待回归 | SS 结构 + 产量 2c |
 | 限流 | `rate-limit-lite/01-ss-supplier-window.sql` | ✅ **必填 `{sid_list}`** | 仍 500 时 `{sid_list}` 逐个查 |
-| 在线时长 | **`03-window-avg.sql`**（默认）或 `online-hours.sql` | ✅ 等值 `client_id`；开窗 SQL 已复测 | 仍 500 → fetch + **`scripts/test-online-hours.py`**；禁止无 client 全表 |
+| 在线时长 | **`03-window-avg.sql`**（`EXTRACT(EPOCH)` + CASE） | ✅ 等值 `client_id`；**禁止 AT TIME ZONE**（500）。2026-09-21 复测 SnapEBK / SnapTravel2B gold | 仍 500 → fetch + **`scripts/test-online-hours.py`**；日表勿默认 MCP `online-hours.sql`；禁止无 client 全表 |
 | 外部 D | `external-events-lite/01-single-country-window.sql` | ✅ | — |
 | Phase 1 | `anomaly-detection-lite/` 01–03 | ✅ | 勿跑完整 anomaly-detection.sql |
 | Phase 2a | `dimension-contribution-lite/02-sid.sql` | ✅ | 完整 dimension-contribution.sql → BI |
