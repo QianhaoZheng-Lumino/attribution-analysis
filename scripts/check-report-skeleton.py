@@ -124,7 +124,7 @@ P1_ROWS = [
 ONLINE_ROWS = [
     "探测 DidaBiz PPS/QPS WoW",
     "是否触发",
-    "异动（日均少 ≥2h）",
+    "异动（日均少 ≥1.5h）",
 ]
 
 ACC_ROWS = [

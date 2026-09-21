@@ -109,7 +109,7 @@ Phase 1 默认仍 `public.npd_booking_view` + `execute_sql`。不要先搜元数
 | 表名 | 用途 | 关键字段 | 备注 |
 |------|------|---------|------|
 | `rateaccuracy.channel_online_states_new` | 渠道上下线原始日志 | `client_id, status, channel_operation_time, source, remark` | **status：0=下线，1=上线**；见 [online-hours-mapping.md](docs/online-hours-mapping.md) |
-| （复用结果表）`online_hours_daily` | 每日在线时长 | `client_id, dt, online_hours, online_pct` | 现行：MCP `03-window-avg.sql` / `online-hours.sql`。#22 已收口，不强制物化 |
+| （复用结果表）`online_hours_daily` | 每日在线时长 | `client_id, dt, online_hours, online_pct` | 现行：MCP `03-window-avg.sql`（EPOCH+CASE）。日表 Python / Hologres。#22 已收口 |
 | `dws.dws_hotel_flow_didamonitor_supplier_csa_di` | SS 限流 + 缓存 | 见下表 | lite：`sql/rate-limit-lite/` |
 
 **SS 限流表字段与公式**（`clientid × supplierid`，窗口内 **SUM 全部 supplieraccountid**，**不筛 biztype**；`log_date` 与 `clientsupplierhotelcallcountsummary.date` 对齐）：

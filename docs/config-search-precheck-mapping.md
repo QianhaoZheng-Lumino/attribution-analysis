@@ -106,7 +106,7 @@ HBGPKG×Meituan 类问题：**CS scope** 对齐 client + supplier。
 **整体 QPS ↓：**
 
 1. 酒店需求变少（市场）
-2. **渠道在线时长 ↓** → `sql/online-hours-lite/03-window-avg.sql`（**触发：DidaBiz QPS/PPS \|WoW\|>10%**；**异动：日均少 ≥2h**）。MCP 500 才拉 log + 脚本。详见 [online-hours-mapping.md](./online-hours-mapping.md)
+2. **渠道在线时长 ↓** → `sql/online-hours-lite/03-window-avg.sql`（**触发：DidaBiz QPS/PPS \|WoW\|>10%**；**异动：日均少 ≥1.5h**；**禁止 AT TIME ZONE**）。MCP 500 才拉 log + 脚本。详见 [online-hours-mapping.md](./online-hours-mapping.md)
 3. 渠道酒店匹配更换 / 关分销 / 缓存酒店增减 / 请求逻辑改变（见 [es-cause-catalog.md](./es-cause-catalog.md) A1/A2）
 
 **有价请求 / 有价率变、查价总量几乎不动：** 先查 Configuration QPS/PPS 上限（A6），再查关房。

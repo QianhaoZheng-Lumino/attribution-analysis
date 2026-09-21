@@ -248,11 +248,11 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - 表：`rateaccuracy.channel_online_states_new`；lite：`sql/online-hours-lite/`
 - **status：0=下线动作，1=上线动作**；时间用 `channel_operation_time`
 - **触发：** DidaBiz QPS/PPS **\|WoW\| > 10%**（与限流同阈值）
-- **异动：** 当前窗日均 online_hours 比对比窗 **少 ≥ 2 小时**
+- **异动：** 当前窗日均 online_hours 比对比窗 **少 ≥ 1.5 小时**（2026-09-21 由 2h 下调；SnapEBK −1.93h 与查价 −11.9% 同向）
 - **窗口：** 与 Phase 1 当前期/对比期 **完全对齐**
 - **source 可信度：** **邮件解析=完全可信**；**数据库分析=仅参考**，不得强定责 C 下线
 - **因果链：** **在线时长↓ → 查价↓**（只解释漏斗上段）；产量方向 **须看转化**（转化↑时查价↓仍可 BKS↑，见 SnapTravel2B gold）
-- **计算（2026-09-09）：** MCP 默认 `03-window-avg.sql` / `online-hours.sql`（单 client 开窗；库内 timestamptz 用 `AT TIME ZONE`，禁止 `to_timestamp(ms/1000)`）。禁止手算。仅当仍 500 才拉 log + `test-online-hours.py`。禁止无 client 扫全表。
+- **计算（2026-09-21）：** MCP 默认 `03-window-avg.sql`（`EXTRACT(EPOCH FROM col)` + CASE 裁窗 + `TIMESTAMPTZ '...+08'`）。**禁止**对 `channel_operation_time` 写 `AT TIME ZONE` 或 `/1000`（网关 500；09-14 起旧写法复现）。禁止 `to_timestamp(ms/1000)`（Python 算法）。禁止 generate_series 日切作 MCP 默认。日表走 fetch + `test-online-hours.py`。禁止手算。仅当 03 仍 500 才拉 log + 脚本。禁止无 client 扫全表。
 - **#22（2026-09-09 ✅）：** 以 MCP 单 client 开窗收口，不再等全客户物化表。全客户 Hologres SQL 可选、不阻塞。
 - 全文：[online-hours-mapping.md](./online-hours-mapping.md)
 

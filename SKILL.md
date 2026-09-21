@@ -99,7 +99,7 @@ description: >-
 
 常用指标 [metrics.md](metrics.md)。装完先按 [README.md](README.md)「权限自测」逐表 `SELECT 1 LIMIT 1`。500 ≠ 无权限。
 
-渠道在线时长：须 `{client_id}`，默认 `sql/online-hours-lite/03-window-avg.sql`（两窗日均）或 `sql/online-hours.sql`。禁止手算日均。仅当开窗 SQL 仍 500 才跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。#3 DidaBase 专用表没有，CS 查价只用 SS 近似。
+渠道在线时长：须 `{client_id}`，默认 `sql/online-hours-lite/03-window-avg.sql`（`EXTRACT(EPOCH)` + CASE 裁窗）。**禁止**对 `channel_operation_time` 写 `AT TIME ZONE`（MCP 500）。异动：日均少 **≥1.5h**。禁止手算日均。仅当 03 仍 500 才跑 `scripts/test-online-hours.py`。禁止无 client 扫全表。#3 DidaBase 专用表没有，CS 查价只用 SS 近似。
 
 ## Phase 1：异动识别
 
@@ -169,6 +169,7 @@ SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`*
 
 ## 归因口径（Phase 3–4 必读）
 
+- [docs/overseas-attribution-logic.md](docs/overseas-attribution-logic.md) — **给人读的逻辑主线**（识别 → 定责 → 下钻 → 证据 → 收口）
 - [docs/es-writing.md](docs/es-writing.md) — **ES 人话**（导语给业务，六键代号后置）
 - [docs/es-cause-catalog.md](docs/es-cause-catalog.md) — **#5 ES 后续动作**
 - [docs/evidence-synthesis-rules.md](docs/evidence-synthesis-rules.md) — **A+B+C 综合判断**
