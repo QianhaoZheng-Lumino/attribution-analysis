@@ -32,6 +32,8 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 | 查指标趋势 | `analyse_query` / `search_metrics` |
 | MCP「不稳定」含义 | **非权限问题**；复杂/长 SQL（多层 CTE、PERCENTILE_CONT、FILTER）易 **HTTP 500** |
 | 应对策略 | **拆分 lite 版 SQL**，完整 SQL 作 source of truth，MCP 跑短查询。**禁止手写 SQL、禁止 14 路 UNION** |
+| 开跑探活（2026-09-22） | **不做**。健康路径零额外调用。本轮第一条 `execute_sql` 500 才 `SELECT 1 LIMIT 1`：也失败则整轮 STOP；成功则只重试该 lite 一次，仍失败标未验 |
+| 防幻觉（2026-09-22） | 数字、枚举、机制必须来自当次查询或本 skill 文档；两边都没有 →「文档/查询无此记录」。不采用问答助手的「拒贴原文 / 脱敏 client_id / 报告里附 SQL 路径」：骨架必须原样填空，`client_id` 是主键，#27 禁止路径进成品 |
 
 **元数据搜不到的表**（如 `wolf_rateadjust_hotel_log`）仍可能通过 `execute_sql` 直接查，只是 `search_meta_data` 无索引。
 
