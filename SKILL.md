@@ -44,13 +44,15 @@ description: >-
 - 抄 gold / case 的旧 3a 表头；ES 后续动作不按 [es-cause-catalog.md](docs/es-cause-catalog.md) 自编
 - ES 导语堆 `parent`/`WoW`/`SID`/`验证 B`/`CS`/`PPS`；或把机构查价 `|WoW|>10%` 从 ES 删掉。写法见 [docs/es-writing.md](docs/es-writing.md)
 - 把 `mcp.json`、对话导出、真实 key 写入仓库
+- 每次开跑先 `SELECT 1` 探活。只有本轮**第一条** `execute_sql` 返回 500 时才探一次：探活也 500 → 整轮 STOP；探活成功 → 只重试这一条 lite
+- 查询结果和本 skill 文档都没有的字段含义、配置逻辑、技术背景：写「文档/查询无此记录」，禁止用常识补完
 
 ## 失败模式（触发 → 一线 → 仍失败）
 
 | 触发 | 一线修复 | 仍失败兜底 |
 |------|----------|------------|
 | `user-data-mcp` 不可用 / 未认证 | 🛑 STOP。禁止手写 SQL、禁止编造结论 | 告诉用户去配 MCP + 自己的 `agent_user_key`，本轮结束 |
-| `execute_sql` 返回 500 / 超时 | 确认 SQL 来自 **一个** lite 原文、只换占位符；`timeout_seconds=30` 再跑同一文件一次 | 该步标「未验」。禁止写成 0、禁止改口「已排除」 |
+| `execute_sql` 返回 500 / 超时 | 本轮还没探过活：先 `SELECT 1 LIMIT 1`。探活也 500 → 🛑 STOP 整轮，告诉用户 data MCP / `execute_sql` 不稳定。探活成功：确认 SQL 来自 **一个** lite 原文、只换占位符；`timeout_seconds=30` 再跑同一文件一次 | 业务 SQL 仍失败：该步标「未验」。禁止写成 0、禁止改口「已排除」。探活失败则整轮结束，不要把后续步骤标成未验凑报告 |
 | 查询成功但 0 行 | 记「有表权限、当前过滤下 0 行」。禁止当无权限，禁止换别的 client 凑数 | 权限自测同表 `SELECT 1` 有行 → 才可写业务 0；否则写「本账号看不到该范围」 |
 | `search_meta_data` 搜不到表 | 改 `execute_sql` `SELECT 1 LIMIT 1` | 仍失败按上一行 500/0 行分支 |
 | Phase 1 lite 任一步失败 | **串行**重跑该步（必须 01→02→03，禁止三步并行） | 缺哪步就缺哪项分数；禁止用单一环比凑结论 |
