@@ -1,4 +1,4 @@
--- 08-lt.sql | 8_LT — 结构下钻
+/* 08-lt.sql | 8_LT — 结构下钻 */
 
 SELECT
     CASE

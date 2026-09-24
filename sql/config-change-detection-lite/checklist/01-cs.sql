@@ -1,6 +1,6 @@
--- #1 CS | 窗口内记录数（简化：无 LAG，MCP 稳定）
--- 占位符: {client_id} {w_start} {w_end}
--- event_count > 0 → 跑 detail/01-cs-detail.sql
+/* 1 CS | 窗口内记录数（简化：无 LAG，MCP 稳定） */
+/* 占位符: {client_id} {w_start} {w_end} */
+/* event_count > 0 → 跑 detail/01-cs-detail.sql */
 
 SELECT
     'CS' AS level,

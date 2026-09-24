@@ -1,7 +1,7 @@
--- 04-country.sql | 4_Country — 2c C/Dida 路径
--- 占位符见 ../params-template.md
--- 2c 结构：两窗任一 ≥10（含新建/清零）；报告 Top3 按 |占总量|，含反向
--- 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500）
+/* 04-country.sql | 4_Country — 2c C/Dida 路径 */
+/* 占位符见 ../params-template.md */
+/* 2c 结构：两窗任一 ≥10（含新建/清零）；报告 Top3 按 |占总量|，含反向 */
+/* 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500） */
 
 SELECT
     COALESCE(b.country_code, 'Unknown') AS country_code,

@@ -1,5 +1,5 @@
--- 08-lt.sql | Phase 3c lite | hierarchy 8_LT
--- within_contribution_pp: Agent 本地算（README）
+/* 08-lt.sql | Phase 3c lite | hierarchy 8_LT */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '8_LT' AS hierarchy_level,
     t.lt,

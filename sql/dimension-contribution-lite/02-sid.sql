@@ -1,5 +1,5 @@
--- 02-sid.sql | 2_SID — Phase 2b 验证 A（必跑）
--- 占位符见 ../params-template.md
+/* 02-sid.sql | 2_SID — Phase 2b 验证 A（必跑） */
+/* 占位符见 ../params-template.md */
 
 SELECT
     a.sid,

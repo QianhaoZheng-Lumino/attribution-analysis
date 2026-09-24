@@ -1,5 +1,5 @@
--- 07-sid-chain.sql | Phase 3c lite | hierarchy 7_SID+Chain
--- within_contribution_pp: Agent 本地算（README）
+/* 07-sid-chain.sql | Phase 3c lite | hierarchy 7_SID+Chain */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '7_SID+Chain' AS hierarchy_level,
     t.supplier_id::text AS supplier_id, COALESCE(t.chain, 'Independent') AS chain,

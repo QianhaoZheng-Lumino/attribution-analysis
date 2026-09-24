@@ -1,5 +1,5 @@
--- 01-total.sql | 1_Total 总量
--- 占位符见 ../params-template.md
+/* 01-total.sql | 1_Total 总量 */
+/* 占位符见 ../params-template.md */
 
 SELECT
     SUM(CASE WHEN a.channel_createdate::date BETWEEN '{current_start}'::date AND '{current_end}'::date THEN 1 ELSE 0 END) AS current_bookings,

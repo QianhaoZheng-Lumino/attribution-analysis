@@ -1,5 +1,5 @@
--- CS 变更明细（event_count > 0 时跑）
--- 无 LAG；Agent 读 status/margin 变化判断开关房/调价
+/* CS 变更明细（event_count > 0 时跑） */
+/* 无 LAG；Agent 读 status/margin 变化判断开关房/调价 */
 
 SELECT
     updatedate::date AS change_date,

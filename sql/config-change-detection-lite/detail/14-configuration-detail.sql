@@ -1,4 +1,4 @@
--- Configuration 14 key 明细（PPS/QPS/timeout/映射）
+/* Configuration 14 key 明细（PPS/QPS/timeout/映射） */
 
 SELECT
     created_at::date AS change_date,

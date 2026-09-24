@@ -1,6 +1,6 @@
--- Step 1：当前期 vs 对比期总量
--- 替换 {current_start} {current_end} {compare_start} {compare_end} {current_days}
--- 以及 {client_id} {parent_client_id}
+/* Step 1：当前期 vs 对比期总量 */
+/* 替换 {current_start} {current_end} {compare_start} {compare_end} {current_days} */
+/* 以及 {client_id} {parent_client_id} */
 
 SELECT
     SUM(CASE

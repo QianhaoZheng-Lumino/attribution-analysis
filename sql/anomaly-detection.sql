@@ -1,5 +1,5 @@
--- 异动识别 SQL（来源：用户脚本，供 execute_sql 直接运行）
--- 使用前替换 params 中的参数
+/* 异动识别 SQL（来源：用户脚本，供 execute_sql 直接运行） */
+/* 使用前替换 params 中的参数 */
 
 WITH params AS (
     SELECT

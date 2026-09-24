@@ -1,4 +1,4 @@
--- #12 C Bottom（小表，MCP 稳定）
+/* 12 C Bottom（小表，MCP 稳定） */
 
 SELECT
     'C Bottom' AS level,

@@ -1,5 +1,5 @@
--- 12-nationality.sql | Phase 3c lite | hierarchy 12_Nationality
--- within_contribution_pp: Agent 本地算（README）
+/* 12-nationality.sql | Phase 3c lite | hierarchy 12_Nationality */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '12_Nationality' AS hierarchy_level,
     t.nationality::text AS nationality,

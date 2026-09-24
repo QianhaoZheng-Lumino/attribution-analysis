@@ -1,8 +1,8 @@
--- #9 LCDH hotel_bks lite | event_count > 0 时必跑（MCP 单行聚合）
--- WITH 击穿兜底名单变更酒店 join 订单；增/删语义见 checklist/09-lcdh.sql + BI 片段
--- 占位符: {client_id} {w_start} {w_end} {compare_start} {compare_end} {current_start} {current_end}
--- MCP tables: configuration.wolf_rateadjust_hotel_log, public.npd_booking_view
--- 仍 500 → BI cdh-lcdh-hotel-bks.sql
+/* 9 LCDH hotel_bks lite | event_count > 0 时必跑（MCP 单行聚合） */
+/* WITH 击穿兜底名单变更酒店 join 订单；增/删语义见 checklist/09-lcdh.sql + BI 片段 */
+/* 占位符: {client_id} {w_start} {w_end} {compare_start} {compare_end} {current_start} {current_end} */
+/* MCP tables: configuration.wolf_rateadjust_hotel_log, public.npd_booking_view */
+/* 仍 500 → BI cdh-lcdh-hotel-bks.sql */
 
 WITH lcdh_hotels AS (
     SELECT DISTINCT didahotelid

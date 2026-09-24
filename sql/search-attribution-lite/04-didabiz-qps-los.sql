@@ -1,5 +1,5 @@
--- 04-didabiz-qps-los.sql | Phase 3b lite | 占位符见 ../params-template.md
--- 完整版 ../search-attribution.sql（MCP 禁止 UNION）
+/* 04-didabiz-qps-los.sql | Phase 3b lite | 占位符见 ../params-template.md */
+/* 完整版 ../search-attribution.sql（MCP 禁止 UNION） */
 
 WITH search AS (
     SELECT CASE WHEN a.los = 1 THEN '1' WHEN a.los = 2 THEN '2' WHEN a.los = 3 THEN '3'

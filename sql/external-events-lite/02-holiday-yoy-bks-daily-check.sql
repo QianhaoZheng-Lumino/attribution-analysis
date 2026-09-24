@@ -1,7 +1,7 @@
--- 02-holiday-yoy-bks-daily-check | D2 诊断 — 国别按日 BKS（仅当主查询结果可疑时）
--- 禁止替代 02-holiday-yoy-bks-lite.sql 做 rubric；禁止手写变体
--- 占位符: {client_id} {country_code} {seg_start} {seg_end}
--- 例: Agoda MY y1_pre → seg 2025-03-24 ~ 2025-03-30
+/* 02-holiday-yoy-bks-daily-check | D2 诊断 — 国别按日 BKS（仅当主查询结果可疑时） */
+/* 禁止替代 02-holiday-yoy-bks-lite.sql 做 rubric；禁止手写变体 */
+/* 占位符: {client_id} {country_code} {seg_start} {seg_end} */
+/* 例: Agoda MY y1_pre → seg 2025-03-24 ~ 2025-03-30 */
 
 SELECT
     a.channel_createdate::date AS bk_date,

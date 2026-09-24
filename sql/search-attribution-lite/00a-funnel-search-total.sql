@@ -1,8 +1,8 @@
--- 00a-funnel-search-total | Phase 3b fallback A — 机构查价加总（ads 500 时）
--- 数据源: data_ovs.didamonitor_funnel_client_country 按 client 加总
--- 占位符: {client_id} {analysis_date} {current_end} {compare_start} {compare_end}
--- 与 00b-funnel-precheck-total.sql 同窗；Agent 本地合并算有价率/查验比
--- MCP tables: data_ovs.didamonitor_funnel_client_country
+/* 00a-funnel-search-total | Phase 3b fallback A — 机构查价加总（ads 500 时） */
+/* 数据源: data_ovs.didamonitor_funnel_client_country 按 client 加总 */
+/* 占位符: {client_id} {analysis_date} {current_end} {compare_start} {compare_end} */
+/* 与 00b-funnel-precheck-total.sql 同窗；Agent 本地合并算有价率/查验比 */
+/* MCP tables: data_ovs.didamonitor_funnel_client_country */
 
 SELECT
     'DidaBiz PPS (funnel fallback)' AS db_level,

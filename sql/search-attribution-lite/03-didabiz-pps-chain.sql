@@ -1,5 +1,5 @@
--- 03-didabiz-pps-chain.sql | Phase 3b lite | 占位符见 ../params-template.md
--- 完整版 ../search-attribution.sql（MCP 禁止 UNION）
+/* 03-didabiz-pps-chain.sql | Phase 3b lite | 占位符见 ../params-template.md */
+/* 完整版 ../search-attribution.sql（MCP 禁止 UNION） */
 
 WITH search AS (
     SELECT a.parent_chain_name AS index,

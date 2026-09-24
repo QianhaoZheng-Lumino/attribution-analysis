@@ -1,4 +1,4 @@
--- 09-sid-lt.sql | 9_SID+LT — S/CS 结构
+/* 09-sid-lt.sql | 9_SID+LT — S/CS 结构 */
 
 SELECT
     CASE

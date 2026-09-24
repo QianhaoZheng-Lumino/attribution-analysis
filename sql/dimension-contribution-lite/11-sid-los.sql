@@ -1,4 +1,4 @@
--- 11-sid-los.sql | 11_SID+LOS — S/CS 结构
+/* 11-sid-los.sql | 11_SID+LOS — S/CS 结构 */
 
 SELECT
     CASE

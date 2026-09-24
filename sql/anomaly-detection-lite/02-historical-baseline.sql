@@ -1,6 +1,6 @@
--- Step 2：历史 42 天基准（日均均值 + 标准差）
--- 替换 {hist_start} {analysis_date} {client_id} {parent_client_id}
--- 上界是 {analysis_date} 开区间（= hist_end 次日）；不要填 {hist_end}
+/* Step 2：历史 42 天基准（日均均值 + 标准差） */
+/* 替换 {hist_start} {analysis_date} {client_id} {parent_client_id} */
+/* 上界是 {analysis_date} 开区间（= hist_end 次日）；不要填 {hist_end} */
 
 SELECT
     ROUND(AVG(daily_cnt)::numeric, 2) AS historical_avg_daily,

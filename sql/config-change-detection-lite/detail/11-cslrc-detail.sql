@@ -1,9 +1,9 @@
--- #11 CSLRC 明细（event_count > 0 时跑）
--- 占位符: {client_id} {w_start} {w_end}
--- MCP tables: configuration.wolfl2lconfiglog
--- 按 SID×账号聚合，不是日志行 dump。COUNT 仍是日志行数。
--- n_limit>0 → 操作「限售」；仅 n_open>0 → 其他（取消限售/全部可卖）
--- LIMIT 50 限制的是 SID 数。禁止对全历史 ORDER BY updatetime DESC
+/* 11 CSLRC 明细（event_count > 0 时跑） */
+/* 占位符: {client_id} {w_start} {w_end} */
+/* MCP tables: configuration.wolfl2lconfiglog */
+/* 按 SID×账号聚合，不是日志行 dump。COUNT 仍是日志行数。 */
+/* n_limit>0 → 操作「限售」；仅 n_open>0 → 其他（取消限售/全部可卖） */
+/* LIMIT 50 限制的是 SID 数。禁止对全历史 ORDER BY updatetime DESC */
 
 SELECT
     supplierid,

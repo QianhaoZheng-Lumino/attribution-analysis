@@ -1,4 +1,4 @@
--- 01-total.sql | Phase 3c lite | hierarchy 1_Total
+/* 01-total.sql | Phase 3c lite | hierarchy 1_Total */
 
 SELECT '1_Total' AS hierarchy_level, 'ALL' AS index,
 

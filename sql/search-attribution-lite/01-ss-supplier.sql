@@ -1,8 +1,8 @@
--- 01-ss-supplier | Phase 3b 查价归因 lite — 【必跑】CS/S 路径优先
--- 占位符: {client_id} {sid_list} {analysis_date} {current_end} {compare_start} {compare_end}
--- {sid_list} = 2b 锁定 SID，或占本案 |ΔBKS|≥10% 的 SID，逗号分隔整数，如 26, 95, 61
--- 无结构 SID 时填 02-sid |change| Top3。禁止 IN () 空列表
--- 全表 ORDER BY avail_change ASC LIMIT 50 会截掉涨尾 SID，禁止据此写「未覆盖涨尾」
+/* 01-ss-supplier | Phase 3b 查价归因 lite — 【必跑】CS/S 路径优先 */
+/* 占位符: {client_id} {sid_list} {analysis_date} {current_end} {compare_start} {compare_end} */
+/* {sid_list} = 2b 锁定 SID，或占本案 |ΔBKS|≥10% 的 SID，逗号分隔整数，如 26, 95, 61 */
+/* 无结构 SID 时填 02-sid |change| Top3。禁止 IN () 空列表 */
+/* 全表 ORDER BY avail_change ASC LIMIT 50 会截掉涨尾 SID，禁止据此写「未覆盖涨尾」 */
 
 WITH search AS (
     SELECT
@@ -27,7 +27,7 @@ precheck AS (
         AND a.log_date BETWEEN '{compare_start}'::date AND '{current_end}'::date
         AND a.client_id = '{client_id}'
         AND a.supplier_id IS NOT NULL
-        -- precheck.supplier_id 多为 text；CAST AS INTEGER 会 MCP 500。用 string_to_array 对齐整数 {sid_list}
+        /* precheck.supplier_id 多为 text；CAST AS INTEGER 会 MCP 500。用 string_to_array 对齐整数 {sid_list} */
         AND a.supplier_id::text = ANY (string_to_array(replace('{sid_list}', ' ', ''), ','))
     GROUP BY 1
 )

@@ -1,6 +1,6 @@
--- 维度贡献度分析 SQL（来源：用户脚本）
--- 在指定 client 范围内，按多维度 GROUPING SETS 计算贡献占比
--- 注意：本 SQL 不能判定 C/Dida/S/CS，需配合交叉验证（见 responsibility-model.md）
+/* 维度贡献度分析 SQL（来源：用户脚本） */
+/* 在指定 client 范围内，按多维度 GROUPING SETS 计算贡献占比 */
+/* 注意：本 SQL 不能判定 C/Dida/S/CS，需配合交叉验证（见 responsibility-model.md） */
 
 WITH params AS (
     SELECT

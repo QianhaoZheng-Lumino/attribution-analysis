@@ -1,5 +1,5 @@
--- 11-sid-los.sql | Phase 3c lite | hierarchy 11_SID+LOS
--- within_contribution_pp: Agent 本地算（README）
+/* 11-sid-los.sql | Phase 3c lite | hierarchy 11_SID+LOS */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '11_SID+LOS' AS hierarchy_level,
     t.supplier_id::text AS supplier_id, t.los,

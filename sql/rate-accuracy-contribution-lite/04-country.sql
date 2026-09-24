@@ -1,5 +1,5 @@
--- 04-country.sql | Phase 3c lite | hierarchy 4_Country
--- within_contribution_pp: Agent 本地算（README）
+/* 04-country.sql | Phase 3c lite | hierarchy 4_Country */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '4_Country' AS hierarchy_level,
     t.country_code,

@@ -1,6 +1,6 @@
--- Step 2：单 client 产量 before/after（信号强度测试用）
--- 窗口：变更日前 7 天 vs 变更日起 compare_days（与主 SQL 一致）
--- 改 params 中的 client_id / change_date 即可复用
+/* Step 2：单 client 产量 before/after（信号强度测试用） */
+/* 窗口：变更日前 7 天 vs 变更日起 compare_days（与主 SQL 一致） */
+/* 改 params 中的 client_id / change_date 即可复用 */
 
 WITH params AS (
     SELECT

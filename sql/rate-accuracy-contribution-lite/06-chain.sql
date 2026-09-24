@@ -1,5 +1,5 @@
--- 06-chain.sql | Phase 3c lite | hierarchy 6_Chain
--- within_contribution_pp: Agent 本地算（README）
+/* 06-chain.sql | Phase 3c lite | hierarchy 6_Chain */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '6_Chain' AS hierarchy_level,
     COALESCE(t.chain, 'Independent') AS chain,

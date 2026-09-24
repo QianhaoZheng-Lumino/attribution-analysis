@@ -1,4 +1,4 @@
--- #7 CDH | ⚠️ wolf_rateadjust_hotel_log 大表，MCP 可能 500；失败标「MCP 不可用→BI」
+/* 7 CDH | ⚠️ wolf_rateadjust_hotel_log 大表，MCP 可能 500；失败标「MCP 不可用→BI」 */
 
 SELECT
     'CDH' AS level,

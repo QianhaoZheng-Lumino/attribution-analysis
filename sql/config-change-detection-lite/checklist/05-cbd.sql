@@ -1,4 +1,4 @@
--- #5 CBD（预订日期窗口）
+/* 5 CBD（预订日期窗口） */
 
 SELECT
     'CBD' AS level,

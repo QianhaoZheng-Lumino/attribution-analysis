@@ -1,4 +1,4 @@
--- #6 SBD（全局 supplier 预订窗口）
+/* 6 SBD（全局 supplier 预订窗口） */
 
 SELECT
     'SBD' AS level,

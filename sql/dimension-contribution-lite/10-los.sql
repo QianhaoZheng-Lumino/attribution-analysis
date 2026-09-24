@@ -1,4 +1,4 @@
--- 10-los.sql | 10_LOS — 结构下钻
+/* 10-los.sql | 10_LOS — 结构下钻 */
 
 SELECT
     CASE

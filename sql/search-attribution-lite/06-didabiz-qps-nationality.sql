@@ -1,5 +1,5 @@
--- 06-didabiz-qps-nationality.sql | Phase 3b lite | 占位符见 ../params-template.md
--- 完整版 ../search-attribution.sql（MCP 禁止 UNION）
+/* 06-didabiz-qps-nationality.sql | Phase 3b lite | 占位符见 ../params-template.md */
+/* 完整版 ../search-attribution.sql（MCP 禁止 UNION） */
 
 WITH search AS (
     SELECT a.nationality AS index,

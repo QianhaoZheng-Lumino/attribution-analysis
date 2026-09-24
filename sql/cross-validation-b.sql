@@ -1,15 +1,15 @@
--- 交叉验证 B：在指定 Supplier 下，各 Client 的产量变化
--- 用途：Phase 2b — 判断 S（supplier 普遍掉） vs CS（仅 focus client 掉）
--- 前置：Phase 2a 已识别 Top supplier（sid）及 focus client（来自 params）
--- 验证 A 见 dimension-contribution.sql 的 2_SID 层级，无需重复跑本文件
+/* 交叉验证 B：在指定 Supplier 下，各 Client 的产量变化 */
+/* 用途：Phase 2b — 判断 S（supplier 普遍掉） vs CS（仅 focus client 掉） */
+/* 前置：Phase 2a 已识别 Top supplier（sid）及 focus client（来自 params） */
+/* 验证 A 见 dimension-contribution.sql 的 2_SID 层级，无需重复跑本文件 */
 
 WITH params AS (
     SELECT
         '2026-03-20'::date AS analysis_date,
         NULLIF('10', '')::int AS n_days,
-        'EPS' AS sid,                              -- Phase 2a Top 贡献 supplier（必填）
-        'SnapTravel' AS focus_parent_client_id,    -- Phase 2a 分析的 parent client（可选，用于标注）
-        'SnapEBK' AS focus_client_id               -- Phase 2a 分析的 client（可选，用于标注）
+        'EPS' AS sid,                              /* Phase 2a Top 贡献 supplier（必填） */
+        'SnapTravel' AS focus_parent_client_id,    /* Phase 2a 分析的 parent client（可选，用于标注） */
+        'SnapEBK' AS focus_client_id               /* Phase 2a 分析的 client（可选，用于标注） */
 ),
 date_calculator AS (
     SELECT
@@ -199,7 +199,7 @@ validation_conclusion AS (
     FROM validation_stats vs
     LEFT JOIN focus_client_stats fcs ON TRUE
 )
--- ========== 明细：Supplier 下各 Parent Client ==========
+/* ========== 明细：Supplier 下各 Parent Client ========== */
 SELECT
     'client_detail' AS result_type,
     dc.analysis_date,
@@ -240,7 +240,7 @@ CROSS JOIN params p
 
 UNION ALL
 
--- ========== 汇总：验证 B 结论 ==========
+/* ========== 汇总：验证 B 结论 ========== */
 SELECT
     'validation_summary' AS result_type,
     dc.analysis_date,
