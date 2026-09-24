@@ -282,7 +282,7 @@ def build_mast(blocks: list[dict], h1: str, quote: str) -> tuple[str, str, str]:
         wow_html = f'<em class="up">{html.escape(wow)}</em>'
     else:
         wow_html = html.escape(wow or "—")
-    scored = re.fullmatch(r"(\d+)\s*/\s*100", score)
+    scored = re.match(r"(\d+)\s*/\s*100\b", score)
     if scored:
         score_html = f'{scored.group(1)}<span class="unit"> / 100</span>'
     else:
