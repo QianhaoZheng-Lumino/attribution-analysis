@@ -202,11 +202,12 @@ Phase 3a 进度:
 
 | level | 比什么 |
 |-------|--------|
-| C / CS / CSA | 同一 client（+ supplier / account）按 `updatedate` 的上一条 |
-| CBD | 同一 client + 同一预订窗的上一条；没有则该 client **上一段 CBD** |
-| C Bottom | 同一 `item` 上一条 |
+| C / CS / CSA | 同一 client（CS 再加 supplier，CSA 再加 account）按 `updatedate` 的上一条。detail 列 `last_status` / `last_margin` |
+| S | 同一 supplier、且 `username != 'JobAPI'` 的上一条。同一天多条都保留，禁止按天收成一行 |
+| CBD | 同一 client + 同一预订窗的上一条；没有则该 client **上一段 CBD**。detail 没有上一条列 |
+| C Bottom / S Bottom | 同一 `item` 的上一条。detail 列 `last_margin` / `last_is_remove`。S Bottom 的 `item` 是供应商号 |
 
-CBD/C `n>0` 且 detail 只有当前 margin → 再查历史 `ORDER BY updatedate DESC LIMIT 5`。**不要**把 LAG 写进 checklist。
+C、CS、CSA、S、C Bottom、S Bottom 直接读 detail 里的上一条列，禁止再查历史。结果里没有该列或值为空，都算空：先走第 4 条 remark，再不行写未验。禁止用备注里的减点反推上一条数值。CBD 的 detail 仍只有当前 margin，按上表比。**不要**把 LAG 写进 checklist。
 
 **一行 level 多条日志：** 跌产填最狠的（关房 > 加价 > 其它）；涨产填开房 > 降价 > 其它。其余 footnote。相对对比期仍贵的「回撤」**禁止**主操作写成降价。
 
