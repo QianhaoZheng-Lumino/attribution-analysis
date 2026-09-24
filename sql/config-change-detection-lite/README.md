@@ -21,10 +21,10 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 
 | COUNT 文件 | n>0 跑 |
 |------------|--------|
-| 01-cs | detail/01-cs-detail.sql |
-| 02-c | detail/02-c-detail.sql |
-| 03-s | detail/03-s-detail.sql（全局 LIMIT 30；默认弱/背景） |
-| 04-csa | detail/04-csa-detail.sql |
+| 01-cs | detail/01-cs-detail.sql（含 `last_status` / `last_margin`） |
+| 02-c | detail/02-c-detail.sql（含 `last_status` / `last_margin`） |
+| 03-s | detail/03-s-detail.sql（全局 LIMIT 30；含上一条；同一天多条都保留；默认弱/背景） |
+| 04-csa | detail/04-csa-detail.sql（含 `last_status` / `last_margin`） |
 | 05-cbd | detail/05-cbd-detail.sql（读 remark） |
 | 06-sbd | detail/06-sbd-detail.sql（全局 LIMIT 30；n=0 则跳过） |
 | 07-cdh | detail/07-cdh-hotel-bks-lite.sql（不是行 dump） |
@@ -32,8 +32,8 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 | 09-lcdh | detail/09-lcdh-hotel-bks-lite.sql |
 | 10-l2l | detail/10-l2l-detail.sql |
 | 11-cslrc | detail/11-cslrc-detail.sql（按 SID 聚合；n_limit>0=限售；LIMIT 50 是 SID 数） |
-| 12-c-bottom | detail/12-c-bottom-detail.sql |
-| 13-s-bottom | detail/13-s-bottom-detail.sql（禁止抄 12） |
+| 12-c-bottom | detail/12-c-bottom-detail.sql（含 `last_margin` / `last_is_remove`） |
+| 13-s-bottom | detail/13-s-bottom-detail.sql（禁止抄 12；含 `last_margin` / `last_is_remove`） |
 | 14-configuration | detail/14-configuration-detail.sql |
 
 ## 目录结构
