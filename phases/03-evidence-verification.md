@@ -417,8 +417,12 @@ Lite：`sql/external-events-lite/`
    - 当前窗必查；对比窗可选
    - **（可选 D2）** D1 命中 Top 节日 → seed 对齐 `holiday_key` → Read `02-holiday-yoy-bks-lite.sql` 原文 MCP（占位符见 `d2-params-template.md`）；**禁止手写 D2 SQL**；rubric 仅用 `country_*_bks`；D2 的 ≥10% 分母与 §5.3 一致（C=client，S/CS=该 SID）
 8. 【3d 合成】按 docs/evidence-synthesis-rules.md；**3a 未满 14/14 或 3b 缺机构级 → 禁止「已确认/已排除 Dida」**
-9. 【Phase 4 报告收口】按 [phases/04-report.md](04-report.md) 模板 **完整输出**（对话交付，不写文件除非用户要求）：
-   - Executive Summary → §0 参数 → Phase 1–3 → 3d 综合 → 根因结论 → 后续动作（P0/P1/P2）。**成品不要附录**；MCP 500 写在对应节
+9. 【Phase 4 报告收口】按 [phases/04-report.md](04-report.md) 收口。归因型 / 完整型才写文件；探查型停在 Phase 1，不写文件：
+   - 复制骨架只填空，写入 `examples/case-{client}-{date}.md`
+   - `python scripts/check-report-skeleton.py` 该文件。不过则停，不渲染，不在对话里补一版全文
+   - 通过后 `python scripts/render-report-html.py` 该文件，得到同名 `.html`。禁止手写 HTML
+   - 对话只贴该 Markdown 的 Executive Summary，并给出 HTML 路径
+   - **成品不要附录**；MCP 500 写在对应节
    - 对照 gold：`examples/gold-agoda-20260320.md`（跌/C）、`examples/gold-snaptravel2b-20260801.md`（涨/S）、`examples/gold-hbgpkg-20260706.md`（正常波动/CS）、`examples/gold-hbgpkg-20260710.md`（CS 崩量）
    - **合成门禁**与**置信度**用词见 04-report.md「合成门禁」「置信度定义」
 ```

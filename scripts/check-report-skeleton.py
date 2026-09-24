@@ -38,7 +38,6 @@ H3_REQUIRED = [
     ),
     (r"^### 3b 查价（B 线）$", "### 3b 查价（B 线）"),
     (r"^### 3c 准确率$", "### 3c 准确率"),
-    (r"^### 3d 外部事件 D 线$", "### 3d 外部事件 D 线"),
     (r"^### 责任修正（相对 2b 初判）$", "### 责任修正（相对 2b 初判）"),
     (r"^### 证据对照表$", "### 证据对照表"),
     (r"^### 一句话结论$", "### 一句话结论"),
@@ -238,6 +237,54 @@ def col0(rows: list[list[str]]) -> list[str]:
     return [r[0] for r in rows if r]
 
 
+def has_daily_hours(value: str) -> bool:
+    """22.07h 与 22.07小时 都算可比较日均。"""
+    return bool(re.search(r"\d+(?:\.\d+)?\s*(?:h|小时)", value, re.I))
+
+
+def row_value(rows: list[list[str]], label: str) -> str:
+    for row in rows:
+        if row and strip_md(row[0]) == label and len(row) > 1:
+            return strip_md(" ".join(row[1:]))
+    return ""
+
+
+def accuracy_delta_pp(text: str) -> float | None:
+    """从 3c 探测行取出 Δpp。读不到数字就返回 None，不靠「未启动」猜。"""
+    s = strip_md(text).replace("−", "-").replace("－", "-").replace("＋", "+")
+    m = re.search(r"(?:Δpp|Δ)\s*[=＝:]?\s*([+-])?\s*(\d+(?:\.\d+)?)", s)
+    if not m:
+        m = re.search(r"([+-])\s*(\d+(?:\.\d+)?)\s*pp", s)
+    if not m:
+        return None
+    sign = -1.0 if m.group(1) == "-" else 1.0
+    return sign * float(m.group(2))
+
+
+_MAIN_CAUSE_RE = re.compile(
+    r"^(?:倾向\s*)?(?:C/Dida|CS|Dida|C|S)\s*（([^，,）]+)(?:[，,][^）]*)?）$"
+)
+
+
+def main_cause_short(cell: str) -> str | None:
+    """页眉主因只收「代号（短名）」或「代号（短名，细节）」。对不上返回 None。"""
+    m = _MAIN_CAUSE_RE.fullmatch(strip_md(cell))
+    if not m:
+        return None
+    short = m.group(1).strip()
+    return short or None
+
+
+def external_has_result(note: str) -> bool:
+    """未查、未取不算结果。查过并写了节日、命中或 0 行，小节必须留下。"""
+    text = strip_md(note)
+    if re.search(r"节日|HOLIDAY|命中|无匹配", text, re.I):
+        return True
+    if "未查" in text or "未取" in text:
+        return False
+    return text not in {"", "—", "-", "空"}
+
+
 def strip_md(s: str) -> str:
     s = re.sub(r"\*\*(.+?)\*\*", r"\1", s)
     s = re.sub(r"`([^`]+)`", r"\1", s)
@@ -247,6 +294,7 @@ def strip_md(s: str) -> str:
 def check_file(path: Path) -> list[str]:
     text = path.read_text(encoding="utf-8")
     errs: list[str] = []
+    template = path.name == "04-report-skeleton.md"
 
     # H2 sequence (ignore H1)
     h2 = [t for _, t in headings(text, 2)]
@@ -270,6 +318,12 @@ def check_file(path: Path) -> list[str]:
             close = [x for x in actual_h3 if needle[:8] in x]
             if close:
                 errs.append(f"    接近: {close[0]}")
+
+    external_heading = "### 3d 外部事件 D 线"
+    has_external = any(line == external_heading for line in actual_h3)
+    for i, line in enumerate(actual_h3):
+        if line == external_heading:
+            used[i] = True
 
     extra = [actual_h3[i] for i, u in enumerate(used) if not u]
     if extra:
@@ -374,37 +428,100 @@ def check_file(path: Path) -> list[str]:
         expect_header(h_rl, "限流/缓存")
 
     h_oh = find_heading_line(text, "#### 在线时长", 4)
-    if not h_oh:
-        errs.append("缺 H4：#### 在线时长（先探测 PPS/QPS）")
-    else:
+    if h_oh:
         rows_oh = expect_header(h_oh, "在线时长")
-        got_oh = [strip_md(x) for x in col0(rows_oh)]
-        for req in ONLINE_ROWS:
-            if strip_md(req) not in got_oh:
-                errs.append(f"在线时长缺行：{req}")
+        hours = row_value(rows_oh, "当前窗 / 对比窗日均 online_hours")
+        if not template and not has_daily_hours(hours):
+            errs.append("在线时长没有可比较日均，不要写 #### 在线时长")
+        else:
+            got_oh = [strip_md(x) for x in col0(rows_oh)]
+            for req in ONLINE_ROWS:
+                if strip_md(req) not in got_oh:
+                    errs.append(f"在线时长缺行：{req}")
 
     rows3c = expect_header("### 3c 准确率", "3c 准确率")
     got3c = [strip_md(x) for x in col0(rows3c)]
     for req in ACC_ROWS:
         if strip_md(req) not in got3c:
             errs.append(f"3c 缺行：{req}")
-
+    probe = ""
+    for row in rows3c:
+        if row and strip_md(row[0]) == strip_md("探测 `01-total`"):
+            probe = strip_md(" ".join(row[1:]))
+            break
     h_acc = find_heading_line(text, "#### 启动后下钻", 4)
-    if not h_acc:
-        errs.append("缺 H4：#### 启动后下钻（|Δpp|≥5 才填数；未启动行内 —）")
+    if template:
+        if h_acc:
+            expect_header(h_acc, "启动后下钻")
     else:
-        expect_header(h_acc, "启动后下钻")
+        delta = accuracy_delta_pp(probe)
+        if delta is None:
+            errs.append("3c 探测行读不出 Δpp，无法判断要不要写启动后下钻")
+        elif abs(delta) >= 5 and not h_acc:
+            errs.append("准确率 |Δpp|≥5，缺 H4：#### 启动后下钻")
+        elif abs(delta) < 5 and h_acc:
+            errs.append("准确率 |Δpp|<5，不要写 #### 启动后下钻")
+        elif h_acc:
+            expect_header(h_acc, "启动后下钻")
 
     rows_corr = expect_header("### 责任修正（相对 2b 初判）", "责任修正")
     got_corr = [strip_md(x) for x in col0(rows_corr)]
     if got_corr != CORR_ROWS:
         errs.append(f"责任修正四行须 {CORR_ROWS}，实际 {got_corr}")
+    elif not template:
+        cause_cell = ""
+        for row in rows_corr:
+            if row and strip_md(row[0]) == "修正后主因" and len(row) > 1:
+                cause_cell = strip_md(row[1])
+                break
+        if main_cause_short(cause_cell) is None:
+            errs.append(
+                "修正后主因须写成代号（短名）或代号（短名，细节），"
+                "例如 S（HotelTrader 全网，美国 / 温德姆）。"
+                "代号只许 S、CS、C、Dida、C/Dida，前面可加「倾向」，括号用中文。"
+                "不要用冒号或间隔号，不要在括号外再写字，不要一格写两条；第二条放进并列。"
+                "定责标题不走这条"
+            )
 
     rows_ev = expect_header("### 证据对照表", "证据对照表")
     got_ev = [strip_md(x) for x in col0(rows_ev)]
     for req in EVIDENCE_ROWS:
         if req not in got_ev:
             errs.append(f"证据对照表缺行：{req}")
+    if not h_oh:
+        online_note = ""
+        for row in rows_ev:
+            if row and strip_md(row[0]) == "在线时长" and len(row) > 1:
+                online_note = strip_md(row[1])
+                break
+        if has_daily_hours(online_note):
+            errs.append("在线时长证据里有日均，缺 H4：#### 在线时长")
+    if not has_external:
+        external_note = ""
+        for row in rows_ev:
+            if row and strip_md(row[0]) == "D 外部" and len(row) > 1:
+                external_note = row[1]
+                break
+        if external_has_result(external_note):
+            errs.append("外部事件已有结果，缺 H3：### 3d 外部事件 D 线")
+    elif not template:
+        sec = section_after(text, "### 3d 外部事件 D 线")
+        _, ext_rows = first_table(sec)
+        trigger = ""
+        origin = ""
+        for row in ext_rows:
+            if not row:
+                continue
+            label = strip_md(row[0])
+            joined = strip_md(" ".join(row))
+            if label == "是否触发":
+                trigger = joined
+            elif label == "取国来源":
+                origin = joined
+        if "未查" in trigger or "未取" in trigger or "未取" in origin or (
+            "跳过" in trigger and "未查" in sec
+        ):
+            errs.append("外部事件未查或未取，不要写 ### 3d 外部事件 D 线")
 
     expect_header("### 已确认", "已确认")
     expect_header("### 倾向（待后续动作或更多证据）", "倾向")

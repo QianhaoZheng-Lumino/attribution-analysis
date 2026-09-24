@@ -45,7 +45,7 @@ MCP：Cursor Settings → MCP，或自己的 `~/.cursor/mcp.json`。URL / `agent
 2. 用**自己的** `agent_user_key`。不要把 `mcp.json` 或 key 写进本仓库。
 3. 探查（「有没有掉」「看看本周」）**只跑 Phase 1**，问一句是否继续。
 4. 「为什么掉 / 归因」且门禁过，**并且有 `client_id`**（或 parent 下已锁定 focus）才自动 Phase 2–4。大盘禁止自动 3a / 在线时长 / 限流。
-5. 报告：复制 `phases/04-report-skeleton.md` 只填空，跑 `python scripts/check-report-skeleton.py 报告.md`。ES 人话见 `docs/es-writing.md`；后续动作编号见 `docs/es-cause-catalog.md`。不要抄 gold 的旧 3a 表头。
+5. 报告：复制 `phases/04-report-skeleton.md` 只填空。先跑 `python scripts/check-report-skeleton.py 报告.md`，通过后再跑 `python scripts/render-report-html.py 报告.md`，得到同名 HTML。检查或渲染失败则不写 HTML。ES 人话见 `docs/es-writing.md`；后续动作编号见 `docs/es-cause-catalog.md`。不要抄 gold 的旧 3a 表头。
 6. `execute_sql` 只 Read lite 原文填占位符；一次调用一个文件。禁止 14 路 UNION。SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（结构 SID；禁止空 `IN ()`）。SH 禁止 `clientid`。禁止全表 LIMIT 50 写结构 SID「未覆盖/未返回」。
 7. 未支持：#23 机构供应商白名单快照禁止当 3a 证据；#3 DidaBase 没有，CS 查价用 SS 近似。LCDH 叫击穿兜底名单，不是白名单。
 8. 口径入口是 `SKILL.md`，不是 backlog。回归只用 `examples/gold-*.md`。
