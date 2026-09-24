@@ -1,6 +1,6 @@
--- 13-sid-nationality.sql | 13_SID+Nationality — S/CS 结构
--- 2c 结构：两窗任一 ≥3（含新建/清零）；报告仍写段落，按 |占 SID 变化| 取 Top2–3
--- 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500）
+/* 13-sid-nationality.sql | 13_SID+Nationality — S/CS 结构 */
+/* 2c 结构：两窗任一 ≥3（含新建/清零）；报告仍写段落，按 |占 SID 变化| 取 Top2–3 */
+/* 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500） */
 
 SELECT
     COALESCE(a.channel_nationality::text, '(empty)') AS nationality,

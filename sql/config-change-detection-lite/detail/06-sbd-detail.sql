@@ -1,6 +1,6 @@
--- #6 SBD 明细（event_count > 0 时跑；全局，无 client）
--- 占位符: {w_start} {w_end}
--- MCP tables: configuration.wolf_rateadjust_log
+/* 6 SBD 明细（event_count > 0 时跑；全局，无 client） */
+/* 占位符: {w_start} {w_end} */
+/* MCP tables: configuration.wolf_rateadjust_log */
 
 SELECT
     updatedate::date AS change_date,

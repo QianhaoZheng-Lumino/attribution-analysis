@@ -1,4 +1,4 @@
--- #9 LCDH | ⚠️ 大表
+/* 9 LCDH | ⚠️ 大表 */
 
 SELECT
     'LCDH' AS level,

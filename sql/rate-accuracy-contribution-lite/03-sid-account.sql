@@ -1,5 +1,5 @@
--- 03-sid-account.sql | Phase 3c lite | hierarchy 3_SID+Account
--- within_contribution_pp: Agent 本地算（README）
+/* 03-sid-account.sql | Phase 3c lite | hierarchy 3_SID+Account */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '3_SID+Account' AS hierarchy_level,
     t.supplier_id::text AS supplier_id, t.supplier_account_id::text AS supplier_account_id,

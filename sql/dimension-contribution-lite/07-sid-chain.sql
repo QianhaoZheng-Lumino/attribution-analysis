@@ -1,6 +1,6 @@
--- 07-sid-chain.sql | 7_SID+Chain — S/CS 路径
--- 2c 结构：两窗任一 ≥3（含新建/清零）；报告 Top3 按 |占 SID 变化|，含反向
--- 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500）
+/* 07-sid-chain.sql | 7_SID+Chain — S/CS 路径 */
+/* 2c 结构：两窗任一 ≥3（含新建/清零）；报告 Top3 按 |占 SID 变化|，含反向 */
+/* 禁止 ORDER BY ABS(booking_change)（Hologres 对别名套 ABS 会 500） */
 
 SELECT
     COALESCE(b.parent_chain_name, 'Independent') AS chain,

@@ -1,4 +1,4 @@
--- #10 L2L
+/* 10 L2L */
 
 SELECT
     'L2L' AS level,

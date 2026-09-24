@@ -1,4 +1,4 @@
--- #3 S（全局 supplier，无 client 过滤）
+/* 3 S（全局 supplier，无 client 过滤） */
 
 SELECT
     'S' AS level,

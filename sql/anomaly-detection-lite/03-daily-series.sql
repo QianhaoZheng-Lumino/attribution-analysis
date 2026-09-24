@@ -1,5 +1,5 @@
--- Step 3：历史 42 天日序列（用于 Agent 计算 Q1/Q3）
--- 替换 {hist_start} {analysis_date} {client_id} {parent_client_id}
+/* Step 3：历史 42 天日序列（用于 Agent 计算 Q1/Q3） */
+/* 替换 {hist_start} {analysis_date} {client_id} {parent_client_id} */
 
 SELECT
     TO_CHAR(DATE(a.channel_createdate), 'YYYY-MM-DD') AS booking_date,

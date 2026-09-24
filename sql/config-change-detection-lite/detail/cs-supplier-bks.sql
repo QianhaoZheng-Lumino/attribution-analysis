@@ -1,5 +1,5 @@
--- CS 链路产量 before/after（按 supplierid）
--- 替换 {supplierid} 为 detail 中关注的 supplier
+/* CS 链路产量 before/after（按 supplierid） */
+/* 替换 {supplierid} 为 detail 中关注的 supplier */
 
 SELECT
     {supplierid} AS supplierid,

@@ -1,9 +1,9 @@
--- 01-single-country-window | Phase 3d 证据线 D — 单国家 × 单窗口
--- 占位符: {country_code} {window_start} {window_end}
--- 可选: {max_dt} — 若空则子查询 MAX(dt)
---
--- 表：ads.ads_marketing_calendar_event_wide_d_f
--- 规则见 docs/external-events-mapping.md（全局表、仅 HOLIDAY、排除 WEATHER/展会/演唱会）
+/* 01-single-country-window | Phase 3d 证据线 D — 单国家 × 单窗口 */
+/* 占位符: {country_code} {window_start} {window_end} */
+/* 可选: {max_dt} — 若空则子查询 MAX(dt) */
+
+/* 表：ads.ads_marketing_calendar_event_wide_d_f */
+/* 规则见 docs/external-events-mapping.md（全局表、仅 HOLIDAY、排除 WEATHER/展会/演唱会） */
 
 SELECT
     event_type,

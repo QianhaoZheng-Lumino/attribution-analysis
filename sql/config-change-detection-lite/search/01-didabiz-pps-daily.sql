@@ -1,7 +1,7 @@
--- DidaBiz 查价：按日拆分（比跨日 SUM 更不易 500）
--- 占位符: {client_id} {compare_start} {current_end}
--- dt 是 text（YYYY-MM-DD）。勿写 stat_date；勿 dt::date（MCP 会把 date 打成毫秒）
--- 同一天可能多行（biz_type）；机构总量需把各 biz_type 相加
+/* DidaBiz 查价：按日拆分（比跨日 SUM 更不易 500） */
+/* 占位符: {client_id} {compare_start} {current_end} */
+/* dt 是 text（YYYY-MM-DD）。勿写 stat_date；勿 dt::date（MCP 会把 date 打成毫秒） */
+/* 同一天可能多行（biz_type）；机构总量需把各 biz_type 相加 */
 
 SELECT
     dt AS stat_date,

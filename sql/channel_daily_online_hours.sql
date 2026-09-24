@@ -1,16 +1,16 @@
--- 客户 × 日 在线时长表（Hologres 批处理，可选）
--- #22 已收口：归因走 MCP 单 client 开窗，不依赖本文件。本文件仅全客户落表时用。
---
--- 相对完整版的加速：
---   1. 用 channel_operation_time（毫秒）过滤，不先 to_timestamp 扫全表
---   2. 窗前每个 client 只取 1 条，不对全部历史做 LAG
---   3. LAG/LEAD 只打在「窗前 1 条 ∪ 窗内日志」上
---   4. 客户维限定 crm Overseas 生产客户（client_group_id=3），缩小扫描
---
--- 日期只改下面 params：start_date 含，end_date 不含（默认算到北京昨天）
--- 无 rateaccuracy 写权限时，改表名 schema
+/* 客户 × 日 在线时长表（Hologres 批处理，可选） */
+/* 22 已收口：归因走 MCP 单 client 开窗，不依赖本文件。本文件仅全客户落表时用。 */
 
--- ========== 1) 建表：空库只跑一次。表已有数据时不要重跑 CALL ==========
+/* 相对完整版的加速： */
+/* 1. 用 channel_operation_time（毫秒）过滤，不先 to_timestamp 扫全表 */
+/* 2. 窗前每个 client 只取 1 条，不对全部历史做 LAG */
+/* 3. LAG/LEAD 只打在「窗前 1 条 ∪ 窗内日志」上 */
+/* 4. 客户维限定 crm Overseas 生产客户（client_group_id=3），缩小扫描 */
+
+/* 日期只改下面 params：start_date 含，end_date 不含（默认算到北京昨天） */
+/* 无 rateaccuracy 写权限时，改表名 schema */
+
+/* ========== 1) 建表：空库只跑一次。表已有数据时不要重跑 CALL ========== */
 BEGIN;
 
 CREATE TABLE IF NOT EXISTS rateaccuracy.channel_online_hours_daily (
@@ -28,7 +28,7 @@ CALL set_table_property('rateaccuracy.channel_online_hours_daily', 'bitmap_colum
 
 COMMIT;
 
--- ========== 2) 填数：可重复跑。只改这一处日期 ==========
+/* ========== 2) 填数：可重复跑。只改这一处日期 ========== */
 DROP TABLE IF EXISTS tmp_oh_params;
 CREATE TEMP TABLE tmp_oh_params AS
 SELECT

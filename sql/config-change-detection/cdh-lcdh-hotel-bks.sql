@@ -1,7 +1,7 @@
--- CDH / LCDH 酒店级产量前后对比（片段）
--- 用途：机构级 before/after_bks 会被非变更酒店稀释；本片段仅统计「本次配置涉及的 didahotelid」上的订单。
--- 用法：嵌入 config-change-detection.sql，在最终 SELECT 中 left join cdh_lcdh_hotel_bks。
--- 暂不包含 SH（供应商酒店需 supplierhotelid 映射，另做）。
+/* CDH / LCDH 酒店级产量前后对比（片段） */
+/* 用途：机构级 before/after_bks 会被非变更酒店稀释；本片段仅统计「本次配置涉及的 didahotelid」上的订单。 */
+/* 用法：嵌入 config-change-detection.sql，在最终 SELECT 中 left join cdh_lcdh_hotel_bks。 */
+/* 暂不包含 SH（供应商酒店需 supplierhotelid 映射，另做）。 */
 
 , cdh_lcdh_event_hotels as (
     select

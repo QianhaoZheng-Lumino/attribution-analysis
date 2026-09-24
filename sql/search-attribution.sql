@@ -1,8 +1,8 @@
--- Phase 3b 查价归因（有价率 + 查验比）— 用户 SQL1 完整版
--- BI 专用；MCP 请用 search-attribution-lite/ 分批
--- 参数块与 dimension-contribution.sql 一致
+/* Phase 3b 查价归因（有价率 + 查验比）— 用户 SQL1 完整版 */
+/* BI 专用；MCP 请用 search-attribution-lite/ 分批 */
+/* 参数块与 dimension-contribution.sql 一致 */
 
--- 定义参数
+/* 定义参数 */
 WITH params AS (
     SELECT 
         '2026-04-10'::date as analysis_date,
@@ -10,7 +10,7 @@ WITH params AS (
         '' as parent_client_id,
         NULLIF('10', '')::int as n_days
 ),
--- 日期计算逻辑（保持不变）
+/* 日期计算逻辑（保持不变） */
 date_calculator AS (
     SELECT 
         analysis_date,

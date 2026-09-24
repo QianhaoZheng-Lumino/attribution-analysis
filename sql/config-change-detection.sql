@@ -1,12 +1,12 @@
--- Phase 3 内部配置变更检测（14 类 level + CDH/LCDH 酒店级产量）
--- 来源：用户脚本 + Configuration union + 酒店级 before/after
+/* Phase 3 内部配置变更检测（14 类 level + CDH/LCDH 酒店级产量） */
+/* 来源：用户脚本 + Configuration union + 酒店级 before/after */
 
 WITH params AS (
     SELECT 
         '2026-04-29'::date as analysis_date,
         'NuiteeLMB' as client_id,
         '' as parent_client_id
---         NULLIF('10', '')::int as n_days
+/* NULLIF('10', '')::int as n_days */
 )
 , pid as (
 select client_id 
@@ -50,16 +50,16 @@ select level, clientid, supplierid, supplierhoteldefaultstatus, status, margin, 
 , lag(margin) over(partition by level, clientid, supplierid order by updatedate) as last_margin
 from configuration.wolf_rateadjust_log
 where level = 'CS' 
--- and clientid = '$val{client_id}'
--- and (
---                 ((select client_id from params) != '' and (select client_id from params) is not null and clientid = (select client_id from params))
---                 or 
---                 (clientid in (select client_id from pid))
---                 )
+/* and clientid = '$val{client_id}' */
+/* and ( */
+/* ((select client_id from params) != '' and (select client_id from params) is not null and clientid = (select client_id from params)) */
+/* or */
+/* (clientid in (select client_id from pid)) */
+/* ) */
 and clientid in (select client_id from pid)
 order by clientid, supplierid, updatedate
 ) as a 
--- where updatedate >= now() - interval '$val{day_range} days' 
+/* where updatedate >= now() - interval '$val{day_range} days' */
 where updatedate::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatedate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 ) as a 
 )
@@ -105,7 +105,7 @@ from configuration.wolf_rateadjust_log
 where level = 'C' 
 and clientid in (select client_id from pid)
 ) as a 
--- where updatedate >= now() - interval '$val{day_range} days' 
+/* where updatedate >= now() - interval '$val{day_range} days' */
 where updatedate::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatedate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 ) as a 
 )
@@ -151,14 +151,14 @@ select level, supplierid, supplierhoteldefaultstatus, status, margin, cutoffdays
 , lag(cancellationcutoffdays) over(partition by level, supplierid order by updatedate) as last_cancellationcutoffdays
 from (
 select level, supplierid, supplierhoteldefaultstatus, status, margin, cutoffdays, cancellationcutoffdays, updatedate, username
--- , remark 
+/* , remark */
 , row_number() over(partition by level, supplierid, updatedate::date order by updatedate desc) as time_rank 
 from configuration.wolf_rateadjust_log
 where level = 'S' and username != 'JobAPI'
 ) as a 
 where time_rank = 1
 ) as a 
--- where updatedate >= now() - interval '$val{day_range} days' 
+/* where updatedate >= now() - interval '$val{day_range} days' */
 where updatedate::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatedate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 ) as a 
 cross join pid
@@ -169,9 +169,9 @@ select level, clientid, 0 as supplierid, 0 as supplieraccountid, bookingstartdat
 , '窗口期操作' as category
 from configuration.wolf_rateadjust_log
 where level = 'CBD' 
--- and clientid = '$val{client_id}'
+/* and clientid = '$val{client_id}' */
 and clientid in (select client_id from pid)
--- and bookingstartdate >= now() - interval '$val{day_range} days' 
+/* and bookingstartdate >= now() - interval '$val{day_range} days' */
 and bookingstartdate::date >= (SELECT analysis_date FROM params) - interval '1 days' and bookingstartdate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 )
 , sbd_operation as (
@@ -181,7 +181,7 @@ select level, client_id as clientid, supplierid, supplieraccountid, bookingstart
 from configuration.wolf_rateadjust_log
 cross join pid
 where level = 'SBD' 
--- and bookingstartdate >= now() - interval '$val{day_range} days' 
+/* and bookingstartdate >= now() - interval '$val{day_range} days' */
 and bookingstartdate::date >= (SELECT analysis_date FROM params) - interval '1 days' and bookingstartdate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 )
 , csa_operation_base as (
@@ -192,14 +192,14 @@ select level, clientid, supplierid, supplieraccountid, supplierhoteldefaultstatu
 , lag(supplierhoteldefaultstatus) over(partition by level, clientid, supplierid, supplieraccountid order by updatedate) as last_supplierhoteldefaultstatus
 , lag(status) over(partition by level, clientid, supplierid, supplieraccountid order by updatedate) as last_status 
 , lag(margin) over(partition by level, clientid, supplierid, supplieraccountid order by updatedate) as last_margin
--- select * 
+/* select * */
 from configuration.wolf_rateadjust_log
 where level = 'CSA' 
--- and clientid = '$val{client_id}'
+/* and clientid = '$val{client_id}' */
 and clientid in (select client_id from pid)
 order by clientid, supplierid, supplieraccountid, updatedate
 ) as a 
--- where updatedate >= now() - interval '$val{day_range} days' 
+/* where updatedate >= now() - interval '$val{day_range} days' */
 where updatedate::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatedate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 ) 
 , csa_operation_by_user as (
@@ -243,10 +243,10 @@ from (
 select clientid, level, updatetime, username, brgpunishmentday
 , lag(level) over(partition by clientid order by updatetime) as last_level
 from configuration.wolfl2lclientlevelconfiglog
--- where clientid = '$val{client_id}'
+/* where clientid = '$val{client_id}' */
 where clientid in (select client_id from pid)
 ) as a 
--- where updatetime >= now() - interval '$val{day_range} days' and level != last_level
+/* where updatetime >= now() - interval '$val{day_range} days' and level != last_level */
 where updatetime::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatetime::date <= (SELECT analysis_date FROM params) + interval '1 days'
 )
 , cslrc as (
@@ -259,10 +259,10 @@ from (
 select 'CSLRC' as level, clientid, supplierid, supplieraccountid, updatetime as updatedate, username, islimit
 , row_number() over(partition by level, clientid, supplierid, supplieraccountid, updatetime::date order by updatetime desc) as time_rank 
 from configuration.wolfl2lconfiglog
--- where clientid = '$val{client_id}' 
+/* where clientid = '$val{client_id}' */
 where clientid in (select client_id from pid)
 and l2llevel = 'CSLRC'
--- and updatetime >= now() - interval '$val{day_range} days'
+/* and updatetime >= now() - interval '$val{day_range} days' */
 and updatetime::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatetime::date <= (SELECT analysis_date FROM params) + interval '1 days'
 ) as a 
 where time_rank = 1
@@ -284,7 +284,7 @@ from configuration.bottom_margin_log
 where level = 'Supplier'
 ) as a 
 cross join pid 
--- where update_time >= now() - interval '$val{day_range} days' 
+/* where update_time >= now() - interval '$val{day_range} days' */
 where update_time::date >= (SELECT analysis_date FROM params) - interval '1 days' and update_time::date <= (SELECT analysis_date FROM params) + interval '1 days'
 and margin != last_margin 
 )
@@ -302,10 +302,10 @@ select level, item, margin, is_remove, update_time, update_user
 , lag(margin) over(partition by level, item order by update_time) as last_margin 
 , lag(is_remove) over(partition by level, item order by update_time) as last_status 
 from configuration.bottom_margin_log
--- where item = '$val{client_id}'
+/* where item = '$val{client_id}' */
 where item in (select client_id from pid)
 ) as a 
--- where update_time >= now() - interval '$val{day_range} days' 
+/* where update_time >= now() - interval '$val{day_range} days' */
 where update_time::date >= (SELECT analysis_date FROM params) - interval '1 days' and update_time::date <= (SELECT analysis_date FROM params) + interval '1 days'
 and margin != last_margin 
 ) 
@@ -319,9 +319,9 @@ from (
 select level, clientid, status, margin, updatedate::date, username, uniq(didahotelid) as hotel_count 
 from configuration.wolf_rateadjust_hotel_log
 where level = 'CDH' 
--- and clientid = '$val{client_id}'
+/* and clientid = '$val{client_id}' */
 and clientid in (select client_id from pid)
--- and updatedate >= now() - interval '$val{day_range} days'
+/* and updatedate >= now() - interval '$val{day_range} days' */
 and updatedate::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatedate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 group by 1,2,3,4,5,6
 ) as a 
@@ -354,9 +354,9 @@ select level, clientid, margin, updatedate, username
 , uniq(didahotelid) as hotel_count 
 from configuration.wolf_rateadjust_hotel_log 
 where level = 'LCDH' 
--- and clientid = '$val{client_id}' 
+/* and clientid = '$val{client_id}' */
 and clientid in (select client_id from pid)
--- and updatedate::date >= now() - interval '$val{day_range} days'
+/* and updatedate::date >= now() - interval '$val{day_range} days' */
 and updatedate::date >= (SELECT analysis_date FROM params) - interval '1 days' and updatedate::date <= (SELECT analysis_date FROM params) + interval '1 days'
 group by 1,2,3,4,5,6
 ) as a 
@@ -447,9 +447,9 @@ where supplierid != 0 and supplieraccountid = 0
 left join (select channel_bookingnumber, clientid, supplierid, channel_createdate, channel_pricecny from npd_booking_view where clientid in (select client_id from pid) and channel_status in ('Confirmed','Canceled') and rebook_sequence = 1 and channel_createdate >= (SELECT analysis_date FROM params) - interval '10 days' and channel_createdate <= (SELECT analysis_date FROM params) + interval '10 days') as b 
 on a.supplierid = b.supplierid and a.clientid = b.clientid 
 group by 1,2,3
--- order by 6 desc
+/* order by 6 desc */
 )
--------------------------------------------------
+/* - */
 , cs_search as (
 select a.clientid, a.supplierid, a.updatedate
 , sum(case when a.compare_days > 0
@@ -484,7 +484,7 @@ and date >= (SELECT analysis_date FROM params) - interval '10 days' and date <= 
 on a.supplierid = b.supplierid and a.clientid = b.clientid 
 group by 1,2,3
 )
-----------------------------------
+
 , csa_bks as (
 select a.clientid, a.supplierid, a.supplieraccountid, a.updatedate
 , sum(case when a.compare_days > 0
@@ -511,7 +511,7 @@ where supplierid != 0 and supplieraccountid != 0
 ) as a 
 left join (select channel_bookingnumber, clientid, supplierid, supplieraccountid, channel_createdate, channel_pricecny from npd_booking_view where clientid in (select client_id from pid) and channel_status in ('Confirmed','Canceled') and rebook_sequence = 1 and channel_createdate >= (SELECT analysis_date FROM params) - interval '10 days' and channel_createdate <= (SELECT analysis_date FROM params) + interval '10 days') as b on a.supplierid = b.supplierid and a.supplieraccountid = b.supplieraccountid and a.clientid = b.clientid 
 group by 1,2,3,4
--- order by 1,2,3
+/* order by 1,2,3 */
 )
 , c_bks as (
 select a.clientid, a.updatedate
@@ -539,9 +539,9 @@ where supplierid = 0 and supplieraccountid = 0
 ) as a 
 left join (select clientid, channel_bookingnumber, channel_createdate, channel_pricecny from npd_booking_view where clientid in (select client_id from pid) and channel_status in ('Confirmed','Canceled') and rebook_sequence = 1 and channel_createdate >= (SELECT analysis_date FROM params) - interval '10 days' and channel_createdate <= (SELECT analysis_date FROM params) + interval '10 days') as b on a.clientid = b.clientid 
 group by 1,2
--- order by 1,2,3
+/* order by 1,2,3 */
 )
--------------------------------------------
+/* - */
 
 , c_search as (
 select a.clientid, a.updatedate
@@ -681,7 +681,7 @@ group by 1,2
         a.lcdh_status
 )
 
--------------------------------------------
+/* - */
 select a.*
 , replace(split_part(e.op_user_name,'[',2),']','') op
 , least(7, greatest(0, ((current_date - interval '1 day')::date - a.updatedate::date + 1)))::int as compare_days

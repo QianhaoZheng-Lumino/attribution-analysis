@@ -1,4 +1,4 @@
--- #13 S Bottom（全局 supplier 兜底）
+/* 13 S Bottom（全局 supplier 兜底） */
 
 SELECT
     'S Bottom' AS level,

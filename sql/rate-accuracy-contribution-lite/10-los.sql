@@ -1,5 +1,5 @@
--- 10-los.sql | Phase 3c lite | hierarchy 10_LOS
--- within_contribution_pp: Agent 本地算（README）
+/* 10-los.sql | Phase 3c lite | hierarchy 10_LOS */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '10_LOS' AS hierarchy_level,
     t.los,

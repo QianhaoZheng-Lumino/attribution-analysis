@@ -1,5 +1,5 @@
--- Step 1a（MCP 可跑）：Configuration 类变更清单
--- Step 1b（BI）：完整 14 类见 ../config-change-detection.sql
+/* Step 1a（MCP 可跑）：Configuration 类变更清单 */
+/* Step 1b（BI）：完整 14 类见 ../config-change-detection.sql */
 
 WITH params AS (
     SELECT

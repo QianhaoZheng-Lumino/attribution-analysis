@@ -1,5 +1,5 @@
--- 05-didabiz-qps-leadtime.sql | Phase 3b lite | 占位符见 ../params-template.md
--- 完整版 ../search-attribution.sql（MCP 禁止 UNION）
+/* 05-didabiz-qps-leadtime.sql | Phase 3b lite | 占位符见 ../params-template.md */
+/* 完整版 ../search-attribution.sql（MCP 禁止 UNION） */
 
 WITH search AS (
     SELECT CASE WHEN a.leadtime BETWEEN -1 AND 0 THEN '-1~0' WHEN a.leadtime = 1 THEN '1'

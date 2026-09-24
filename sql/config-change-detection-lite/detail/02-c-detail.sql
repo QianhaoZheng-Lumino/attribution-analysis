@@ -1,4 +1,4 @@
--- C 变更明细
+/* C 变更明细 */
 
 SELECT
     updatedate::date AS change_date,

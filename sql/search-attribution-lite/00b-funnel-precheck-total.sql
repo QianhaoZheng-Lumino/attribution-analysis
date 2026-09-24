@@ -1,7 +1,7 @@
--- 00b-funnel-precheck-total | Phase 3b fallback B — 机构验价量（ads 500 时）
--- 与 00a-funnel-search-total.sql 同窗；Agent 用 00a 的 avail + 本文件 precheck 算查验比
--- 占位符: {client_id} {analysis_date} {current_end} {compare_start} {compare_end}
--- MCP tables: data_ovs.rate_accuracy_channel_multi_dimension
+/* 00b-funnel-precheck-total | Phase 3b fallback B — 机构验价量（ads 500 时） */
+/* 与 00a-funnel-search-total.sql 同窗；Agent 用 00a 的 avail + 本文件 precheck 算查验比 */
+/* 占位符: {client_id} {analysis_date} {current_end} {compare_start} {compare_end} */
+/* MCP tables: data_ovs.rate_accuracy_channel_multi_dimension */
 
 SELECT
     '{client_id}' AS client_id,

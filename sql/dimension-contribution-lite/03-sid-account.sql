@@ -1,7 +1,7 @@
--- 03-sid-account.sql | 3_SID+Account — S/CS 路径（贡献≥10% 才写报告）
--- 替换 {sid} 为 2b 锁定的 supplier
--- 2c 结构：两窗任一 ≥3（含新建/清零）；定责 02-sid 仍为对比期≥5
--- 报告按 |占 SID 变化| 降序，含反向；禁止 ORDER BY ABS(booking_change)（Hologres 500）；MCP 可能打乱，Agent 须本地再排
+/* 03-sid-account.sql | 3_SID+Account — S/CS 路径（贡献≥10% 才写报告） */
+/* 替换 {sid} 为 2b 锁定的 supplier */
+/* 2c 结构：两窗任一 ≥3（含新建/清零）；定责 02-sid 仍为对比期≥5 */
+/* 报告按 |占 SID 变化| 降序，含反向；禁止 ORDER BY ABS(booking_change)（Hologres 500）；MCP 可能打乱，Agent 须本地再排 */
 
 SELECT
     a.sid,

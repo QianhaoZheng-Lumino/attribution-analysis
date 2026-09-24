@@ -249,6 +249,12 @@ def row_value(rows: list[list[str]], label: str) -> str:
     return ""
 
 
+def probe_is_unverified(text: str) -> bool:
+    """探测行写了 MCP 500 或未验，且没有可解析的 Δpp。"""
+    s = strip_md(text)
+    return ("MCP 500" in s) or ("未验" in s)
+
+
 def accuracy_delta_pp(text: str) -> float | None:
     """从 3c 探测行取出 Δpp。读不到数字就返回 None，不靠「未启动」猜。"""
     s = strip_md(text).replace("−", "-").replace("－", "-").replace("＋", "+")
@@ -455,7 +461,10 @@ def check_file(path: Path) -> list[str]:
             expect_header(h_acc, "启动后下钻")
     else:
         delta = accuracy_delta_pp(probe)
-        if delta is None:
+        if delta is None and probe_is_unverified(probe):
+            if h_acc:
+                errs.append("准确率未验，不要写 #### 启动后下钻")
+        elif delta is None:
             errs.append("3c 探测行读不出 Δpp，无法判断要不要写启动后下钻")
         elif abs(delta) >= 5 and not h_acc:
             errs.append("准确率 |Δpp|≥5，缺 H4：#### 启动后下钻")

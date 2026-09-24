@@ -1,6 +1,6 @@
--- 14-sid-client-validation.sql | cross-validation B lite
--- 替换 {sid} 为 2a Top 下降 supplier 的 sid 前缀（如 116-EPS%）或完整 sid
--- 占位符日期见 ../params-template.md
+/* 14-sid-client-validation.sql | cross-validation B lite */
+/* 替换 {sid} 为 2a Top 下降 supplier 的 sid 前缀（如 116-EPS%）或完整 sid */
+/* 占位符日期见 ../params-template.md */
 
 SELECT
     a.clientid,

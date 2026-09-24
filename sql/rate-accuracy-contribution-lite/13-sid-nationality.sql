@@ -1,5 +1,5 @@
--- 13-sid-nationality.sql | Phase 3c lite | hierarchy 13_SID+Nationality
--- within_contribution_pp: Agent 本地算（README）
+/* 13-sid-nationality.sql | Phase 3c lite | hierarchy 13_SID+Nationality */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '13_SID+Nationality' AS hierarchy_level,
     t.supplier_id::text AS supplier_id, t.nationality::text AS nationality,

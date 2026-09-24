@@ -1,6 +1,6 @@
--- C Bottom margin 明细
--- item = client_id；操作人列 = update_user（与 S Bottom 同列，同表）
--- 禁止把本文件抄成 S Bottom：S 的 item 是供应商号。S Bottom 用 detail/13-s-bottom-detail.sql
+/* C Bottom margin 明细 */
+/* item = client_id；操作人列 = update_user（与 S Bottom 同列，同表） */
+/* 禁止把本文件抄成 S Bottom：S 的 item 是供应商号。S Bottom 用 detail/13-s-bottom-detail.sql */
 
 SELECT
     update_time::date AS change_date,

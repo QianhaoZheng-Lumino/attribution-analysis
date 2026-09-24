@@ -1,4 +1,4 @@
--- #2 C
+/* 2 C */
 
 SELECT
     'C' AS level,

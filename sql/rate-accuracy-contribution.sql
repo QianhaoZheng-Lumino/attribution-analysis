@@ -1,8 +1,8 @@
--- Phase 3c 验价准确率贡献（用户 SQL2 完整版）
--- BI 专用；MCP 请用 rate-accuracy-contribution-lite/ 分批
--- 参数块与 dimension-contribution.sql 一致
+/* Phase 3c 验价准确率贡献（用户 SQL2 完整版） */
+/* BI 专用；MCP 请用 rate-accuracy-contribution-lite/ 分批 */
+/* 参数块与 dimension-contribution.sql 一致 */
 
--- 定义参数
+/* 定义参数 */
 WITH params AS (
     SELECT 
         '2026-03-20'::date as analysis_date,
@@ -10,7 +10,7 @@ WITH params AS (
         'SnapTravel' as parent_client_id,
         NULLIF('10', '')::int as n_days
 ),
--- 计算智能日期范围（排除今天）
+/* 计算智能日期范围（排除今天） */
 date_calculator AS (
     SELECT 
         analysis_date,
@@ -32,7 +32,7 @@ date_calculator AS (
         END as new_current_days
     FROM params
 ),
--- 决策：使用哪种逻辑
+/* 决策：使用哪种逻辑 */
 decision AS (
     SELECT 
         *,
@@ -87,7 +87,7 @@ decision AS (
             ELSE 7
         END as expected_days,
         LEAST(analysis_date - GREATEST(14, COALESCE(n_days, 0)), analysis_date - 7) as min_data_date,
-        -- 新增：过滤维度类型
+        /* 新增：过滤维度类型 */
         CASE 
             WHEN client_id IS NOT NULL AND client_id != '' THEN 'Client ID'
             WHEN parent_client_id IS NOT NULL AND parent_client_id != '' THEN 'Parent Client ID'
@@ -96,8 +96,8 @@ decision AS (
     FROM date_calculator
     WHERE (LEAST(analysis_date + 6, CURRENT_DATE - 1) - analysis_date + 1) > 0
 ),
--- 基础数据：data_ovs.rate_accuracy_channel_multi_dimension
--- dt=同步分区日；log_date=业务日；los/lt 已为分桶字段，不再 CASE
+/* 基础数据：data_ovs.rate_accuracy_channel_multi_dimension */
+/* dt=同步分区日；log_date=业务日；los/lt 已为分桶字段，不再 CASE */
 base_data AS (
     SELECT 
         t.supplier_id,
@@ -317,7 +317,7 @@ final_calc AS (
         fb.*,
         (fb.current_precheck - fb.previous_precheck) as precheck_change,
         (fb.current_accuracy - fb.previous_accuracy) * 100 as item_accuracy_delta_pp,
-        -- 层内分解（within 口径）：上期权重 * 子项准确率变化
+        /* 层内分解（within 口径）：上期权重 * 子项准确率变化 */
         (fb.previous_precheck::numeric
             / NULLIF(SUM(fb.previous_precheck) OVER (PARTITION BY fb.hierarchy_level), 0))
         * ((fb.current_accuracy - fb.previous_accuracy) * 100) as within_contribution_pp,
@@ -332,7 +332,7 @@ final_calc AS (
 )
 SELECT
     fc.*,
-    -- precheck 贡献度（按你的口径：本行变化 / Total变化）
+    /* precheck 贡献度（按你的口径：本行变化 / Total变化） */
     fc.precheck_change::numeric
         / NULLIF(
             MAX(CASE WHEN fc.hierarchy_level = '1_Total' THEN fc.precheck_change END) OVER (),

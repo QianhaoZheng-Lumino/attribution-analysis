@@ -1,24 +1,24 @@
--- 02-holiday-yoy-bks-lite | Phase 3d D2 — YoY 同节日 client×国别 BKS
---
--- ⚠️ 硬规则（2026-08-18 · TH Songkran 手写 pre 漏国别过滤事故）：
---   1. Agent 必须 Read 本文件原文执行，禁止手写 D2 SQL
---   2. Rubric 仅用 country_*_bks；pre_bks/during_bks/post_bks 为 client 全量，不可混读
---   3. 占位符说明见 d2-params-template.md
---
--- 日期来自 holiday-canonical-seed.csv（非 ads 表）
--- 占位符:
---   {client_id} {country_code}
---   {y1_holiday_start} {y1_holiday_end}   -- 较早年节窗（如 2024-03-31）
---   {y2_holiday_start} {y2_holiday_end}   -- 较新年节窗（如 2025-03-31）
---   {pre_days} {post_days}                  -- 默认 7；单日节可 3
---   {client_window_start} {client_window_end}  -- Phase 1 分析全窗（client 门槛 ≥100）
---
--- MCP tables: public.npd_booking_view, content.dida_hotel_view
--- 口径（MVP）: channel_createdate::date — 与 Phase 1/2c create 口径对齐
--- 未来优化（讨论 2026-08-18）: 节日 pre/during/post 应对齐 checkoutdate::date（离店/消费发生），
---   而非下单日；需单独 02-checkout 版 SQL + 与 Phase 1 WoW 窗解耦说明（见 external-events-mapping §10.9）
--- 门槛（讨论定稿）: 国别 during+post 合并窗 BKS≥20；client 全窗≥100 → 否则 inconclusive
--- 输出: 两年 pre/during/post + client 全窗 + 国别 holiday 覆盖窗合计
+/* 02-holiday-yoy-bks-lite | Phase 3d D2 — YoY 同节日 client×国别 BKS */
+
+/* ⚠️ 硬规则（2026-08-18 · TH Songkran 手写 pre 漏国别过滤事故）： */
+/* 1. Agent 必须 Read 本文件原文执行，禁止手写 D2 SQL */
+/* 2. Rubric 仅用 country_*_bks；pre_bks/during_bks/post_bks 为 client 全量，不可混读 */
+/* 3. 占位符说明见 d2-params-template.md */
+
+/* 日期来自 holiday-canonical-seed.csv（非 ads 表） */
+/* 占位符: */
+/* {client_id} {country_code} */
+/* {y1_holiday_start} {y1_holiday_end}     较早年节窗（如 2024-03-31） */
+/* {y2_holiday_start} {y2_holiday_end}     较新年节窗（如 2025-03-31） */
+/* {pre_days} {post_days}                    默认 7；单日节可 3 */
+/* {client_window_start} {client_window_end}    Phase 1 分析全窗（client 门槛 ≥100） */
+
+/* MCP tables: public.npd_booking_view, content.dida_hotel_view */
+/* 口径（MVP）: channel_createdate::date — 与 Phase 1/2c create 口径对齐 */
+/* 未来优化（讨论 2026-08-18）: 节日 pre/during/post 应对齐 checkoutdate::date（离店/消费发生）， */
+/* 而非下单日；需单独 02-checkout 版 SQL + 与 Phase 1 WoW 窗解耦说明（见 external-events-mapping §10.9） */
+/* 门槛（讨论定稿）: 国别 during+post 合并窗 BKS≥20；client 全窗≥100 → 否则 inconclusive */
+/* 输出: 两年 pre/during/post + client 全窗 + 国别 holiday 覆盖窗合计 */
 
 WITH params AS (
     SELECT

@@ -1,5 +1,5 @@
--- 09-sid-lt.sql | Phase 3c lite | hierarchy 9_SID+LT
--- within_contribution_pp: Agent 本地算（README）
+/* 09-sid-lt.sql | Phase 3c lite | hierarchy 9_SID+LT */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '9_SID+LT' AS hierarchy_level,
     t.supplier_id::text AS supplier_id, t.lt,

@@ -1,5 +1,5 @@
--- 05-sid-country.sql | Phase 3c lite | hierarchy 5_SID+Country
--- within_contribution_pp: Agent 本地算（README）
+/* 05-sid-country.sql | Phase 3c lite | hierarchy 5_SID+Country */
+/* within_contribution_pp: Agent 本地算（README） */
 
 SELECT '5_SID+Country' AS hierarchy_level,
     t.supplier_id::text AS supplier_id, t.country_code,

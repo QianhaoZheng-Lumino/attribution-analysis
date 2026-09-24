@@ -1,5 +1,5 @@
--- issue/01-issue-type | 3c 下钻：issue_type 占比 current vs previous
--- is_request_chain=True 用 _chain 字段
+/* issue/01-issue-type | 3c 下钻：issue_type 占比 current vs previous */
+/* is_request_chain=True 用 _chain 字段 */
 
 SELECT
     CASE WHEN t.is_request_chain = TRUE THEN t.issue_type_chain ELSE t.issue_type END AS issue_type,

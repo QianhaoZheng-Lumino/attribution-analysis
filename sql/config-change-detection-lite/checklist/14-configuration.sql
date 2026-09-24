@@ -1,4 +1,4 @@
--- #14 Configuration（14 key：PPS/QPS/timeout/映射，MCP 稳定）
+/* 14 Configuration（14 key：PPS/QPS/timeout/映射，MCP 稳定） */
 
 SELECT
     'Configuration' AS level,
