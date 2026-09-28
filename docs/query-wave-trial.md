@@ -17,7 +17,17 @@
 - W3：方向 C/Dida（门 2：同降 29/41=70.7%，最大单 SID 29.6%<50%），1 轮 5 条：04-country，06-chain，08-lt，10-los，12-nationality
 - W4：过线 level 为 CS（n=4）、S（n=12）、CSA（n=3）、S Bottom（n=1）；SH n=3<10 不发 detail；其余 level n=0 不发。第 1 轮 4 条：detail/01-cs-detail（MCP 500），detail/03-s-detail，detail/04-csa-detail，detail/13-s-bottom-detail；第 2 轮 1 条：detail/01-cs-detail 同文重试（仍 MCP 500，标未验）
 - 其余查询（Phase 3 现有触发条件）：第 1 轮 4 条：search-attribution-lite/00-client-total，search-attribution-lite/02-didabiz-pps-country（0 行），search-attribution-lite/03-didabiz-pps-chain（0 行），rate-accuracy-contribution-lite/01-total（1 行但各项为空）；第 2 轮 3 条：external-events-lite/01-single-country-window（TH），同文件（MY），同文件（VN）；第 3 轮 3 条（复核补发）：search-attribution-lite/04-didabiz-qps-los（7 行；查价 1,348,204,882 → 1,349,707,743，基本持平；各档验价为 0，查验比未验），search-attribution-lite/05-didabiz-qps-leadtime（10 行；4~7 天 152,051,113 → 143,756,071，15~28 天 220,170,454 → 205,258,668，43~70 天 149,046,134 → 143,369,696，>70 天 267,462,907 → 277,178,335；验价为 0，查验比未验），search-attribution-lite/06-didabiz-qps-nationality（16 行；各国查价仅数千次量级，TH 1,081 → 999；验价为 0，查验比未验）
-- 全程 execute_sql 共 46 次（首轮 43 次 + 复核补发 3 次），单轮最多 5 次；未探活（首条即成功，后续 500 都发生在同批已有成功结果的轮次）
+- 全程 execute_sql 共 77 次（首轮 43 次 + 复核补发 3 次 + 保留注释重发 31 次），单轮最多 5 次；未探活（首条即成功，后续 500 都发生在同批已有成功结果的轮次）
+
+## 保留注释重发
+
+首轮有 27 条语句在发送时删掉了文件头部的 `/* */` 说明行。这些删了注释的执行不再作为本次试跑的有效执行，以下面保留全部注释的重发为准。重发时每个文件先 Read，只替换占位符（注释里的占位符也替换），语句里没有 `--` 或 `#`，timeout 30 秒，每轮最多 5 条；遇到 500 只重试那一条一次，仍失败就标未验。
+
+- 重发文件（27 条）：anomaly-detection-lite/02-historical-baseline，03-daily-series；dimension-contribution-lite/02-sid，14-sid-client-validation（116-EPS、131-Traveloka、1835-DCshareIND），04-country，06-chain，12-nationality；config-change-detection-lite/checklist/01-cs，07-cdh，08-sh，09-lcdh，02-client-before-after-bks；detail/01-cs-detail，03-s-detail，04-csa-detail，13-s-bottom-detail；online-hours-lite/03-window-avg；rate-limit-lite/01-ss-supplier-window；search-attribution-lite/00-client-total，01-ss-supplier，02-didabiz-pps-country，03-didabiz-pps-chain；external-events-lite/01-single-country-window（TH、MY、VN）
+- 轮次：1 / 1 / 1 / 5 / 5 / 5 / 4 / 5 / 4，共 31 次（27 条 + 4 次 500 重试）
+- 与首轮结果相同的有 23 条：Phase 1 基线与日序列、02-sid、三条验证 B、checklist 01-cs / 07-cdh / 08-sh（3）/ 09-lcdh（0）、04-country（TH −113、MY −66、VN −44）、06-chain（Independent −401）、12-nationality（仅空值一桶 2,739 → 2,287）、03-s-detail（12 行）、04-csa-detail（3 行）、13-s-bottom-detail（594 兜底移除 1 行），以及事件 TH / VN 0 行、MY 开斋节 1 行。01-ss-supplier、限流、02/03-didabiz-pps 四条仍是成功但 0 行，按「有表权限、当前过滤下 0 行」记
+- 同文重试后仍 500、标未验的有 4 条：02-client-before-after-bks 与 detail/01-cs-detail（首轮也是未验）；online-hours-lite/03-window-avg 与 search-attribution-lite/00-client-total（首轮删注释版本成功，保留注释版本两次 500）。所以在线时长（首轮 24.00h → 23.01h）与机构 PPS 总量（首轮 +0.11%）改记为未验，不再作为已确认的排除证据。按晚数和提前期拆开的查价量（04/05-didabiz-qps，保留注释，复核时发出）仍然持平，「查价量没掉」这一点仍有证据支撑
+- 方向与失败条件：重发没有改变 2b 的输入（02-sid 与三条验证 B 结果相同），方向仍是 C/Dida，门 2 仍为 29/41=70.7%、最大单 SID 29.6%；五个失败条件仍然都是「否」
 
 ## 四项比对
 
@@ -38,8 +48,8 @@
 
 - 产量数字与旧 gold 一致（2,739 → 2,287，−16.5%），定责方向也一致（C/Dida），没有数据漂移。
 - 成品主因写成「倾向 C/Dida（宽口径，CS 明细与验价未验）」，比 gold 的「C」宽：CS 明细两次 MCP 500，验价表当日分区没有 3 月数据，出门禁只能部分通过。这是证据缺口，不是方向变化。
-- 未验项：02-client-before-after-bks、detail/01-cs-detail（均为同文重试后仍 500）；01-ss-supplier、rate-limit 01-ss-supplier-window、02/03-didabiz 维度（查询成功 0 行，按「有表权限、当前过滤下 0 行」记）；3c 01-total（各项为空）。
-- 首轮记录曾把调用总数写成 45，按实际列出的调用应为 43，已更正；复核补发 3 条后共 46。
-- 首轮的部分语句删掉了文件头部的 `/* */` 说明行，SQL 正文是文件原文、只替换了占位符；复核补发的 04/05/06 三条保留了文件里的全部注释，只替换了占位符。
+- 未验项：02-client-before-after-bks、detail/01-cs-detail、online-hours-lite/03-window-avg、search-attribution-lite/00-client-total（保留注释重发，同文重试后仍 500）；01-ss-supplier、rate-limit 01-ss-supplier-window、02/03-didabiz 维度（查询成功 0 行，按「有表权限、当前过滤下 0 行」记）；3c 01-total（各项为空）。
+- 首轮记录曾把调用总数写成 45，按实际列出的调用应为 43，已更正；复核补发 3 条后是 46，保留注释重发 31 次后共 77。
+- 首轮删掉头部注释的 27 条语句已按上面「保留注释重发」一节全部重发，结论以重发结果为准；复核补发的 04/05/06 三条本来就保留了全部注释，没有重发。
 - 04/05/06 结果：Agoda 按入住晚数、提前期拆开的查价量都没有随产量同步下降（总量持平），提前 4~7 天的查价少了约 5.5%，远小于该档产量 −44%；三张表的验价字段都是 0，查验比未验。客源维查价量太小，不能用于解读。
 - 成品报告：examples/case-agoda-20260320.md 与同名 HTML，check-report-skeleton.py 通过后渲染。
