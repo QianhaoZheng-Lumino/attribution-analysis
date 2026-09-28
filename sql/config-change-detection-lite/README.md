@@ -11,7 +11,7 @@
 ```
 Step 0  填占位符（client_id, analysis_date, w_start/w_end, 产量窗口；**SH 必填 {sid_list}**；SS/限流用同一套，见 params-template）
 Step 1  02-client-before-after-bks.sql     → 机构级 before/after（必做）
-Step 2  checklist/01-cs.sql … 14-*.sql     → 14 行清单（逐条 MCP，含 0 也要跑；**Read 文件原文执行，禁止手写**）
+Step 2  checklist/01-cs.sql … 14-*.sql     → 14 行清单（按查数波次 W2，同一轮最多 5 条，含 0 也要跑；**Read 文件原文执行，禁止手写**）
 Step 3  event_count > 0 的 level           → 按下表跑明细
 Step 3' CDH/LCDH event_count > 0           → detail/07-cdh-hotel-bks-lite.sql / 09-lcdh-hotel-bks-lite.sql
         SH event_count ≥ 10                → detail/08-sh-hotel-bks-lite.sql（<10 不跑；>50000 → BI）
@@ -50,7 +50,7 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 
 ## checklist 执行顺序（Agent 打勾）
 
-**执行纪律：** 每条 MCP 调用前 **Read 对应 `.sql` 文件**，仅替换占位符；500 时用 **同一文件原文** 重试 1 次后再标未验。详见 [phases/03-evidence-verification.md](../../phases/03-evidence-verification.md) 规则 5。
+**执行纪律：** 按 [phases/02-dimension-drilldown.md](../../phases/02-dimension-drilldown.md)「查数波次」W2 发送。每批先 Read 最多 5 个文件，下一轮再发这最多 5 条；一次调用一个文件。500 时只重试这一条，用同一文件原文再跑 1 次后仍失败才标未验。打勾清单保留。
 
 ```
 Phase 3 checklist 进度:
