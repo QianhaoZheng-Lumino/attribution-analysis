@@ -99,14 +99,57 @@
 
 ---
 
+## 查数波次
+
+占位符在进入该波之前填好：`client_id`、`analysis_date`、产量窗口。`{sid_list}` 只在 W1 返回之后才算有值。每一批是两轮：先 Read 这批最多 5 个文件，下一轮再发已经 Read 过的查询。同一轮 `execute_sql` 最多 5 条。一次调用一个 lite 文件。某一条 500 只重试这一条，同批成功结果保留。
+
+### W0 Phase 1
+
+文件：`sql/anomaly-detection-lite/01-period-totals.sql`，然后 `02-historical-baseline.sql`，然后 `03-daily-series.sql`。一条完成后再发下一条。失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
+
+### W1 定责入口
+
+只跑 `sql/dimension-contribution-lite/02-sid.sql`。这一条回来之前，不发 W2、W3。
+
+### W2 02-sid 已返回
+
+先按现有规则填 `{sid_list}`（2b 锁定的 SID，或 `02-sid` 里 `|change|` Top3）。填完仍为空时，本波照样开始，只是不发 SH、`01-ss-supplier`、限流。
+
+下列文件互不依赖。按优先级每批 5 条，直到发完。同一轮最多 5 条：
+
+1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额。
+2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个文件，含结果为 0 的也要发。
+3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`。
+
+`{sid_list}` 仍空时，从本波拿掉 `checklist/08-sh.sql`、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window.sql`。其余 checklist 照发。W2 不包含 2c 路径文件，也不包含任何 detail。`01-ss-supplier` 不等 `00-client-total`。`03-window-avg.sql` 在本波发送，不必等查价 WoW。
+
+### W3 2b 方向已经写出
+
+只跑该方向的文件，每批最多 5 条。`02-sid` 不重复跑。方向还没写出时不发本波。禁止两个方向一起投机跑。
+
+| 方向 | 文件 |
+|---|---|
+| C/Dida | `04-country.sql`、`06-chain.sql`、`08-lt.sql`、`10-los.sql`、`12-nationality.sql` |
+| S/CS | `05-sid-country.sql`、`07-sid-chain.sql`、`03-sid-account.sql`、`09-sid-lt.sql`、`11-sid-los.sql`、`13-sid-nationality.sql` |
+
+验证 B 的跳过条件、写死 C/Dida 的双门、S/CS 的 Account 过滤，仍以 `responsibility-model.md` 为准。本波只改变发送批次。
+
+### W4 checklist 已返回
+
+只跑过线的 detail，每批最多 5 条。一般 level：`event_count > 0` 才跑配对 detail。SH：`event_count ≥ 10` 才跑 `detail/08-sh-hotel-bks-lite.sql`；`<10` 不跑；`>50000` 或 MCP 500 走现有 BI 兜底。CDH / LCDH：`event_count > 0` 才跑 `detail/07-cdh-hotel-bks-lite.sql` / `detail/09-lcdh-hotel-bks-lite.sql`。`event_count = 0` 不发 detail。S Bottom 只用 `detail/13-s-bottom-detail.sql`，禁止抄 C Bottom。
+
+### 其余查询
+
+3b 里除 `01-ss-supplier` 以外的下钻、3c、3d、准确率 issue、在线时长 500 兜底脚本，仍按 Phase 3 现有触发条件决定发不发。同一时刻有多条、且谁也不用谁的结果时，同样每批最多 5 条，每条一个文件。
+
 ## 执行清单
 
 ```
-- [ ] 2a 必跑：dimension-contribution-lite/02-sid.sql
-- [ ] 2c 路径（C/Dida **5/5** 或 S/CS **6 文件**，见下表）— 缺任一 → 2c_progress 未达标
+- [ ] W1：dimension-contribution-lite/02-sid.sql（回来之前不发 W2、W3）
+- [ ] W2：验证 B（过线 SID 每家一次；无则写「无 SID≥10%，跳过」）+ checklist 与「查数波次」W2 其余文件
+- [ ] W3：2b 方向写出后，只发该方向的 2c 文件（C/Dida 5 个或 S/CS 6 个）— 缺任一 → 2c_progress 未达标
 - [ ] 2b-A 读 2_SID → 定责方向
-- [ ] 2b-B 若需要 → cross-validation-b.sql
-- [ ] 2c 写入报告（Country+Chain 表；LT/LOS/Nationality 段落）→ Phase 3
+- [ ] 2c 写入报告（Country+Chain 表；LT/LOS/Nationality 段落）
 ```
 
 ### 2c MCP 必跑文件（lite · 禁止只跑 Country）
@@ -115,6 +158,8 @@
 |----|------|------|
 | **C/Dida** | `02-sid` + `04-country` + **`06-chain`** + **`08-lt`** + **`10-los`** + **`12-nationality`** | **5/5** |
 | **S/CS** | `02-sid` + `05-sid-country` + **`07-sid-chain`** + `03-sid-account`（占 SID 变化≥10%） + **`09-sid-lt`** + **`11-sid-los`** + **`13-sid-nationality`** | 至少 country+chain+lt+los+nat |
+
+这些文件按「查数波次」W3 发送。方向未写出不发。禁止两个方向一起发。
 
 BI 一次跑完整 `dimension-contribution.sql` 可替代 lite 分批，但报告仍须覆盖上表各 hierarchy。
 
