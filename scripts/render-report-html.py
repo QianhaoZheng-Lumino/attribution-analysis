@@ -207,12 +207,53 @@ def window_phrase(current: str, previous: str) -> str:
     return f"{left}，对照 {right}。"
 
 
+_NUM = r"[0-9][0-9,]*(?:\.\d+)?"
+_PAIR = re.compile(rf"({_NUM})\s*/\s*({_NUM})")
+_WOW = re.compile(r"[+−-]\d+(?:\.\d+)?%")
+
+
+def _flip_pair(current: str, previous: str) -> str:
+    """表内是当前 / 对比。页眉按对比 → 当前排，数字原样搬。"""
+    return f"{previous} → {current}"
+
+
 def booking_pair(cell: str) -> str:
-    """表内是当前 / 对比。页眉按对比 → 当前排，两个数原样搬。"""
-    m = re.fullmatch(r"([0-9][0-9,]*(?:\.\d+)?)\s*/\s*([0-9][0-9,]*(?:\.\d+)?)", plain(cell))
-    if not m:
-        return plain(cell)
-    return f"{m.group(2)} → {m.group(1)}"
+    """单客户整格是一对数字。parent 会写成「parent 当前 / 对比；focus 当前 / 对比」，每对都要翻。"""
+    text = plain(cell)
+    matches = list(_PAIR.finditer(text))
+    if not matches:
+        return text
+    parts: list[str] = []
+    last = 0
+    for match in matches:
+        parts.append(text[last : match.start()])
+        parts.append(_flip_pair(match.group(1), match.group(2)))
+        last = match.end()
+    parts.append(text[last:])
+    return "".join(parts)
+
+
+def wow_html(text: str) -> str:
+    """给每个带正负号的百分数上色。parent 行不以正负号开头，不能只看整格开头。"""
+    raw = plain(text)
+    if not raw:
+        return "—"
+    parts: list[str] = []
+    last = 0
+    found = False
+    for match in _WOW.finditer(raw):
+        found = True
+        parts.append(html.escape(raw[last : match.start()]))
+        token = match.group(0)
+        if token[0] in "−-":
+            parts.append(f"<em>{html.escape(token)}</em>")
+        else:
+            parts.append(f'<em class="up">{html.escape(token)}</em>')
+        last = match.end()
+    parts.append(html.escape(raw[last:]))
+    if not found:
+        return html.escape(raw)
+    return "".join(parts)
 
 
 def cause_short(cell: str) -> str:
@@ -276,12 +317,7 @@ def build_mast(blocks: list[dict], h1: str, quote: str) -> tuple[str, str, str]:
     cause = cause_short(lookup_row(verdict_table, "修正后主因"))
 
     bookings = booking_pair(total) if total else "—"
-    if re.match(r"^[−-]\d", wow):
-        wow_html = f"<em>{html.escape(wow)}</em>"
-    elif re.match(r"^\+\d", wow):
-        wow_html = f'<em class="up">{html.escape(wow)}</em>'
-    else:
-        wow_html = html.escape(wow or "—")
+    wow_markup = wow_html(wow)
     scored = re.match(r"(\d+)\s*/\s*100\b", score)
     if scored:
         score_html = f'{scored.group(1)}<span class="unit"> / 100</span>'
@@ -289,7 +325,7 @@ def build_mast(blocks: list[dict], h1: str, quote: str) -> tuple[str, str, str]:
         score_html = html.escape(score or "—")
     stats = (
         f'<div class="stat"><span>预订量</span><strong>{html.escape(bookings)}</strong></div>'
-        f'<div class="stat"><span>环比</span><strong>{wow_html}</strong></div>'
+        f'<div class="stat"><span>环比</span><strong>{wow_markup}</strong></div>'
         f'<div class="stat"><span>异动</span><strong>{score_html}</strong></div>'
         f'<div class="stat"><span>主因</span><strong class="cause">{html.escape(cause or "—")}</strong></div>'
     )
@@ -489,11 +525,13 @@ h4 {
 .keys dt { color: var(--brass); font-weight: 650; }
 .keys dd { margin: 0; }
 .bars { display: grid; gap: 8px; margin: 8px 0 4px; }
+.bar-note { font-size: 12px; color: var(--muted, #667); }
 .bar-row { display: grid; grid-template-columns: 72px 1fr 72px; gap: 10px; align-items: center; font-size: 13px; }
 .track { height: 10px; background: #efe8dc; border-radius: 99px; overflow: hidden; }
 .fill { height: 100%; border-radius: 99px; }
 .fill.prev { background: #c4b49a; }
-.fill.now { background: var(--drop); }
+.fill.now.up { background: var(--rise); }
+.fill.now.down { background: var(--drop); }
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0 14px; }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { font-size: 12px; color: var(--muted); background: #faf7f2; }
@@ -546,26 +584,41 @@ def plain(text: str) -> str:
     return re.sub(r"\*+|`", "", text).strip()
 
 
+def _series_label(prefix: str) -> str:
+    """去掉「历史日均」括号，留下 parent / TPS 这类名字。"""
+    cleaned = re.sub(r"（[^）]*）", "", prefix)
+    cleaned = re.sub(r"\([^)]*\)", "", cleaned)
+    return cleaned.strip(" ；;，,。:：")
+
+
 def daily_chart(table: dict) -> str:
+    """日均格里每一对「当前 / 对比」画一组条。历史日均、标准差不参与。"""
     raw = ""
     for row in table["rows"]:
         if row and plain(row[0]) == "日均" and len(row) > 1:
             raw = plain(row[1])
             break
-    match = re.fullmatch(r"(\d+(?:\.\d+)?)\s*/\s*(\d+(?:\.\d+)?)", raw)
-    if not match:
+    matches = list(_PAIR.finditer(raw))
+    if not matches:
         return ""
-    current = float(match.group(1))
-    previous = float(match.group(2))
-    scale = max(current, previous, 1.0)
-    current_width = f"{current / scale * 100:.1f}%"
-    previous_width = f"{previous / scale * 100:.1f}%"
-    return (
-        '<div class="bars" aria-label="日均预订对比">'
-        f'<div class="bar-row"><span>对比期</span><div class="track"><div class="fill prev" style="width:{previous_width}"></div></div><span>{html.escape(match.group(2))}</span></div>'
-        f'<div class="bar-row"><span>当前期</span><div class="track"><div class="fill now" style="width:{current_width}"></div></div><span>{html.escape(match.group(1))}</span></div>'
-        "</div>"
-    )
+    rows: list[str] = []
+    last = 0
+    for match in matches:
+        label = _series_label(raw[last : match.start()])
+        last = match.end()
+        current = float(match.group(1).replace(",", ""))
+        previous = float(match.group(2).replace(",", ""))
+        scale = max(current, previous, 1.0)
+        current_width = f"{current / scale * 100:.1f}%"
+        previous_width = f"{previous / scale * 100:.1f}%"
+        tone = "up" if current >= previous else "down"
+        note = f'<div class="bar-note">{html.escape(label)} 日均</div>' if label else ""
+        rows.append(
+            f"{note}"
+            f'<div class="bar-row"><span>对比期</span><div class="track"><div class="fill prev" style="width:{previous_width}"></div></div><span>{html.escape(match.group(2))}</span></div>'
+            f'<div class="bar-row"><span>当前期</span><div class="track"><div class="fill now {tone}" style="width:{current_width}"></div></div><span>{html.escape(match.group(1))}</span></div>'
+        )
+    return f'<div class="bars" aria-label="日均预订对比">{"".join(rows)}</div>'
 
 
 def render_keys(items: list[str]) -> str:
