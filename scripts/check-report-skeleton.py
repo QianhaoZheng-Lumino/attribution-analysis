@@ -256,15 +256,30 @@ def probe_is_unverified(text: str) -> bool:
 
 
 def accuracy_delta_pp(text: str) -> float | None:
-    """从 3c 探测行取出 Δpp。读不到数字就返回 None，不靠「未启动」猜。"""
+    """从 3c 探测行取出 Δpp。读不到数字就返回 None，不靠「未启动」猜。
+
+    认这几种写法：Δpp −4.71、Δ −4.71、−4.71pp、−4.71 个百分点。
+    正负号或「下降 / 上升」必须有，避免把准确率本身的百分数当成差值。
+    """
     s = strip_md(text).replace("−", "-").replace("－", "-").replace("＋", "+")
-    m = re.search(r"(?:Δpp|Δ)\s*[=＝:]?\s*([+-])?\s*(\d+(?:\.\d+)?)", s)
-    if not m:
-        m = re.search(r"([+-])\s*(\d+(?:\.\d+)?)\s*pp", s)
-    if not m:
+    patterns = (
+        r"(?:Δpp|Δ)\s*[=＝:]?\s*([+-])?\s*(\d+(?:\.\d+)?)",
+        r"([+-])\s*(\d+(?:\.\d+)?)\s*pp",
+        r"([+-])\s*(\d+(?:\.\d+)?)\s*个百分点",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, s)
+        if match:
+            sign = -1.0 if match.group(1) == "-" else 1.0
+            return sign * float(match.group(2))
+    worded = re.search(
+        r"(下降|减少|下跌|降低|上升|增加|上涨)\s*(\d+(?:\.\d+)?)\s*个百分点",
+        s,
+    )
+    if not worded:
         return None
-    sign = -1.0 if m.group(1) == "-" else 1.0
-    return sign * float(m.group(2))
+    sign = -1.0 if worded.group(1) in {"下降", "减少", "下跌", "降低"} else 1.0
+    return sign * float(worded.group(2))
 
 
 _MAIN_CAUSE_RE = re.compile(
@@ -465,7 +480,10 @@ def check_file(path: Path) -> list[str]:
             if h_acc:
                 errs.append("准确率未验，不要写 #### 启动后下钻")
         elif delta is None:
-            errs.append("3c 探测行读不出 Δpp，无法判断要不要写启动后下钻")
+            errs.append(
+                "3c 探测行读不出 Δpp，无法判断要不要写启动后下钻。"
+                "写成 Δpp −4.71、−4.71pp 或 −4.71 个百分点，并带上正负号"
+            )
         elif abs(delta) >= 5 and not h_acc:
             errs.append("准确率 |Δpp|≥5，缺 H4：#### 启动后下钻")
         elif abs(delta) < 5 and h_acc:
