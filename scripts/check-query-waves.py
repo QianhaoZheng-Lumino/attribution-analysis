@@ -55,6 +55,11 @@ def main() -> int:
             errs.append(f"{rel} 仍要求逐条发送 checklist")
         if "查数波次" not in text:
             errs.append(f"{rel} 未指向查数波次")
+    matrix = read("docs/mcp-permission-matrix.md")
+    if "逐个 MCP" in matrix or "逐个跑" in matrix:
+        errs.append("docs/mcp-permission-matrix.md 仍要求逐个发送 checklist")
+    if "查数波次" not in matrix:
+        errs.append("docs/mcp-permission-matrix.md 未指向查数波次")
     if "逐条打勾" not in phase3:
         errs.append("Phase 3 丢了「逐条打勾」（14 行输出要保留）")
     if "禁止抄 C Bottom" not in phase3 and "禁止抄" not in phase3:

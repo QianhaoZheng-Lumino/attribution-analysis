@@ -26,12 +26,20 @@
 - 重发文件（27 条）：anomaly-detection-lite/02-historical-baseline，03-daily-series；dimension-contribution-lite/02-sid，14-sid-client-validation（116-EPS、131-Traveloka、1835-DCshareIND），04-country，06-chain，12-nationality；config-change-detection-lite/checklist/01-cs，07-cdh，08-sh，09-lcdh，02-client-before-after-bks；detail/01-cs-detail，03-s-detail，04-csa-detail，13-s-bottom-detail；online-hours-lite/03-window-avg；rate-limit-lite/01-ss-supplier-window；search-attribution-lite/00-client-total，01-ss-supplier，02-didabiz-pps-country，03-didabiz-pps-chain；external-events-lite/01-single-country-window（TH、MY、VN）
 - 轮次：1 / 1 / 1 / 5 / 5 / 5 / 4 / 5 / 4，共 31 次（27 条 + 4 次 500 重试）
 - 与首轮结果相同的有 23 条：Phase 1 基线与日序列、02-sid、三条验证 B、checklist 01-cs / 07-cdh / 08-sh（3）/ 09-lcdh（0）、04-country（TH −113、MY −66、VN −44）、06-chain（Independent −401）、12-nationality（仅空值一桶 2,739 → 2,287）、03-s-detail（12 行）、04-csa-detail（3 行）、13-s-bottom-detail（594 兜底移除 1 行），以及事件 TH / VN 0 行、MY 开斋节 1 行。01-ss-supplier、限流、02/03-didabiz-pps 四条仍是成功但 0 行，按「有表权限、当前过滤下 0 行」记
-- 同文重试后仍 500、标未验的有 4 条：02-client-before-after-bks 与 detail/01-cs-detail（首轮也是未验）；online-hours-lite/03-window-avg 与 search-attribution-lite/00-client-total（首轮删注释版本成功，保留注释版本两次 500）。所以在线时长（首轮 24.00h → 23.01h）与机构 PPS 总量（首轮 +0.11%）改记为未验，不再作为已确认的排除证据。按晚数和提前期拆开的查价量（04/05-didabiz-qps，保留注释，复核时发出）仍然持平，「查价量没掉」这一点仍有证据支撑
+- 同文重试后仍 500、标未验的有 4 条：02-client-before-after-bks 与 detail/01-cs-detail（首轮也是未验）；online-hours-lite/03-window-avg 与 search-attribution-lite/00-client-total（首轮删注释版本成功，保留注释版本两次 500）。所以在线时长（首轮 24.00h → 23.01h）与机构 PPS 总量（首轮 +0.11%）改记为未验，不再作为已确认的排除证据；之后两者都按下面「500 后的 fallback 补发」一节补发了 fallback。按晚数和提前期拆开的查价量（04/05-didabiz-qps，保留注释，复核时发出）仍然持平，「查价量没掉」这一点仍有证据支撑
 - 方向与失败条件：重发没有改变 2b 的输入（02-sid 与三条验证 B 结果相同），方向仍是 C/Dida，门 2 仍为 29/41=70.7%、最大单 SID 29.6%；五个失败条件仍然都是「否」
+
+## 500 后的 fallback 补发
+
+保留注释版本的 `00-client-total` 与 `03-window-avg` 两次 500 后，按 Phase 3 现有 fallback 补发，没有重跑整个试跑。每个文件先 Read，保留 `/* */` 注释，只替换占位符，没有 `--` 或 `#`，timeout 30 秒，一次调用一个文件，本轮 5 次 execute_sql，无 500。
+
+- 3b 机构级（Phase 3 第 5 步 b：`00-client-total` 仍 500 → `00a`+`00b`，两次单独调用）：`00a-funnel-search-total` 成功返回 1 行，但各项求和为空（`didamonitor_funnel_client_country` 的 dt=当日分区没有 3 月 date）；`00b-funnel-precheck-total` 成功返回 1 行，各项同样为空（验价表 dt=当日分区没有 3 月 log_date）。fallback 本身取不到数，机构查价总量、有价率、验价量仍标未验
+- 在线时长（Phase 3 第 6b 步与 online-hours-mapping §9 Step F：`03-window-avg` 仍 500 → `00-count` → `01-fetch-logs` 拉全 → `scripts/test-online-hours.py`）：`00-count` 得 status 0 共 612 行、status 1 共 1,378 行；`01-fetch-logs` 按 status=0 与 status=1 各拉一页（LIMIT 8000 OFFSET 0，一页即全），共 1,990 行；脚本按 Phase 1 窗口算出对比窗 24.00h、当前窗 23.01h，差 −0.99h，未到 1.5h，不算异动；窗内主导 source 为邮件解析（邮件解析 24、数据库分析 17、每日全量同步 1），下线 remark 为 Agoda 邮件「Breached Precheck Accuracy」关连接。fallback 成功，在线时长恢复为已确认的排除证据
+- 全程 execute_sql 由 77 次变为 82 次（再加 fallback 5 次）
 
 ## 四项比对
 
-1. 触发条件已满足的文件都发出了，或标了未验：是（2c 的 LT / LOS / Nationality 对应的 04/05/06-didabiz-qps 在复核时补发，三条均返回行）
+1. 触发条件已满足的文件都发出了，或标了未验：是（2c 的 LT / LOS / Nationality 对应的 04/05/06-didabiz-qps 在复核时补发，三条均返回行；`00-client-total` 两次 500 后已发 `00a`、`00b`，二者成功但无 3 月数据，机构查价标未验；`03-window-avg` 两次 500 后已走日志拉取加脚本 fallback，得到 −0.99h）
 2. checklist 进度：14/14
 3. detail 集合与 event_count 过线规则一致：是
 4. 定责方向符合当次数字下的双门：C/Dida（门 1 过线 116 / 131 / 1835 各跑一次验证 B，均为平台多 client 同跌，S 成分并列不翻主因；门 2 同降 70.7%≥70% 且最大单 SID 29.6%<50%）。后续动作编号来自 es-cause-catalog：B2
@@ -48,8 +56,8 @@
 
 - 产量数字与旧 gold 一致（2,739 → 2,287，−16.5%），定责方向也一致（C/Dida），没有数据漂移。
 - 成品主因写成「倾向 C/Dida（宽口径，CS 明细与验价未验）」，比 gold 的「C」宽：CS 明细两次 MCP 500，验价表当日分区没有 3 月数据，出门禁只能部分通过。这是证据缺口，不是方向变化。
-- 未验项：02-client-before-after-bks、detail/01-cs-detail、online-hours-lite/03-window-avg、search-attribution-lite/00-client-total（保留注释重发，同文重试后仍 500）；01-ss-supplier、rate-limit 01-ss-supplier-window、02/03-didabiz 维度（查询成功 0 行，按「有表权限、当前过滤下 0 行」记）；3c 01-total（各项为空）。
+- 未验项：02-client-before-after-bks、detail/01-cs-detail（保留注释重发，同文重试后仍 500）；机构查价总量、有价率与验价量（00-client-total 两次 500，fallback 00a/00b 成功但 dt=当日分区无 3 月数据）；在线时长不再是未验项（03-window-avg 两次 500，日志拉取加脚本 fallback 得 −0.99h）；01-ss-supplier、rate-limit 01-ss-supplier-window、02/03-didabiz 维度（查询成功 0 行，按「有表权限、当前过滤下 0 行」记）；3c 01-total（各项为空）。
 - 首轮记录曾把调用总数写成 45，按实际列出的调用应为 43，已更正；复核补发 3 条后是 46，保留注释重发 31 次后共 77。
 - 首轮删掉头部注释的 27 条语句已按上面「保留注释重发」一节全部重发，结论以重发结果为准；复核补发的 04/05/06 三条本来就保留了全部注释，没有重发。
 - 04/05/06 结果：Agoda 按入住晚数、提前期拆开的查价量都没有随产量同步下降（总量持平），提前 4~7 天的查价少了约 5.5%，远小于该档产量 −44%；三张表的验价字段都是 0，查验比未验。客源维查价量太小，不能用于解读。
-- 成品报告：examples/case-agoda-20260320.md 与同名 HTML，check-report-skeleton.py 通过后渲染。
+- 成品报告：examples/case-agoda-20260320.md 与同名 HTML，check-report-skeleton.py 通过后渲染。报告里机构查价写未验（只以 04-didabiz-qps 拆维合计「基本持平」作补充，不写 +0.11%），在线时长写 fallback 得到的 −0.99h 并注明来源。

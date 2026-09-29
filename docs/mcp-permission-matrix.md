@@ -31,7 +31,7 @@
 
 ## 2. Phase 3a：14 类配置矩阵
 
-**Agent 必须：** `checklist/01–14` **逐个 MCP**（含 0 也要跑），输出 **14 行清单** + `checklist_progress`（如 `11/14`，未验标原因）。
+**Agent 必须：** 按 Phase 2 **查数波次 W2** 发送 `checklist/01–14`，**一次 `execute_sql` = 一个文件**，同一轮最多 5 条，含 0 的 level 也要发，输出 **14 行清单** + `checklist_progress`（如 `11/14`，未验标原因）。
 
 | # | Level | lite 文件 | MCP 稳定性 | 典型 fallback | 报告措辞（500 时） |
 |---|-------|-----------|------------|---------------|-------------------|
@@ -92,7 +92,7 @@
 
 | # | Level | MCP | 备注 |
 |---|-------|-----|------|
-| 1–11 | CS~CSLRC | ✅ | 单文件逐个跑；CDH=92485 批量开房 |
+| 1–11 | CS~CSLRC | ✅ | 按查数波次 W2 发送，一次 execute_sql 一个文件，每轮最多 5 条；CDH=92485 批量开房 |
 | **CDH hotel_bks** | **detail/07-cdh-hotel-bks-lite.sql** | ✅ | **92,485 酒店 · before 0 → after 4**（弱信号） |
 | **LCDH hotel_bks** | **detail/09-lcdh-hotel-bks-lite.sql** | ✅ | CVCTrend 窗 0 酒店；**NuiteeLMB 4/29：18,509 酒店 · 208→140** |
 | **SH hotel_bks** | **detail/08-sh-hotel-bks-lite.sql** | ✅ | CVCTrend×26：145 酒店 · **0→0**（弱）；Check24App×591：6082 · **0→0** |
