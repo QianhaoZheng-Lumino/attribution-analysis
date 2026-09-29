@@ -101,11 +101,11 @@
 
 ## 查数波次
 
-占位符在进入该波之前填好：`client_id`、`analysis_date`、产量窗口。`{sid_list}` 只在 W1 返回之后才算有值。每一批是两轮：先 Read 这批最多 5 个文件，下一轮再发已经 Read 过的查询。同一轮 `execute_sql` 最多 5 条。一次调用一个 lite 文件。某一条 500 只重试这一条，同批成功结果保留。
+占位符在进入该波之前填好：`client_id`、`analysis_date`、产量窗口。`{sid_list}` 只在 W1 返回之后才算有值。同一轮可以发送已经 Read 过的查询，并 Read 下一批文件。同一轮刚 Read 的文件，这一轮不能发。同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。一次调用一个 lite 文件。某一条 500 只重试这一条，同批成功结果保留。
 
 ### W0 Phase 1
 
-文件：`sql/anomaly-detection-lite/01-period-totals.sql`，然后 `02-historical-baseline.sql`，然后 `03-daily-series.sql`。一条完成后再发下一条。失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
+文件：`sql/anomaly-detection-lite/01-period-totals.sql`，然后 `02-historical-baseline.sql`，然后 `03-daily-series.sql`。一条完成后再发下一条。发当前这一条的同一轮可以 Read 下一条文件。下一条要等当前这一条返回之后才能发。失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
 
 ### W1 定责入口
 

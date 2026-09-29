@@ -6,12 +6,8 @@
 /* {compare_n_days} = compare_end - compare_start + 1（填整数，如 3） */
 /* {current_n_days} = current_end - current_start + 1（填整数，如 3） */
 
-/* MCP 禁区（2026-09-21 复测）： */
-/* 对 channel_operation_time 写 AT TIME ZONE / 除以 1000 → 网关 500 */
-/* params CTE CROSS JOIN、generate_series 按日切开、ROW_NUMBER 去重 CTE → 易 500 */
-/* 本文件：EXTRACT(EPOCH FROM col) + CASE 裁窗 + TIMESTAMPTZ '...+08' */
-/* 禁止 to_timestamp(col/1000)（那是 MCP JSON 毫秒的 Python 算法）。 */
-/* 2026-09-21 复测：SnapEBK 24.0/22.07/−1.93；SnapTravel2B gold 23.45/20.9/−2.55。 */
+/* 禁区写在本目录 README，不要把会触发网关失败的写法抄进本文件。 */
+/* 本文件用 EXTRACT(EPOCH FROM col) 加 CASE 裁窗，时间字面量带 +08。 */
 
 WITH raw AS (
     SELECT
