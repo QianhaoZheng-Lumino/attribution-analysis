@@ -37,9 +37,9 @@ SELECT
         / nullif(sum(CASE WHEN b.channel_createdate >= p.change_date - interval '7 days' AND b.channel_createdate < p.change_date THEN 1 ELSE 0 END), 0)
     , 1) AS bks_change_pct
 FROM params AS p
-CROSS JOIN public.npd_booking_view AS b
-WHERE b.clientid = p.client_id
-  AND b.channel_status IN ('Confirmed', 'Canceled')
+JOIN public.npd_booking_view AS b
+  ON b.clientid = p.client_id
+WHERE b.channel_status IN ('Confirmed', 'Canceled')
   AND b.rebook_sequence = 1
   AND b.channel_createdate >= p.change_date - interval '10 days'
   AND b.channel_createdate <= p.change_date + interval '10 days'

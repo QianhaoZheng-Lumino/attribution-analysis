@@ -81,9 +81,9 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 
 1. Phase 3 **必须输出 14 行清单**，每一 level **一行**；`event_count=0` 也要写「无」并标 ✓，**禁止只报 CS/C/CDH**。
 2. **执行顺序（MCP 分批）：**
-   - **Step A** 逐条跑 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`（**禁止** 14 路 UNION）
-   - **Step A'** 跑 `02-client-before-after-bks.sql` 取机构级产量
-   - **Step B** 对 `event_count > 0` 的 level，按 `sql/config-change-detection-lite/README.md` Step 3 表跑列出的 detail 路径（**CBD 必跑** `detail/05-cbd-detail.sql`，**必须读 `remark` + 比 last_margin**；**S Bottom 必跑** `detail/13-s-bottom-detail.sql`，**禁止抄 C Bottom**）。10/11/04 必须 Read `detail/10-l2l-detail.sql`、`detail/11-cslrc-detail.sql`、`detail/04-csa-detail.sql`；禁止手写 last_level 列。
+   - **Step A** 按 [02-dimension-drilldown.md](02-dimension-drilldown.md)「查数波次」W2 发送 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`（**禁止** 14 路 UNION；一次调用一个文件；同一轮最多 5 条）
+   - **Step A'** `02-client-before-after-bks.sql` 与 Step A 同属 W2，不等 Step A 全部结束
+   - **Step B** checklist 已返回后，按查数波次 W4 发送过线 detail。对 `event_count > 0` 的 level，按 `sql/config-change-detection-lite/README.md` Step 3 表跑列出的 detail 路径（**CBD 必跑** `detail/05-cbd-detail.sql`，**必须读 `remark` + 比 last_margin**；**S Bottom 必跑** `detail/13-s-bottom-detail.sql`，**禁止抄 C Bottom**）。10/11/04 必须 Read `detail/10-l2l-detail.sql`、`detail/11-cslrc-detail.sql`、`detail/04-csa-detail.sql`；禁止手写 last_level 列。同一轮最多 5 条。
    - **Step B'（CDH/LCDH/SH 必跑）** CDH/LCDH：`event_count > 0` 跑 **`detail/07-cdh-hotel-bks-lite.sql`** / **`detail/09-lcdh-hotel-bks-lite.sql`**。SH：`event_count ≥ 10` 跑 **`detail/08-sh-hotel-bks-lite.sql`**（JOIN `supplierid`+`supplierhotelid`，禁止 `didahotelid` / `clientid` 滤日志；`<10` 不跑不解读；`>50000` 或 MCP 500 → BI）。均为 WITH 酒店清单 join 订单，按 SID/`didahotelid` 聚合 `before/after_hotel_bks`。
    - **Step C** 可选 `search/01-didabiz-pps-daily.sql` 查价（按日，比跨日 SUM 稳定）
 3. 完整 SQL 末尾有 `before/after_bks > 0` 过滤 → **无产量行的配置会消失**；以 Step A 为准补全清单，Step B 补产量证据。
@@ -402,16 +402,16 @@ Lite：`sql/external-events-lite/`
 
 ```
 1. 读取 Phase 2b 结论（C/Dida | CS | S）— 仅初判，3d 可修正
-2. 【3a 配置】02-client-before-after-bks + checklist/01–14 → **必须 14/14 行**（MCP 逐文件）
-3. 【3a】event_count>0 → 按 lite README Step 3 表跑列出的 detail；对照 config-search-precheck-mapping 预期指标
-4. 【3b 查价】强制顺序：
-   a. **2b = C/Dida 或涨产待区分** → 先 `00-client-total`（机构 **查价**，ads 表）；仍 500 → **`00a`+`00b`**（`didamonitor_funnel_*` 加总 fallback，见 search-attribution-lite README「术语」）
-   b. 再 `01-ss-supplier`（**必填 `{sid_list}`**，与 SH 同一套；禁止全表 LIMIT 50 写「未覆盖涨尾」）
+2. 【3a 配置】按 Phase 2「查数波次」W2 发送 02-client-before-after-bks + checklist/01–14 → **必须 14/14 行**（一次调用一个文件，同一轮最多 5 条）
+3. 【3a】checklist 已返回后按 W4：event_count>0 → 按 lite README Step 3 表跑列出的 detail；对照 config-search-precheck-mapping 预期指标
+4. 【3b 查价】
+   a. `01-ss-supplier` 属于 W2（**必填 `{sid_list}`**；禁止全表 LIMIT 50 写「未覆盖涨尾」）。它不等 `00-client-total`。
+   b. **2b = C/Dida 或涨产待区分** → `00-client-total`（机构 **查价**，ads 表）；仍 500 → **`00a`+`00b`**。这不是 W2 的门。
    c. 对齐 2c Top 维 → `02-didabiz-pps-country` 等
    d. 机构级 precheck 总量：rate_accuracy client 聚合（与 00 同窗，手算查验比）
 5. 【3c 准确率】**每案**先 `rate-accuracy-contribution-lite/01-total.sql`。`\|item_accuracy_delta_pp\| ≥ 5`（pp）→ 按 2c 路径跑维 + `issue/01` + `issue/02`；未过线写「已探测、未启动」。禁止用 precheck 量代替。独立，不混配置。见 [accuracy-issue-mapping.md](../docs/accuracy-issue-mapping.md)
-6. 辅助（限流/缓存）：**结构 SID 必出数**（2b 锁定或占 \|ΔBKS\|≥10%）→ `rate-limit-lite/01-ss-supplier-window.sql` **必填 `{sid_list}`**（与 SH / `01-ss-supplier` 同一套）。禁止全表 `ORDER BY`+`LIMIT 50` 代替结构 SID。SS 有价/请求 \|WoW\|>10% 只决定解读档。见 §5.10（涨方向/请求↓产量↑ **待研究**，仅报数；未过 10% 仍出表作排除）
-6b. 辅助（在线时长）：**DidaBiz QPS/PPS \|WoW\| > 10%**（涨跌双向）或需排除渠道下线 → `online-hours-lite/03-window-avg.sql`（**必填 client_id**；窗口 = Phase 1；**禁止 `AT TIME ZONE`**）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥1.5h**。source/remark 用 `04-window-source.sql`（`TIMESTAMPTZ '...+08'` 直接比较）。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
+6. 辅助（限流/缓存）：**结构 SID 必出数**（2b 锁定或占 \|ΔBKS\|≥10%）→ `rate-limit-lite/01-ss-supplier-window.sql` **必填 `{sid_list}`**。`{sid_list}` 已填时该文件属于查数波次 W2。禁止全表 `ORDER BY`+`LIMIT 50` 代替结构 SID。SS 有价/请求 \|WoW\|>10% 只决定解读档。见 §5.10（涨方向/请求↓产量↑ **待研究**，仅报数；未过 10% 仍出表作排除）
+6b. 辅助（在线时长）：`online-hours-lite/03-window-avg.sql` 在查数波次 W2 发送，不必等查价 WoW；此发送规则覆盖 online-hours-mapping §6 旧的「等查价 WoW」触发（**必填 client_id**；窗口 = Phase 1；**禁止 `AT TIME ZONE`**）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥1.5h**。source/remark 用 `04-window-source.sql`（`TIMESTAMPTZ '...+08'` 直接比较）。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
 7. 【3d 外部事件 D】若 [external-events-mapping.md](../docs/external-events-mapping.md) §5 触发（**A/B 已强 → 跳过，写「未查」**）：
    - **取国：** C/Dida → 2c `4_Country` Top1–3；**S/CS → `5_SID+Country`**（锁定 2b 主 SID，该 SID 内 Top1–3）。禁止 S/CS 用 `4_Country`。
    - 一国一调用 `external-events-lite/01-single-country-window.sql`
@@ -443,7 +443,7 @@ Lite：`sql/external-events-lite/`
 - 表名来自 lite / [tables.md](../tables.md) → **直接 `execute_sql`**。`configuration.*` 元数据常无收录。**禁止**用 `search_meta_data` 代替查数或当权限探测
 - **500 ≠ 无配置**：必查 [docs/mcp-permission-matrix.md](../docs/mcp-permission-matrix.md)；500 标 **「MCP 500 · 未验」**，禁止写 event_count=0
 - **500 也可能是错 SQL**：列名/表结构不对（如 #12 用 `clientid`、#14 用 `updatedate`）会先 500；**必须 Read checklist 原文重试**，不得直接标未验
-- **14/14 必须逐个跑** checklist/01–14；禁止 UNION 批量；**禁止手写替代**；未验 level 计入 `checklist_progress`（如 11/14）
+- **14/14 必须按查数波次 W2 发完** checklist/01–14（同一轮最多 5 条，一次调用一个文件）；禁止 UNION 批量；**禁止手写替代**；未验 level 计入 `checklist_progress`（如 11/14）
 - **SQL 优化**是降低 500 的主手段；矩阵管 fallback 与措辞（见矩阵 §1）
 
 ---

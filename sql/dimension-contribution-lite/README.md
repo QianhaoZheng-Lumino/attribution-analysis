@@ -11,12 +11,14 @@
 
 ```
 Step 0  按 ../params-template.md 计算日期 → 填入占位符
-Step 1  01-total.sql           → 总量变化（可选）
-Step 2  02-sid.sql             → 【必做】2b 验证 A
-Step 2b 14-sid-client-validation.sql → 门 1：过线 SID（≥10%）每家一次
-Step 3  04-country.sql 等      → 2c 下钻（按 2b 路径选文件；**报告格式**见 docs/2c-structure-report-template.md）
+Step 1  01-total.sql           → 总量变化（可选，不挡 W1）
+Step 2  02-sid.sql             → 【必做】W1。回来之前不发 W2、W3
+Step 2b 14-sid-client-validation.sql → W2：门 1，过线 SID（≥10%）每家一次，优先占批次名额
+Step 3  2b 方向写出后按 W3 发送该方向文件（C/Dida 或 S/CS，禁止两个方向一起发）
 Step 4  Agent 本地算贡献%（分母见下，禁止一律 / total_change）
 ```
+
+发送批次以 [phases/02-dimension-drilldown.md](../../phases/02-dimension-drilldown.md)「查数波次」为准。同一轮最多 5 条。
 
 **2c 报告篇幅：** Country **表** Top3 + Chain **表** Top3；LT/LOS/Nationality **各 1 段话**（Top2–3）。禁止 chain 全表 / LT 全桶表。
 

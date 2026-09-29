@@ -170,9 +170,18 @@ Phase 1 进度:
 
 SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（2b 锁定或 \|ΔBKS\|≥10%；无则 `02-sid` Top3）。
 
+## 查数波次
+
+总表在 [phases/02-dimension-drilldown.md](phases/02-dimension-drilldown.md)「查数波次」。Phase 1 的 `01 → 02 → 03` 仍一条一条执行。
+
+1. 一次 `execute_sql` = 一个 lite 文件。SQL 必须来自上一轮已经返回的 Read 原文，只替换占位符。语句里不出现 `--` 或 `#`。
+2. 同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。同一轮可以发送已经 Read 过的查询，并 Read 下一批最多 5 个文件。同一轮刚 Read 的文件，这一轮不能发。
+3. 某一条返回 500：只重试这一条。先按现有规则判断本轮是否已探活；探活成功则用同一文件原文、`timeout_seconds=30` 再跑一次。同批已经成功的结果保留，不重发。仍失败则这一条标「未验」，禁止写成 0。
+4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这三条标「未验」，禁止空 `IN ()`。
+5. Phase 1 失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
+
 ## 归因口径（Phase 3–4 必读）
 
-- [docs/overseas-attribution-logic.md](docs/overseas-attribution-logic.md) — **给人读的逻辑主线**（识别 → 定责 → 下钻 → 证据 → 收口）
 - [docs/es-writing.md](docs/es-writing.md) — **ES 人话**（导语给业务，六键代号后置）
 - [docs/es-cause-catalog.md](docs/es-cause-catalog.md) — **#5 ES 后续动作**
 - [docs/evidence-synthesis-rules.md](docs/evidence-synthesis-rules.md) — **A+B+C 综合判断**
@@ -185,4 +194,4 @@ SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`*
 - [README.md](README.md) — 同事第一天
 - [cross-validation-design.md](cross-validation-design.md) — 交叉验证设计
 - 维护待办仅本机（跑归因不要 Read）
-- 改完验收：`python scripts/check-first-day.py` + `python scripts/check-report-skeleton.py`
+- 改完验收：`python scripts/check-first-day.py` + `python scripts/check-query-waves.py` + `python scripts/check-report-skeleton.py`
