@@ -4,6 +4,8 @@
 
 **Goal:** 让一次完整归因按波次发出互不依赖的 lite 查询，同一轮最多 5 条 `execute_sql`，每条仍是一个文件。
 
+2026-09-29 起，活规则以 `SKILL.md` 为准：同一轮可以发送已经 Read 过的查询，并 Read 下一批文件。同一轮刚 Read 的文件，这一轮不能发。下文里「要么 Read」「每一批是两轮」「下一轮再发」是当时的写法，不要再执行。
+
 **Architecture:** 总表只写在 `phases/02-dimension-drilldown.md`。`SKILL.md` 写五条硬规则并链接总表。Phase 3 和两份 lite README 删掉「逐条跑」并改指向总表。`scripts/check-query-waves.py` 锁住这些句子，防止以后写回串行。不改 SQL，不改定责公式。
 
 **Tech Stack:** Markdown 技能文档，Python 3 标准库检查脚本，现有 `scripts/check-first-day.py` 与 `scripts/check-report-skeleton.py`。
