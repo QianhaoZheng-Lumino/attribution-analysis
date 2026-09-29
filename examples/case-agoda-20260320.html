@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agoda @ 2026-03-20 归因分析报告</title>
+<style>
+:root {
+  --paper: #f4f0e8; --card: #fffcf7; --ink: #1c1814; --muted: #6e655c;
+  --line: #e3dacd; --drop: #9c342c; --drop-bg: #f8ebe8; --rise: #1f6b45; --rise-bg: #e7f3ec;
+  --brass: #8a6432; --header: #241c16;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--paper); color: var(--ink);
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px; line-height: 1.65;
+}
+a { color: inherit; }
+.wrap {
+  display: grid; grid-template-columns: 196px minmax(0, 920px); gap: 36px;
+  max-width: 1180px; margin: 0 auto; padding: 28px 28px 80px;
+}
+nav { position: sticky; top: 20px; align-self: start; }
+nav p { margin: 0 0 10px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+nav a { display: block; text-decoration: none; font-size: 13px; color: var(--muted); padding: 6px 0 6px 12px; border-left: 2px solid var(--line); }
+nav a:hover { color: var(--ink); border-left-color: var(--brass); }
+header.mast { background: var(--header); color: #f6f1e8; padding: 28px 32px 26px; border-radius: 16px; }
+.kicker { display: flex; gap: 10px; align-items: center; font-size: 12px; letter-spacing: 0.08em; color: #cbbba6; margin-bottom: 10px; }
+.pill { display: inline-block; border: 1px solid rgba(246,241,232,.25); border-radius: 999px; padding: 2px 8px; letter-spacing: 0; }
+header.mast h1 { margin: 0 0 6px; font-family: "Palatino Linotype", "Songti SC", "SimSun", serif; font-weight: 500; font-size: 34px; letter-spacing: -0.02em; }
+header.mast .sub { margin: 0; color: #d9cbb8; font-size: 14px; }
+.stats { display: grid; grid-template-columns: 1.4fr repeat(3, 1fr); gap: 12px; margin-top: 22px; }
+.stat { background: rgba(255,252,247,.06); border: 1px solid rgba(246,241,232,.08); border-radius: 12px; padding: 14px 16px 12px; }
+.stat span { display: block; font-size: 12px; color: #cbbba6; margin-bottom: 4px; }
+.stat strong { font-variant-numeric: tabular-nums; font-size: 26px; font-weight: 600; letter-spacing: -0.03em; }
+.stat strong.cause { font-size: 18px; letter-spacing: 0; line-height: 1.25; }
+.stat em { font-style: normal; color: #e7b2ac; }
+.stat em.up { color: #b7d7c4; }
+.stat .unit { font-size: 16px; color: #cbbba6; font-weight: 600; }
+section, article.lead { margin-top: 18px; background: var(--card); border-radius: 16px; padding: 22px 26px 18px; }
+h2 { margin: 0 0 14px; font-family: "Palatino Linotype", "Songti SC", "SimSun", serif; font-weight: 500; font-size: 22px; }
+h3 {
+  margin: 22px 0 10px; padding: 0 0 0 12px;
+  border-left: 3px solid var(--brass);
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 18px; font-weight: 650; line-height: 1.45;
+}
+h4 {
+  margin: 18px 0 8px;
+  font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px; font-weight: 650; color: var(--muted);
+}
+.keys div { display: grid; grid-template-columns: 88px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.keys dt { color: var(--brass); font-weight: 650; }
+.keys dd { margin: 0; }
+.bars { display: grid; gap: 8px; margin: 8px 0 4px; }
+.bar-note { font-size: 12px; color: var(--muted, #667); }
+.bar-row { display: grid; grid-template-columns: 72px 1fr 72px; gap: 10px; align-items: center; font-size: 13px; }
+.track { height: 10px; background: #efe8dc; border-radius: 99px; overflow: hidden; }
+.fill { height: 100%; border-radius: 99px; }
+.fill.prev { background: #c4b49a; }
+.fill.now.up { background: var(--rise); }
+.fill.now.down { background: var(--drop); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12px; color: var(--muted); background: #faf7f2; }
+table.kv th { font-size: 13.5px; font-weight: 650; white-space: nowrap; width: 1%; }
+td.down { color: var(--drop); font-variant-numeric: tabular-nums; }
+td.up { color: var(--rise); font-variant-numeric: tabular-nums; }
+.tag { display: inline-block; font-size: 12px; line-height: 1.4; padding: 1px 7px; border-radius: 999px; background: var(--drop-bg); color: var(--drop); white-space: nowrap; }
+.tag.ok { background: var(--rise-bg); color: var(--rise); }
+.tag.mid { background: #f3ead8; color: #7a5a28; }
+.tag.mute { background: #eeeae3; color: var(--muted); }
+th.fit, td.fit { white-space: nowrap; width: 1%; }
+blockquote { margin: 0 0 12px; color: var(--muted); }
+hr { border: 0; border-top: 1px solid var(--line); margin: 16px 0; }
+@media (max-width: 860px) {
+  .wrap { grid-template-columns: 1fr; padding: 16px; }
+  nav { position: static; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .keys div { grid-template-columns: 1fr; gap: 2px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><p>目录</p><a href="#s0">先看这段</a><a href="#s1">分析参数</a><a href="#s2">异动识别</a><a href="#s3">定责与下钻</a><a href="#s4">内部证据</a><a href="#s5">综合判断</a><a href="#s6">根因结论</a><a href="#s7">后续动作</a></nav>
+<main>
+<header class="mast">
+<div class="kicker"><span class="pill">跌产</span><span>create 口径预订量</span><span>client Agoda</span></div>
+<h1>Agoda · 3 月 20 日</h1>
+<p class="sub">2026-03-20 至 03-26，对照 03-13 至 03-19。倾向 C/Dida（宽口径）：Agoda 41 家有量供应商中 29 家同降，拆维查价量基本持平，机构层无配置变更，更像渠道侧少下单；Expedia、Traveloka、DCshareIND 在平台上也同跌，S 成分并列；CS 明细、机构查价、验价量与供应商查价未验，不能写成已确认。</p><div class="stats"><div class="stat"><span>预订量</span><strong>2,739 → 2,287</strong></div><div class="stat"><span>环比</span><strong><em>−16.5%</em></strong></div><div class="stat"><span>异动</span><strong>20<span class="unit"> / 100</span></strong></div><div class="stat"><span>主因</span><strong class="cause">宽口径</strong></div></div>
+</header>
+<article class="lead" id="s0"><h2>先看这段</h2>
+<p>3 月 20 日起这一周，Agoda 日均约 327 单，比前一周的 391 单少了约 16.5%，也比过去六周均值低约 12%，但仍在正常波动范围里。掉量不是集中在一家供应商：41 家有量的供应商里有 29 家同时在掉，Expedia 和 Traveloka 各占约三成，这几家在别的客户上也在跌。按入住晚数和提前期拆开看，渠道向我们查价的次数合计基本没变；机构层查价总量和有价比例这次没查到（主查询两次 MCP 500，备用的 funnel 加总没有 3 月数据）。我们机构层面没有关房、加价或系统参数变更。更像渠道侧自己少下单，建议先问 Agoda 这一周有没有调售价或改供应商分配。机构查价、验价量和链路开关明细这次没查到，还不能当成已核实的结论。</p>
+<dl class="keys"><div><dt>异动</dt><dd>当周日均少约 16.5%，比过去六周均值低约 12%，属于正常波动范围内的下滑。（正常波动·下降；WoW −16.5%，评分 20/100，门禁否，按完整归因执行）</dd></div><div><dt>结构</dt><dd>41 家有量供应商中 29 家同降（70.7%）；Expedia −134、Traveloka −129、DCshareIND −48；泰国、马来西亚酒店，单体酒店，提前 4~7 天预订和 1 晚短住掉得最多。</dd></div><div><dt>主因</dt><dd>倾向渠道侧或我方内部（定责 C/Dida，宽口径）：多数供应商一起降，拆维查价量基本持平，机构层没有配置变更；机构查价总量未验。</dd></div><div><dt>并列</dt><dd>Expedia、Traveloka、DCshareIND 在别的客户上也同步下跌（验证 B 多 client 同跌，S 成分并列）；马来西亚 3/23 开斋节假期（仅背景）。</dd></div><div><dt>已排除</dt><dd>机构层关房、加价、等级变更、系统参数（3a 机构 0 条）；渠道在线时长（日均少 0.99 小时，未到 1.5 小时；默认查询两次 MCP 500，改用日志拉取加脚本算出）。</dd></div><div><dt>后续动作</dt><dd>问 Agoda 3/20 起是否调了售价、改了供应商分配或流量策略。（目录 <strong>B2</strong>（多数供应商同降、查价不掉、无强配置）→ 可能渠道侧加价或其他看不见的操作；禁止写成已确认）</dd></div></dl>
+<hr>
+</article><section id="s1"><h2>分析参数</h2>
+<table class="kv"><tbody><tr><th>client_id</th><td><strong>Agoda</strong></td></tr><tr><th>parent_client_id</th><td>空</td></tr><tr><th>analysis_date</th><td><strong>2026-03-20</strong></td></tr><tr><th>当前期</th><td>2026-03-20 ~ 2026-03-26（7 天，原逻辑）</td></tr><tr><th>对比期</th><td>2026-03-13 ~ 2026-03-19</td></tr><tr><th>指标</th><td>create 口径预订量（默认）</td></tr><tr><th>大盘对照</th><td>未查（本次按 client 口径执行，未跑大盘 Phase 1）</td></tr></tbody></table>
+<hr>
+</section><section id="s2"><h2>1. 异动识别</h2>
+<div class="bars" aria-label="日均预订对比"><div class="bar-row"><span>对比期</span><div class="track"><div class="fill prev" style="width:100.0%"></div></div><span>391.29</span></div><div class="bar-row"><span>当前期</span><div class="track"><div class="fill now down" style="width:83.5%"></div></div><span>326.71</span></div></div>
+<table class="kv"><tbody><tr><th>当前期 / 对比期总量</th><td><strong>2,287</strong> / <strong>2,739</strong></td></tr><tr><th>日均</th><td><strong>326.71</strong> / <strong>391.29</strong>（历史 42 天日均 <strong>371.48</strong>，std <strong>73.58</strong>）</td></tr><tr><th><strong>WoW</strong></th><td class="down"><strong>−16.5%</strong></td></tr><tr><th>vs 历史 42 天均值</th><td class="down"><strong>−12.05%</strong></td></tr><tr><th>Z-score</th><td class="down"><strong>−0.61</strong></td></tr><tr><th>below/above_normal_range</th><td>否 / 否（Q1=320.25，Q3=407.25；326.71 未低于 Q1×0.7=224.18、未高于 Q3×1.3=529.43）</td></tr><tr><th><strong>综合评分</strong></th><td><strong>20 / 100</strong>（WoW 10 + Z 0 + vs 历史 10）</td></tr><tr><th><strong>异动等级</strong></th><td><strong>正常波动</strong>（下降方向：326.71 &lt; 391.29×0.9）</td></tr><tr><th>need_attribution</th><td><strong>否</strong>（|WoW|≤20%、|Z|≤1.5、未低于正常区间）；完整型，按完整归因执行</td></tr></tbody></table>
+<p><strong>日趋势：</strong> 历史 42 天（2/06–3/19）日值 214–588：2/07–2/11 高位 431–588，2/12 起回落到 283–463；3/11 最低 214；对比期 3/13–3/19 在 357–422。当前期日均 326.71，低于对比期但高于历史 Q1。</p>
+<p><strong>大盘对照：</strong> 未查（本次试跑只跑 Agoda client 口径）。</p>
+<hr>
+</section><section id="s3"><h2>2. 定责与下钻</h2>
+<h3>定责 → <strong>C/Dida（门 2 通过；验证 B 三家多 client 同跌，并列 S）</strong></h3>
+<table><thead><tr><th>验证</th><th>结果</th></tr></thead><tbody><tr><td><strong>验证 A（2_SID）</strong></td><td>有效 SID 41 家（对比期 ≥5 单，02-sid 未截断）；同向（降）29/41=<strong>70.7%≥70%</strong>；最大单 SID 116-EPS 占 |ΔBKS| <strong>29.6%&lt;50%</strong> → 门 2 <strong>允许写 C/Dida</strong>。门 1 过线 SID：116（29.6%）、131（28.5%）、1835（10.6%）</td></tr><tr><td><strong>验证 B（cross-validation-b）</strong></td><td>三家各跑一次 14-sid-client-validation。116：跌幅 Top30 全为下跌 client（SnapEBK −3,647、AgodaEBK −1,819、DidaOpaq −1,503…，Agoda −134 排第 9）；131：DidaOpaq −2,314、AgodaEBK −1,913…，Agoda −129 排第 5；1835：AgodaEBK −147、ctrip_HK −80…，Agoda −48 排第 7。三家均为<strong>平台多 client 同跌</strong> → S 成分并列（lite ASC LIMIT 30，涨尾 client 未返回）</td></tr><tr><td><strong>2b 初判</strong></td><td><strong>C/Dida</strong>。门 2 已满足，验证 B 的 S 成分只并列，不翻主因</td></tr></tbody></table>
+<p><strong>Top 贡献 supplier（总量变化 −452）：</strong></p>
+<table><thead><tr><th>Supplier</th><th>prev → cur</th><th>change</th><th>贡献%</th></tr></thead><tbody><tr><td>116-EPS[唐慧芳]</td><td>459 → 325</td><td class="down"><strong>−134</strong></td><td><strong>29.6%</strong></td></tr><tr><td>131-Traveloka[钟茗]</td><td>848 → 719</td><td class="down"><strong>−129</strong></td><td><strong>28.5%</strong></td></tr><tr><td>1835-DCshareIND[林婉媚]</td><td>318 → 270</td><td class="down">−48</td><td>10.6%</td></tr><tr><td>565-Ctrip[唐磊]</td><td>44 → 0（清零）</td><td class="down">−44</td><td>9.7%</td></tr><tr><td>1943-Etstur[区芷予]</td><td>99 → 57</td><td class="down">−42</td><td>9.3%</td></tr><tr><td>429-EBookingDirectPrepayment[苏甜甜]</td><td>105 → 67</td><td class="down">−38</td><td>8.4%</td></tr><tr><td>1647-DCSiteminderWTSGCH[蔡沈博]</td><td>96 → 128</td><td class="up">+32</td><td class="down">−7.1%</td></tr></tbody></table>
+<h3>下钻</h3>
+<blockquote><p>2b = C/Dida，走单维路径；占比分母 = client 总量变化 −452。</p></blockquote>
+<h4>主结构 · Country（4_Country · C/Dida）</h4>
+<table><thead><tr><th>Country</th><th>prev → cur</th><th>change</th><th>占总量</th></tr></thead><tbody><tr><td>TH</td><td>592 → 479</td><td class="down"><strong>−113</strong></td><td><strong>25.0%</strong></td></tr><tr><td>MY</td><td>211 → 145</td><td class="down">−66</td><td>14.6%</td></tr><tr><td>VN</td><td>397 → 353</td><td class="down">−44</td><td>9.7%</td></tr><tr><td>SG</td><td>138 → 172</td><td class="up">+34</td><td class="down">−7.5%</td></tr></tbody></table>
+<p>*Top3 占 ~49%；TR −43（9.5%）、TW −34（7.5%）紧随；SG +34 反向。分布较散。*</p>
+<h4>主结构 · Chain（6_Chain · C/Dida）</h4>
+<table><thead><tr><th>Chain</th><th>prev → cur</th><th>change</th><th>占总量</th></tr></thead><tbody><tr><td>Independent</td><td>2,072 → 1,671</td><td class="down"><strong>−401</strong></td><td><strong>88.7%</strong></td></tr><tr><td>Worldwide Hotels Pte Ltd.</td><td>104 → 140</td><td class="up">+36</td><td class="down">−8.0%</td></tr><tr><td>OYO Rooms (UK)</td><td>8 → 31</td><td class="up">+23</td><td class="down">−5.1%</td></tr></tbody></table>
+<p>*单体酒店占绝大部分跌量；连锁里 Wyndham −18 最大，其余均为个位数。*</p>
+<h4>结构补充（描述性 · 段落）</h4>
+<ul><li><strong>Lead Time：</strong> 4~7 天 −170（37.6%）、&gt;70 天 −98（21.7%）、43~70 天 −76（16.8%）；29~42 天 +27 反向。多桶同向降，4~7 天最集中。</li><li><strong>LOS：</strong> 1 晚 −146（32.3%）、4~7 晚 −102（22.6%）、2 晚 −98（21.7%）、3 晚 −78（17.3%）。各档全部下降，无单档主导。</li><li><strong>Nationality（客源）：</strong> 该 client 客源字段全部为空（2,739 → 2,287 全在空值一桶），无法拆客源。</li></ul>
+<p>→ <strong>结构小结：</strong> 跌量铺在多数供应商、多个国家、单体酒店、各档提前期与入住晚数上，没有单一维度能收口，与「渠道整体少下单」的形态一致。</p>
+<hr>
+</section><section id="s4"><h2>3. 内部证据</h2>
+<h3>配置（checklist <strong>14/14</strong> ✅，窗口 2026-03-19 ~ 2026-03-21）</h3>
+<table><thead><tr><th>#</th><th>Level</th><th>n</th><th>操作(枚举)</th><th>Δmargin / remark</th><th class="fit">信号</th></tr></thead><tbody><tr><td>1</td><td>机构供应商 CS</td><td>4</td><td>未验</td><td>3/19–3/20 共 4 条；明细两次 MCP 500</td><td class="fit">未验</td></tr><tr><td>2</td><td>机构 C</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>3</td><td>供应商 S</td><td>12</td><td>关房</td><td>全局；3/19 关 1995/2040/1884（1884「ebk技术调试」），2040 当日反复开关；510 恢复上线 margin 2.0→2.5；无 116/131/1835</td><td class="fit">弱/背景</td></tr><tr><td>4</td><td>机构供应商账号 CSA</td><td>3</td><td>关房</td><td>3/20 SID 257 account 2667/2668「3.20关」；3/19 SID 1995 account 2682 开（上一条为空）</td><td class="fit">弱（257/1995 不在 Agoda 有效 SID 内）</td></tr><tr><td>5</td><td>机构预定窗口 CBD</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>6</td><td>供应商预定窗口 SBD</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>7</td><td>机构酒店 CDH</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>8</td><td>供应商酒店 SH</td><td>3</td><td>其他</td><td>sid_list=116, 131, 1835；n=3&lt;10 不跑 hotel_bks、不解读</td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>9</td><td>击穿兜底 LCDH</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>10</td><td>面纱 L2L</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>11</td><td>机构特殊配置 CSLRC</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>12</td><td>机构兜底 C Bottom</td><td>0</td><td>无</td><td></td><td class="fit"><span class="tag ok">无</span></td></tr><tr><td>13</td><td>供应商兜底 S Bottom</td><td>1</td><td>其他</td><td>3/20 供应商 594 兜底移除（is_remove false→true，margin 2.5 不变）</td><td class="fit">弱（594 不在 Agoda 有效 SID 内）</td></tr><tr><td>14</td><td>Wolf2.0配置 Configuration</td><td>0</td><td>无</td><td>14 key 无变更</td><td class="fit"><span class="tag ok">无</span></td></tr></tbody></table>
+<p><strong>3a 小结：</strong> 机构层（C / CBD / C Bottom / L2L / CSLRC / Configuration）全部 0 条。S、CSA、S Bottom 的记录都不在 Agoda 三家主跌供应商上。CS 4 条的明细两次 MCP 500，操作标未验。02-client-before-after-bks 两次 MCP 500，标未验；机构产量用 Phase 1 同窗 2,739 → 2,287。 <strong>倾向 C 出门禁：</strong> 部分通过。机构操作无关房/加价/等级变/PPS ✓；CSA 关房落在零单 SID ✓；CS 4 条明细未验，无法确认链路关房/加价是否零单，因此主因只写宽口径。</p>
+<hr>
+<h3>查价（B 线）</h3>
+<h4>机构级（必跑：2b=C/Dida 或涨产待区分）</h4>
+<table><thead><tr><th>指标</th><th>对比期 → 当前期</th><th>WoW</th></tr></thead><tbody><tr><td>查价量（DidaBiz PPS / funnel 加总）</td><td>未验（00-client-total 两次 MCP 500；00a funnel 加总 dt=当日分区无 3 月数据，各项为空）</td><td>未验</td></tr><tr><td>有价查价</td><td>未验</td><td>未验</td></tr><tr><td><strong>有价率</strong></td><td>未验</td><td>未验</td></tr><tr><td><strong>验价量（precheck）</strong></td><td>未验（00b 与验价表 dt=当日分区均无 3 月数据，各项为空）</td><td>未验</td></tr><tr><td><strong>查验比</strong>（avail/rp）</td><td>未验</td><td>未验</td></tr><tr><td><strong>产量（BKS）</strong></td><td>2,739 → 2,287</td><td class="down"><strong>−16.5%</strong></td></tr><tr><td>查价量（04-didabiz-qps 按入住晚数合计，补充）</td><td>1,348,204,882 → 1,349,707,743</td><td>基本持平（拆维合计，不替代机构级）</td></tr></tbody></table>
+<p><strong>机构级解读：</strong> 机构级查价总量、有价率与验价量都未验。按入住晚数、提前期拆开的查价量（04/05-didabiz-qps）合计基本持平，产量却降 16.5%，与 B2「查价不太掉、渠道掉产」方向一致，但只是补充证据。价格竞争力这一段无法判断，B 线机构结论最高「倾向」。</p>
+<h4>SS 层 Top supplier（结构补充，不替代机构级）</h4>
+<table><thead><tr><th>SID</th><th>SS 请求量</th><th>有价率</th><th>查验比</th><th>BKS</th></tr></thead><tbody><tr><td>116 / 131 / 1835</td><td>未验（01-ss-supplier 查询成功但 0 行）</td><td>未验</td><td>未验</td><td>459→325 / 848→719 / 318→270</td></tr></tbody></table>
+<p>01-ss-supplier 按 sid_list=116, 131, 1835 查询成功、返回 0 行：有表权限、当前过滤下 0 行，不写成业务 0。</p>
+<h4>限流/缓存（结构 SID 必出数；§5.10）</h4>
+<table><thead><tr><th>SID</th><th>出数原因</th><th>requests</th><th>SS限流率 WoW</th><th>缓存命中率 WoW</th><th>SS通过率 WoW</th><th>命中只吐缓存率 WoW</th><th>解读</th></tr></thead><tbody><tr><td>116 / 131 / 1835</td><td>|ΔBKS|≥10%</td><td>未验</td><td>未验</td><td>未验</td><td>未验</td><td>未验</td><td>查询成功但 0 行，未验</td></tr></tbody></table>
+<p><strong>限流备注：</strong> rate-limit-lite/01-ss-supplier-window 按结构 SID 发出，查询成功但 0 行；有表权限、当前过滤下 0 行，限流不能写成已排除。</p>
+<h4>在线时长（先探测 PPS/QPS；|WoW|&gt;10% 才查日均）</h4>
+<table><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>探测 DidaBiz PPS/QPS WoW</td><td>机构 PPS 未验；拆维 QPS 合计基本持平</td></tr><tr><td>是否触发</td><td>按查数波次 W2 发送 <code>03-window-avg.sql</code>，不等查价 WoW；两次 MCP 500，改走 fallback（00-count → 01-fetch-logs 拉全 1,990 行 → <code>scripts/test-online-hours.py</code>）</td></tr><tr><td>当前窗 / 对比窗日均 online_hours</td><td>23.01h / 24.00h</td></tr><tr><td>差值</td><td class="down">−0.99h</td></tr><tr><td>异动（日均少 ≥1.5h）</td><td>否</td></tr><tr><td>窗口内主导 source</td><td>邮件解析（窗内动作：邮件解析 24、数据库分析 17、每日全量同步 1）</td></tr><tr><td>下线 remark</td><td>Agoda 邮件：Breached Precheck Accuracy 触发关连接（3/21、3/23–3/25 多次）</td></tr><tr><td>解读</td><td>日均少 0.99 小时，未过 1.5 小时；当前窗 3/21、3/23、3/24、3/25 分别为 22.73h、23.63h、21.87h、20.83h，其余日满 24 小时。在线不是本案因素</td></tr></tbody></table>
+<hr>
+<h3>准确率</h3>
+<table><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>探测 <code>01-total</code></td><td>MCP 未验（查询成功，但 dt=当日分区无 3 月 log_date，各项为空）</td></tr><tr><td>是否启动</td><td>未验，不启动下钻</td></tr></tbody></table>
+<p><strong>3c 解读：</strong> 准确率探测取不到 3 月数据，标未验，不写成无线索。</p>
+<hr>
+<h3>外部事件 D 线</h3>
+<table><thead><tr><th>项</th><th>值</th></tr></thead><tbody><tr><td>是否触发</td><td>是（P0：A 无强信号 + B 查价正常 + 2b 倾向 C/Dida）</td></tr><tr><td>取国来源</td><td>4_Country Top1–3：TH、MY、VN（分母=client 变化 −452）</td></tr></tbody></table>
+<table><thead><tr><th>类型</th><th>事件</th><th>国家/城市</th><th>窗口重叠</th></tr></thead><tbody><tr><td>HOLIDAY</td><td>Hari Raya Puasa Holiday</td><td>MY / 吉隆坡（city_rank 12）</td><td>3/23，与当前窗重叠</td></tr><tr><td>HOLIDAY</td><td>营销日历无匹配节日</td><td>TH</td><td>—</td></tr><tr><td>HOLIDAY</td><td>营销日历无匹配节日</td><td>VN</td><td>—</td></tr></tbody></table>
+<p><strong>D 线解读（全局，不与 client 交叉定责）：</strong> 马来西亚开斋节假期落在当前窗，马来西亚是第二大跌量国（−66），只作背景。泰国、越南无匹配节日。</p>
+<hr>
+</section><section id="s5"><h2>4. 综合判断</h2>
+<h3>责任修正（相对 2b 初判）</h3>
+<table><thead><tr><th>项</th><th>结论</th><th class="fit">置信度</th></tr></thead><tbody><tr><td>Phase 2b 初判</td><td>C/Dida</td><td class="fit">—</td></tr><tr><td><strong>修正后主因</strong></td><td>倾向 C/Dida（宽口径，CS 明细、机构查价与验价未验）</td><td class="fit"><span class="tag mid">倾向</span></td></tr><tr><td><strong>并列</strong></td><td>S 成分：Expedia、Traveloka、DCshareIND 平台多 client 同跌；马来西亚开斋节背景</td><td class="fit"><span class="tag mid">倾向</span></td></tr><tr><td><strong>非主因（已排除）</strong></td><td>机构层关房/加价/等级变/Configuration；在线时长</td><td class="fit"><span class="tag ok">已确认</span></td></tr></tbody></table>
+<h3>证据对照表</h3>
+<table><thead><tr><th class="fit">线</th><th>关键发现</th><th>与 BKS 同向？</th><th class="fit">强度</th></tr></thead><tbody><tr><td class="fit"><strong>A 配置</strong></td><td>14/14；机构 0 条；S/CSA/S Bottom 不在主跌供应商；CS 明细未验</td><td>否</td><td class="fit"><span class="tag mute">弱</span></td></tr><tr><td class="fit"><strong>B 机构</strong></td><td>机构查价、有价率、验价与查验比未验（00-client-total 两次 500，00a/00b 无 3 月数据）；拆维查价合计基本持平</td><td>否（拆维查价不掉）</td><td class="fit"><span class="tag mute">弱</span></td></tr><tr><td class="fit"><strong>B SS</strong></td><td>01-ss-supplier 查询成功 0 行</td><td>—</td><td class="fit">未验</td></tr><tr><td class="fit"><strong>限流</strong></td><td>结构 SID 查询成功 0 行</td><td>—</td><td class="fit">未验</td></tr><tr><td class="fit"><strong>在线时长</strong></td><td>24.00h → 23.01h（−0.99h；日志拉取加脚本 fallback）</td><td>否</td><td class="fit">弱（排除）</td></tr><tr><td class="fit"><strong>D 外部</strong></td><td>MY 开斋节 3/23</td><td>不交叉定责</td><td class="fit"><span class="tag mute">弱</span></td></tr><tr><td class="fit"><strong>C 准确率</strong></td><td>01-total 无 3 月数据</td><td>—</td><td class="fit">未验</td></tr></tbody></table>
+<h3>一句话结论</h3>
+<p>倾向 <strong>C/Dida（宽口径）</strong>：Agoda 41 家有量供应商中 29 家同降，拆维查价量基本持平，机构层无配置变更，更像渠道侧少下单；Expedia、Traveloka、DCshareIND 在平台上也同跌，S 成分并列；CS 明细、机构查价、验价量与供应商查价未验，不能写成已确认。</p>
+<hr>
+</section><section id="s6"><h2>5. 根因结论</h2>
+<h3>已确认</h3>
+<table><thead><tr><th>根因/结构</th><th>责任方</th><th>证据</th><th>影响估算</th></tr></thead><tbody><tr><td>无已确认产量主因</td><td>—</td><td>本案内最高置信度为倾向</td><td>—</td></tr></tbody></table>
+<h3>倾向（待后续动作或更多证据）</h3>
+<table><thead><tr><th>假设</th><th>责任方</th><th>支撑证据</th><th>缺什么</th></tr></thead><tbody><tr><td>渠道侧整体少下单（多数供应商同降、查价不掉）</td><td>C/Dida</td><td>门 2：29/41=70.7% 同降、最大单家 29.6%；拆维查价合计基本持平；机构层 0 条配置</td><td>CS 明细（MCP 500）；机构查价总量；验价量与查验比</td></tr><tr><td>主跌供应商平台同跌</td><td>S（并列）</td><td>验证 B：116/131/1835 上多 client 同跌</td><td>SS 查价与限流 0 行未验</td></tr><tr><td>马来西亚开斋节</td><td>外部背景</td><td>MY −66，3/23 HOLIDAY</td><td>仅背景，不定责</td></tr></tbody></table>
+<h3>数据无法解释 → 后续动作</h3>
+<table><thead><tr><th>现象</th><th>可能方向</th><th>建议运营动作</th></tr></thead><tbody><tr><td>多数供应商同降、拆维查价不动、机构层无配置</td><td>B2：渠道侧加价或其他看不见的操作</td><td>问 Agoda 3/20 起是否调了售价、改了供应商分配或流量策略</td></tr></tbody></table>
+<hr>
+</section><section id="s7"><h2>6. 后续动作</h2>
+<table><thead><tr><th>优先级</th><th>动作</th><th>负责方</th><th>预期效果</th></tr></thead><tbody><tr><td><strong>P0</strong></td><td>问 Agoda 3/20 起是否调售价、改供应商分配或流量策略</td><td>运营 × 渠道</td><td>确认或否定渠道侧主因</td></tr><tr><td><strong>P1</strong></td><td>人工在 Hologres 补跑 CS 明细与 02-client-before-after-bks（MCP 两次 500）</td><td>数据</td><td>补齐链路关房/加价证据，决定能否收窄到 C 或 Dida</td></tr><tr><td><strong>P2</strong></td><td>补机构查价总量、验价量 / 查验比与供应商查价（ads 两次 500，funnel 与验价表当日分区无 3 月数据）</td><td>数据</td><td>判断价格竞争力是否变化</td></tr></tbody></table>
+<hr>
+<p><strong>联系人：</strong> 郑乾皓（Lumino）</p>
+</section>
+</main>
+</div>
+</body>
+</html>

@@ -1,38 +1,41 @@
 /* CS 变更明细（event_count > 0 时跑） */
-/* last_status / last_margin：同一 client + supplier 更早的最近一条 */
-/* 读这两列判断开关房和调价。没有这两列或值为空：写未验，禁止用备注反推 */
+/* 同一 client + supplier，按 updatedate 取更早的最近一条，不限在分析窗内 */
+/* 先扫该客户全部 CS 行，用 LAG 带出上一条，再裁到分析窗 */
+/* 不要对窗口内每一行各查一次全表历史 */
+/* 没有 last_status / last_margin 或值为空：写未验，禁止用备注反推 */
 
+WITH cs_log AS (
+    SELECT
+        updatedate,
+        clientid,
+        supplierid,
+        status,
+        margin,
+        username,
+        remark,
+        LAG(status) OVER (
+            PARTITION BY clientid, supplierid
+            ORDER BY updatedate
+        ) AS last_status,
+        LAG(margin) OVER (
+            PARTITION BY clientid, supplierid
+            ORDER BY updatedate
+        ) AS last_margin
+    FROM configuration.wolf_rateadjust_log
+    WHERE level = 'CS'
+        AND clientid = '{client_id}'
+)
 SELECT
-    t.updatedate::date AS change_date,
-    t.clientid,
-    t.supplierid,
-    t.status,
-    t.margin,
-    (
-        SELECT p.status
-        FROM configuration.wolf_rateadjust_log p
-        WHERE p.level = 'CS'
-            AND p.clientid = t.clientid
-            AND p.supplierid = t.supplierid
-            AND p.updatedate < t.updatedate
-        ORDER BY p.updatedate DESC
-        LIMIT 1
-    ) AS last_status,
-    (
-        SELECT p.margin
-        FROM configuration.wolf_rateadjust_log p
-        WHERE p.level = 'CS'
-            AND p.clientid = t.clientid
-            AND p.supplierid = t.supplierid
-            AND p.updatedate < t.updatedate
-        ORDER BY p.updatedate DESC
-        LIMIT 1
-    ) AS last_margin,
-    t.username,
-    t.remark
-FROM configuration.wolf_rateadjust_log t
-WHERE t.level = 'CS'
-    AND t.clientid = '{client_id}'
-    AND t.updatedate::date BETWEEN '{w_start}'::date AND '{w_end}'::date
-ORDER BY t.updatedate
+    updatedate::date AS change_date,
+    clientid,
+    supplierid,
+    status,
+    margin,
+    last_status,
+    last_margin,
+    username,
+    remark
+FROM cs_log
+WHERE updatedate::date BETWEEN '{w_start}'::date AND '{w_end}'::date
+ORDER BY updatedate
 LIMIT 30;
