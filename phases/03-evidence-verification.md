@@ -191,7 +191,7 @@ Phase 3a 进度:
 2. `status` **0→1** → **开房**
 3. 否则比 `last_margin`：cur > last → **加价**；cur < last → **降价**
 4. `last_margin` 空，但 remark 含「加价 / 限制产量 / 提价」→ **加价**；含「促销 / 降价 / promo」→ **降价**
-5. L2L：`last_level（LAG(level)）` ≠ `level` → **等级变**；相等 → **其他**
+5. L2L：`last_level（LAG(level)）` ≠ `level` → **等级变**；相等 → **其他**。数字变大 = 降级（如 2→3，跌产同向）；数字变小 = 升级（如 3→2，涨产同向）
 6. CSLRC：detail 按 SID 聚合。`n_limit>0` → **限售**；仅 `n_open>0` → **其他**。条数以 checklist COUNT 为准
 7. Configuration 监控 key 有变更 → **其他**（信号按 PPS/QPS mapping）
 8. 对不上 → **其他**；n=0 → **无**；MCP 500 → **未验**
