@@ -4,6 +4,7 @@
 /* last_level 是 LAG 别名，表里没有这列。禁止 SELECT last_level 无窗口函数 */
 /* MCP tables: configuration.wolfl2lclientlevelconfiglog */
 /* Agent：只解读 updatetime 落在 w_start～w_end 的行 */
+/* 数字变大 = 降级（如 2→3，跌产同向）；数字变小 = 升级（如 3→2，涨产同向） */
 /* last_level IS NULL → 操作写「未验」，禁止写成「其他」或「无」 */
 
 SELECT
