@@ -101,7 +101,7 @@
 
 ## 查数波次
 
-占位符在进入该波之前填好：`client_id`、`analysis_date`、产量窗口。`{sid_list}` 只在 W1 返回之后才算有值。同一轮可以发送已经 Read 过的查询，并 Read 下一批文件。同一轮刚 Read 的文件，这一轮不能发。同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。一次调用一个 lite 文件。某一条 500 只重试这一条，同批成功结果保留。
+占位符在进入该波之前填好：`client_id`、`analysis_date`、产量窗口。`{sid_list}` 只在 W1 返回之后才算有值。同一轮可以发送已经 Read 过的查询，并 Read 下一批文件。同一轮刚 Read 的文件，这一轮不能发。上一轮已经返回、还没发的查询，这一轮必须先发，凑满 5 条或发完为止。禁止为了算分、写定责或只 Read 文件而单独开一轮。算分和写定责放在发查询的同一轮。没有待发查询时，才可以只 Read。同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。一次调用一个 lite 文件。某一条 500 只重试这一条，同批成功结果保留。
 
 ### W0 Phase 1
 
@@ -109,13 +109,13 @@
 
 ### W1 定责入口
 
-只跑 `sql/dimension-contribution-lite/02-sid.sql`。这一条回来之前，不发 W2、W3。
+只跑 `sql/dimension-contribution-lite/02-sid.sql`。这一条回来之前，不发 W2、W3。日序列回来之后，若 `02-sid.sql` 上一轮已经 Read，算四分位的同一轮必须发出这一条。
 
 ### W2 02-sid 已返回
 
 先按现有规则填 `{sid_list}`（2b 锁定的 SID，或 `02-sid` 里 `|change|` Top3）。填完仍为空时，本波照样开始，只是不发 SH、`01-ss-supplier`、限流。
 
-下列文件互不依赖。按优先级每批 5 条，直到发完。同一轮最多 5 条：
+下列文件互不依赖。按优先级每批 5 条，直到发完。同一轮最多 5 条。这一波还有已经 Read、还没发的文件时，先发满 5 条，再算贡献百分比。
 
 1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额。
 2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个文件，含结果为 0 的也要发。

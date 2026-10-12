@@ -32,12 +32,15 @@ def main() -> int:
     if "查数波次" not in skill:
         errs.append("SKILL.md 未指向查数波次")
     pipeline = "同一轮刚 Read 的文件，这一轮不能发"
+    must_send = "还没发的查询，这一轮必须先发"
     if pipeline not in skill:
         errs.append("SKILL.md 未锁住同轮新读的文件不能发")
     if "要么 Read" in skill:
         errs.append("SKILL.md 仍写着读和发互斥")
     if "上一轮已经返回的 Read" not in skill:
         errs.append("SKILL.md 未要求 SQL 来自上一轮已返回的 Read")
+    if must_send not in skill:
+        errs.append("SKILL.md 未要求还有未发查询时这一轮必须先发")
 
     if "## 查数波次" not in phase2:
         errs.append("Phase 2 缺「## 查数波次」")
@@ -59,6 +62,12 @@ def main() -> int:
         errs.append("Phase 2 仍要求每批先读完再发")
     if "下一条要等当前这一条返回之后才能发" not in phase2:
         errs.append("Phase 2 未锁住 Phase 1 下一条必须等当前条返回")
+    if must_send not in phase2:
+        errs.append("Phase 2 未要求还有未发查询时这一轮必须先发")
+    if "算四分位的同一轮必须发出这一条" not in phase2:
+        errs.append("Phase 2 未要求算四分位时同时发出 02-sid")
+    if "先发满 5 条，再算贡献百分比" not in phase2:
+        errs.append("Phase 2 未要求 W2 先发满再算贡献")
 
     for rel, text in (
         ("phases/03-evidence-verification.md", phase3),
@@ -89,6 +98,8 @@ def main() -> int:
         errs.append("config lite README 未锁住同轮新读的文件不能发")
     if "下一轮再发这最多 5 条" in cfg:
         errs.append("config lite README 仍要求下一轮才发")
+    if must_send not in cfg:
+        errs.append("config lite README 未要求还有未发查询时这一轮必须先发")
 
     if errs:
         print("FAIL scripts/check-query-waves.py")
