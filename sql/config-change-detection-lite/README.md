@@ -50,7 +50,7 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 
 ## checklist 执行顺序（Agent 打勾）
 
-**执行纪律：** 按 [phases/02-dimension-drilldown.md](../../phases/02-dimension-drilldown.md)「查数波次」W2 发送。同一轮可以发送已经 Read 过的最多 5 条，并 Read 下一批最多 5 个文件。同一轮刚 Read 的文件，这一轮不能发。一次调用一个文件。500 时只重试这一条，用同一文件原文再跑 1 次后仍失败才标未验。打勾清单保留。
+**执行纪律：** 按 [phases/02-dimension-drilldown.md](../../phases/02-dimension-drilldown.md)「查数波次」W2 发送。上一轮已经返回、还没发的查询，这一轮必须先发，凑满 5 条或发完为止。禁止为了算分、写定责或只 Read 文件而单独开一轮。算分和写定责放在发查询的同一轮。没有待发查询时，才可以只 Read。同一轮可以发送已经 Read 过的最多 5 条，并 Read 下一批最多 5 个文件。同一轮刚 Read 的文件，这一轮不能发。一次调用一个文件。500 时只重试这一条，用同一文件原文再跑 1 次后仍失败才标未验。打勾清单保留。
 
 ```
 Phase 3 checklist 进度:
