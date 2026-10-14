@@ -5,7 +5,7 @@
 ## 使用方式
 
 1. **SOP 路径（默认）：** 表名已在本清单 / lite SQL → **直接 `execute_sql`**（Read 原文填占位符）。Phase 1–3 都是这条。
-2. **指标平台口径：** 用 `analyse_query` / `search_metrics`（与 `npd_booking_view` 不是同一口径）。
+2. **指标平台口径：** 用 `analyse_query` / `search_metrics`（与 lite 订单 SQL 不是同一口径）。
 3. **禁止：** 用 `search_meta_data` 当查数、当权限探测、当「先搜有没有表」。搜不到 ≠ 没权限 ≠ 不能查。
 4. **例外：** 用户要探 **本清单和 lite 都没有的未知表** 才允许 `search_meta_data`；搜完仍须 `execute_sql` 才能下结论。
 
@@ -23,13 +23,13 @@
 
 | 表名 | 用途 | 关键字段 | 备注 |
 |------|------|---------|------|
-| public.npd_booking_view | **Phase 1 异动 + Phase 2 贡献度** | clientid, parentclientid, sid, channel_createdate, **checkoutdate**, checkindate | Phase 1/2 默认 **create**；D2 未来改 **checkout**（见 external-events-mapping §10.9） |
-| content.dida_hotel_view | Phase 2 酒店属性 | hotel_id, country_code, parent_chain_name | JOIN 用 |
+| dwd.dwd_hotel_order_channel_supplier_booking_mf | **Phase 1 异动 + Phase 2 贡献度 + 酒店产量** | client_id, parent_client_id, supplier_id, supplier_name, supplier_account_id, channel_create_date, channel_status_name_en, supplier_rebook_sequence, dida_main_hotel_id, supplier_hotel_id, channel_los, channel_lead_day, channel_nationality | 过滤 `channel_status_name_en IN ('Confirmed','Canceled')` 且 `supplier_rebook_sequence = 1`。`{sid}` / `{sid_list}` 是整数 `supplier_id`，不是 `116-EPS[唐慧芳]`。国家/集团 join `dida_main_hotel_id = hotel_id`。SH 用 `supplier_id` + `supplier_hotel_id`，不用 `dida_main_hotel_id` |
+| content.dida_hotel_view | Phase 2 酒店属性 | hotel_id, country_code, parent_chain_name | 与订单 `dida_main_hotel_id` 连接 |
 | configuration.wolf_rateadjust_hotel_log | 酒店调价日志 | clientid, didahotelid, margin, level, status, updatedate, username | updatedate 为毫秒时间戳；元数据未收录 |
 
 ## 常用明细表（指标底层，非 SOP 默认）
 
-Phase 1 默认仍 `public.npd_booking_view` + `execute_sql`。不要先搜元数据再找这些表。若只是对照指标口径，可用 `analyse_query`。关键词仅在用户明确要探未知表时才给 `search_meta_data`：
+Phase 1/2 订单产量用上一张 `dwd` 表 + `execute_sql`。不要改回旧订单视图，也不要先搜元数据。若只是对照指标口径，可用 `analyse_query`。关键词仅在用户明确要探未知表时才给 `search_meta_data`：
 
 | 关键词 | 预期表 |
 |--------|--------|

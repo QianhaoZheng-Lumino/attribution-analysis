@@ -9,7 +9,7 @@
 Phase 1 异动识别（lite 三步）──→ 无异动 → 结束
   │ need_attribution = 是
   ▼
-Phase 2a  维度贡献（MCP lite 分批 / BI 全量 1 次）
+Phase 2a  维度贡献（dimension-contribution-lite）
 Phase 2b  C×S 定责
 Phase 2c  自动下钻（BI 只过滤；MCP 按路径再跑 lite）
   │
@@ -25,9 +25,9 @@ Phase 4  报告收口（合成 1→3d；数据说不清 → 查 es-cause-catalog
 | 阶段 | 状态 | 文件 | 核心能力 |
 |------|------|------|---------|
 | Phase 1 异动识别 | ✅ P0 | phases/01-anomaly-detection.md + sql/anomaly-detection-lite/ | lite 三步 + Agent 评分 |
-| Phase 2a 维度贡献 | ✅ lite | sql/dimension-contribution-lite/ + sql/dimension-contribution.sql | MCP 分批 / BI 全量 |
-| Phase 2b C×S 定责 | ✅ | cross-validation-b.sql + 2_SID | 仅供应轴交叉 |
-| Phase 2c 自动下钻 | ✅ SOP | phases/02c-drilldown.md | BI 0 额外 SQL；MCP 必跑路径 lite |
+| Phase 2a 维度贡献 | ✅ lite | sql/dimension-contribution-lite/ | 只跑 lite。完整 SQL 正文仍是旧表，不要执行 |
+| Phase 2b C×S 定责 | ✅ | 14-sid-client-validation.sql + 2_SID | `{sid}` 是整数 supplier_id |
+| Phase 2c 自动下钻 | ✅ SOP | phases/02c-drilldown.md | 必跑路径 lite |
 | Phase 3a 配置 | ✅ lite | config-change-detection-lite/checklist/ | 14 类分批 |
 | Phase 3b 查价 | ✅ lite | search-attribution-lite/ | 有价率+查验比 |
 | Phase 3c 准确率 | ✅ lite | rate-accuracy-contribution-lite/ | 与配置分离 |
@@ -41,10 +41,10 @@ Phase 4  报告收口（合成 1→3d；数据说不清 → 查 es-cause-catalog
 | methodology.md | Phase 1 判定 + MCP lite 路径 |
 | responsibility-model.md | C/Dida/S/CS + 交叉验证决策树 |
 | tables.md | 数据表清单 |
-| sql/anomaly-detection.sql | Phase 1 完整版（非 MCP） |
-| sql/anomaly-detection-lite/ | Phase 1 MCP 稳定版 |
-| sql/dimension-contribution.sql | Phase 2a |
-| sql/cross-validation-b.sql | Supplier 轴验证 B |
+| sql/anomaly-detection.sql | 正文仍是旧订单表，不要执行 |
+| sql/anomaly-detection-lite/ | Phase 1 执行文件 |
+| sql/dimension-contribution.sql | 正文仍是旧订单表，不要执行 |
+| sql/cross-validation-b.sql | 正文仍是旧订单表，不要执行。验证 B 用 14-sid-client-validation.sql |
 
 ## 里程碑（已完成 · 勿当待办）
 

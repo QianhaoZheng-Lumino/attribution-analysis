@@ -9,7 +9,7 @@
 3. **节窗日期只来自 seed** — `holiday-canonical-seed.csv`，禁止从 ads 表猜去年日期。
 4. **触发 D2** — D1 命中 Top30 HOLIDAY **且** 该国占 \|ΔBKS\| **≥10%**（分母：C=client 总量；S/CS=锁定 SID 变化）。否则仅 D1。
 5. **门槛** — `country_holiday_span_bks ≥ 20` 且 `client_window_bks ≥ 100`，否则 `gate_status` inconclusive。
-6. **口径（MVP）** — `channel_createdate`；**未来**改 `checkoutdate`（§10.9 / holiday-canonical-seed.md）。
+6. **口径（MVP）** — `channel_create_date`。离店日口径还没落地，不要手改日期列。
 
 ## 占位符
 

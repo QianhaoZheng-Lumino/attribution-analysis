@@ -1,3 +1,4 @@
+/* MCP 不要执行本文件。供应商用整数 supplier_id，酒店用 dida_main_hotel_id，列名以 lite 为准。正文留到和文档一起改 */
 /* 交叉验证 B：在指定 Supplier 下，各 Client 的产量变化 */
 /* 用途：Phase 2b — 判断 S（supplier 普遍掉） vs CS（仅 focus client 掉） */
 /* 前置：Phase 2a 已识别 Top supplier（sid）及 focus client（来自 params） */

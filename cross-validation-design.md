@@ -5,15 +5,13 @@
 ## 核心原则
 
 1. **交叉验证只用于定责**（C / Dida / S / CS）— 仅供应轴 C×S，不做全维度宽表交叉。
-2. **下钻不追加宽表交叉验证**（禁止 country×chain 等新 SQL）。
-   - **BI：** `dimension-contribution.sql` **全量 1 次** → 2c 只过滤排序，**0 额外 SQL**
-   - **MCP：** `dimension-contribution-lite/` 分批；2c **必须**补跑路径文件（见 `phases/02-dimension-drilldown.md`）
+2. **下钻不追加宽表交叉验证**（禁止 country×chain 等新 SQL）。只跑 `dimension-contribution-lite/`，2c **必须**补跑路径文件（见 `phases/02-dimension-drilldown.md`）。不要跑完整 `dimension-contribution.sql`。
 3. **定责后自动下钻** — 2b 完成后 Agent 按责任方向自动执行 2c，无需用户逐步点选。
 
 ## 总体流程
 
 ```
-Phase 2a   贡献度：MCP lite 分批 / BI dimension-contribution.sql 全量 1 次
+Phase 2a   贡献度：dimension-contribution-lite 分批
     │
 Phase 2b   C×S 交叉验证（验证 A + 条件性验证 B）
     │      → 输出：C/Dida | S | CS
@@ -28,7 +26,7 @@ Phase 3    配置 / 查价验价 / 外部事件 D（`external-events-lite/`）�
 | 验证 | 数据 | 何时需要 |
 |------|------|---------|
 | **A** | 2a 结果中 `2_SID` 层级 | 总是 |
-| **B** | [cross-validation-b.sql](sql/cross-validation-b.sql) | **门 1：** 任一 SID 占本 client `|ΔBKS|` ≥10%（每家一次）。无 SID ≥10% 才跳过 |
+| **B** | `dimension-contribution-lite/14-sid-client-validation.sql`。`{sid}` 是整数 `supplier_id`。不要跑 `cross-validation-b.sql` | **门 1：** 任一 SID 占本 client `|ΔBKS|` ≥10%（每家一次）。无 SID ≥10% 才跳过 |
 
 ### 判定（双门，见 responsibility-model.md）
 
@@ -89,11 +87,10 @@ Country（酒店国）与 Nationality（客源国）**并列展示**；同时异
 
 ## 性能与数据量
 
-| 步骤 | SQL 次数 |
-|------|---------|
-| dimension-contribution.sql | 1 |
-| cross-validation-b.sql | 0–1 |
-| 2c 下钻 | 0 |
+| 步骤 | SQL |
+|------|------|
+| 2a + 2c | `dimension-contribution-lite/` 按路径分批，不是完整 SQL 一次 |
+| 验证 B | `14-sid-client-validation.sql`，过线供应商每家一次 |
 
 ## 明确不做
 

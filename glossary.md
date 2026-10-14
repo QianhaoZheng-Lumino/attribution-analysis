@@ -6,15 +6,15 @@
 
 | 字段 | 名称 | 含义 | 数据来源 |
 |------|------|------|---------|
-| `sid` | Supplier | 供应商 | npd_booking_view |
-| `supplieraccountid` | Supplier Account | **供应商账号**（每个 supplier 下可有多个 account） | npd_booking_view |
-| `country_code` | Country | **酒店所在国家** | dida_hotel_view |
-| `chain` | Chain | 酒店集团（parent_chain_name，空则 Independent） | dida_hotel_view |
-| `los` | LOS（Length of Stay） | **连住天数**分段 | length_of_stay |
-| `lt` | LT（Lead Time） | **预订提前期**（下单→入住天数，leading_date 分段） | leading_date |
-| `nationality` | Nationality | **渠道侧客源国籍**（channel_nationality） | npd_booking_view |
+| `supplier_id` | Supplier | 供应商整数编号。SQL 占位符 `{sid}`、`{sid_list}` 填这个数，不填 `116-EPS[唐慧芳]` 这种展示串。报告可同时写 `supplier_name` | dwd 订单表 |
+| `supplier_account_id` | Supplier Account | **供应商账号**（每个 supplier 下可有多个 account） | dwd 订单表 |
+| `country_code` | Country | **酒店所在国家**。订单用 `dida_main_hotel_id` 连接 `dida_hotel_view.hotel_id` | dida_hotel_view |
+| `chain` | Chain | 酒店集团（parent_chain_name，空则 Independent）。连接键同上 | dida_hotel_view |
+| `channel_los` | LOS（Length of Stay） | **连住天数**分段 | dwd 订单表 |
+| `channel_lead_day` | LT（Lead Time） | **预订提前期**（下单→入住天数）分段 | dwd 订单表 |
+| `channel_nationality` | Nationality | **渠道侧客源国籍** | dwd 订单表 |
 
-### 分桶（与 dimension-contribution.sql 一致）
+### 分桶（与 lite `08-lt.sql`、`10-los.sql` 一致）
 
 **LOS：** 1 / 2 / 3 / 4~7 / 8~14 / 15~28 / >28
 

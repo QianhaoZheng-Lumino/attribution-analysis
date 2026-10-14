@@ -4,14 +4,14 @@
 /* 例: Agoda MY y1_pre → seg 2025-03-24 ~ 2025-03-30 */
 
 SELECT
-    a.channel_createdate::date AS bk_date,
+    a.channel_create_date::date AS bk_date,
     COUNT(*) AS country_bks
-FROM public.npd_booking_view a
-LEFT JOIN content.dida_hotel_view h ON a.didahotelid = h.hotel_id
-WHERE a.channel_status IN ('Confirmed', 'Canceled')
-    AND a.rebook_sequence = 1
-    AND a.clientid = '{client_id}'
+FROM dwd.dwd_hotel_order_channel_supplier_booking_mf a
+LEFT JOIN content.dida_hotel_view h ON a.dida_main_hotel_id = h.hotel_id
+WHERE a.channel_status_name_en IN ('Confirmed', 'Canceled')
+    AND a.supplier_rebook_sequence = 1
+    AND a.client_id = '{client_id}'
     AND COALESCE(h.country_code, 'Unknown') = '{country_code}'
-    AND a.channel_createdate::date BETWEEN '{seg_start}'::date AND '{seg_end}'::date
+    AND a.channel_create_date::date BETWEEN '{seg_start}'::date AND '{seg_end}'::date
 GROUP BY 1
 ORDER BY 1;

@@ -1,9 +1,9 @@
 # Phase 1 Lite SQL（MCP 稳定版）
 
-完整版 `../anomaly-detection.sql` 在 MCP 上可能因 SQL 过长/过复杂返回 500。
-**MCP 执行一律走本目录三步 SQL + Agent 本地评分。**
+完整版 `../anomaly-detection.sql` 正文仍是旧订单表。不要执行，也不要用它的列名。
+**执行一律走本目录三步 SQL + Agent 本地评分。**
 
-完整 SQL 仍为逻辑源真相；lite 版结果应与之一致。
+lite 是 Phase 1 的依据。
 
 ## 使用顺序
 
@@ -57,9 +57,9 @@ SQL 内统一：
 ```sql
 AND (
     CASE
-        WHEN '{client_id}' <> '' THEN a.clientid = '{client_id}'
-        WHEN '{parent_client_id}' <> '' THEN a.parentclientid = '{parent_client_id}'
-        ELSE a.clientgroup = 'Overseas API'
+        WHEN '{client_id}' <> '' THEN a.client_id = '{client_id}'
+        WHEN '{parent_client_id}' <> '' THEN a.parent_client_id = '{parent_client_id}'
+        ELSE a.client_group_name = 'Overseas API'
     END
 )
 ```
@@ -69,7 +69,7 @@ AND (
 ```json
 {
   "sql": "...",
-  "tables": ["public.npd_booking_view"],
+  "tables": ["dwd.dwd_hotel_order_channel_supplier_booking_mf"],
   "timeout_seconds": 60
 }
 ```

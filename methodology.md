@@ -1,15 +1,15 @@
 # 异动识别方法论
 
-本文档从 `public.npd_booking_view` 异动识别 SQL 蒸馏而来，是 Phase 1 的**判定标准**。
+本文档是 Phase 1 的**判定标准**。订单来自 `dwd.dwd_hotel_order_channel_supplier_booking_mf`。
 
 ## 1. 分析对象
 
 | 项 | 规则 |
 |----|------|
 | 核心指标 | 日预订量（`COUNT(*)`，create 口径） |
-| 数据源 | `public.npd_booking_view` |
-| 订单过滤 | `channel_status IN ('Confirmed','Canceled')` 且 `rebook_sequence = 1` |
-| 时间字段 | `channel_createdate` |
+| 数据源 | `dwd.dwd_hotel_order_channel_supplier_booking_mf` |
+| 订单过滤 | `channel_status_name_en IN ('Confirmed','Canceled')` 且 `supplier_rebook_sequence = 1` |
+| 时间字段 | `channel_create_date` |
 | 数据截止 | **不含当天**，最大日期 = 昨天（`CURRENT_DATE - 1`） |
 
 ## 2. 分析范围（三选一）
@@ -18,9 +18,9 @@
 
 | 优先级 | 参数 | 过滤字段 |
 |--------|------|---------|
-| 1 | `client_id` 非空 | `clientid = client_id` |
-| 2 | `parent_client_id` 非空 | `parentclientid = parent_client_id` |
-| 3 | 均为空 | `clientgroup = 'Overseas API'`（大盘默认） |
+| 1 | `{client_id}` 非空 | `a.client_id = '{client_id}'` |
+| 2 | `{parent_client_id}` 非空 | `a.parent_client_id = '{parent_client_id}'` |
+| 3 | 均为空 | `a.client_group_name = 'Overseas API'`（大盘默认） |
 
 ## 3. 时间窗口逻辑
 
@@ -150,15 +150,15 @@
 3. `03-daily-series.sql` — 日序列 → Agent 算 Q1/Q3
 4. Agent 本地按 §4–§8 评分
 
-完整 `anomaly-detection.sql` 在 MCP 上可能 500（SQL 过长/含 PERCENTILE_CONT），不在 MCP 直接跑。
+不要跑完整 `anomaly-detection.sql`。它的正文仍是旧订单表，列名不能拿去填 lite。
 
-### 路径 B：完整 SQL（本地 DB / 非 MCP）
+### 路径 B：完整 SQL
 
-一次运行 [sql/anomaly-detection.sql](sql/anomaly-detection.sql)。
+归因不用 [sql/anomaly-detection.sql](sql/anomaly-detection.sql)。MCP 与本地都以 lite 01→02→03 为准。
 
 ### 路径 C：analyse_query + 后处理
 
-指标平台口径；有争议以 npd_booking_view 为准。
+指标平台口径。有争议以 lite 订单 SQL 的 create 预订量为准。
 
 ## 11. 默认参数
 

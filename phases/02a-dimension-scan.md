@@ -1,8 +1,7 @@
 # Phase 2a：贡献度缓存说明
 
 > **结果用法**（不定责、不下钻结论）。  
-> **BI：** 跑完 [dimension-contribution.sql](../sql/dimension-contribution.sql) 全量。  
-> **MCP：** 先 `02-sid.sql`；2c 各 hierarchy **尚未在 2a 一次拿到**，须再跑路径 lite。
+> **MCP：** 先 `02-sid.sql`；2c 各 hierarchy **尚未在 2a 一次拿到**，须再跑路径 lite。不要跑完整 `dimension-contribution.sql`。
 
 完整 Phase 2 流程见 [02-dimension-drilldown.md](02-dimension-drilldown.md)。
 

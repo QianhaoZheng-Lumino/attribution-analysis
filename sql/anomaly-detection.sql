@@ -1,4 +1,5 @@
-/* 异动识别 SQL（来源：用户脚本，供 execute_sql 直接运行） */
+/* MCP 不要执行本文件。供应商用整数 supplier_id，酒店用 dida_main_hotel_id，列名以 lite 为准。正文留到和文档一起改 */
+/* 异动识别 SQL（来源：用户脚本） */
 /* 使用前替换 params 中的参数 */
 
 WITH params AS (

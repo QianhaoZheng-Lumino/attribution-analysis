@@ -1,11 +1,11 @@
 # Phase 2 Lite：维度贡献分批 SQL（MCP 稳定版）
 
-完整版 `../dimension-contribution.sql`（GROUPING SETS + 13 层）在 MCP 上易 **500**。
-**MCP 执行一律走本目录单文件查询 + Agent 本地算贡献占比。**
+完整版 `../dimension-contribution.sql` 正文仍是旧订单表。MCP 不要执行，也不要用它的列名。
+**MCP 执行一律走本目录单文件查询 + Agent 本地算贡献占比。** `{sid}` 是整数 `supplier_id`。
 
-完整 SQL 仍为逻辑源真相；lite 结果用于 2b 定责 + 2c 下钻。
+lite 是 2b 定责和 2c 下钻的依据。
 
-**MCP vs BI：** 本目录是 **MCP 必跑路径**。BI 跑一次 `../dimension-contribution.sql` 后 2c 不必再查。MCP **禁止**套用「2c 0 额外 SQL」。
+**MCP vs BI：** 本目录是 **MCP 必跑路径**。不要因为文档里写过「BI 全量 1 次」就去跑完整 SQL。MCP **禁止**套用「2c 0 额外 SQL」。
 
 ## 使用顺序
 

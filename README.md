@@ -75,13 +75,13 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 
 `execute_sql` 的 `tables` 填同一张表，`timeout_seconds` 用 30。返回 1 行 = 有表权限。禁止用 14 路 UNION、完整归因 SQL 或扫全表来测权限。
 
-**最低可用（只能看有没有掉产）：** `public.npd_booking_view`
+**最低可用（只能看有没有掉产）：** `dwd.dwd_hotel_order_channel_supplier_booking_mf`
 
 **完整归因建议一次测完（P0+P1，17 张）：**
 
 | 优先级 | 表 | 缺了会怎样 |
 |--------|-----|------------|
-| P0 | `public.npd_booking_view` | **整条归因停**（Phase 1/2 BKS） |
+| P0 | `dwd.dwd_hotel_order_channel_supplier_booking_mf` | **整条归因停**（Phase 1/2 BKS） |
 | P0 | `content.dida_hotel_view` | 国家/连锁下钻、节假日同比 BKS 做不了 |
 | P1 | `crm.client_info_ods` | 配 parent 时 3a 展开 client 失败 |
 | P1 | `configuration.wolf_rateadjust_log` | CS/C/S/CSA/CBD/SBD 配置未验 |
@@ -112,7 +112,7 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 **一次性复制（20 张）：**
 
 ```
-public.npd_booking_view
+dwd.dwd_hotel_order_channel_supplier_booking_mf
 content.dida_hotel_view
 crm.client_info_ods
 configuration.wolf_rateadjust_log
@@ -136,4 +136,4 @@ ads.ads_marketing_calendar_event_wide_d_f
 
 3a 缺表只能标「未验」，**不能写成 event_count=0，不能写「已排除 Dida」**。MCP 500 的处置见 `docs/mcp-permission-matrix.md`。
 
-**可选：** `search_metrics` 能搜到 `ORD_0231`（BKs*create）或 `ORD_0001`（GP*checkout）；`analyse_query` 任意 7 天、指标 `ORD_0001` 能出数。指标底层会打 `dwd.dwd_hotel_order_channel_supplier_booking_mf`，同样受行级权限限制。Phase 1 SOP 默认仍走 `npd_booking_view`。
+**可选：** `search_metrics` 能搜到 `ORD_0231`（BKs*create）或 `ORD_0001`（GP*checkout）；`analyse_query` 任意 7 天、指标 `ORD_0001` 能出数。指标平台和 Phase 1 lite 都打 `dwd.dwd_hotel_order_channel_supplier_booking_mf`，同样受行级权限限制。产量以 lite SQL 为准。

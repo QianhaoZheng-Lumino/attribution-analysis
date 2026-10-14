@@ -71,7 +71,7 @@ description: >-
 | analysis_date | 分析锚点日期 | 7 天前。「本周」= 本周一，「上周」= 上周一 |
 | 分析范围 | client_id / parent_client_id / 大盘 | 大盘（Overseas API） |
 | n_days | 对比窗口（≥7 走新逻辑） | NULL（原逻辑 7 天） |
-| 指标 | 默认 create 口径预订量 | `npd_booking_view` 日预订量 |
+| 指标 | 默认 create 口径预订量 | `dwd.dwd_hotel_order_channel_supplier_booking_mf` 日预订量 |
 
 同一指标可能有 checkout / checkin / create，先确认口径再下结论。方法论：[methodology.md](methodology.md)。
 
@@ -95,7 +95,7 @@ description: >-
 | 工具 | 用途 |
 |------|------|
 | `execute_sql` | **Phase 1–3 查明细的唯一入口。** 表名来自 lite SQL / [tables.md](tables.md)，Read 原文只填占位符。末尾 LIMIT，最多 1 万行 |
-| `analyse_query` | 指标平台趋势（口径与 `npd_booking_view` 不同；Phase 1 默认仍走 lite SQL）。`begin_time`/`end_time` 用 ISO，自动转北京时间。`date_group_type`：1小时 2天 3周 4月 5分钟 6年 |
+| `analyse_query` | 指标平台趋势（口径与 lite 订单 SQL 不同；Phase 1 默认仍走 lite SQL）。`begin_time`/`end_time` 用 ISO，自动转北京时间。`date_group_type`：1小时 2天 3周 4月 5分钟 6年 |
 | `search_metrics` | 按名称/编码查找指标编码 |
 | `get_analyse_dimension` | Phase 2 指标平台下钻（BKS 下钻仍走 dimension-contribution-lite） |
 | `search_meta_data` | **不是查数** |
@@ -164,7 +164,7 @@ Phase 1 进度:
 
 | 阶段 | 输入 | 输出 | 文件与硬规则 |
 |------|------|------|----------------|
-| Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。MCP lite 分批；BI 全量 1 次。**2b 双门：** ≥10% 必跑 B；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
+| Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。只跑 lite。`{sid}` 是整数 `supplier_id`。不要跑 `dimension-contribution.sql`、`cross-validation-b.sql`。**2b 双门：** ≥10% 必跑 `14-sid-client-validation.sql`；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
 | Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite**：Read 对应 `checklist/` 或 `detail/` 原文只填占位符。3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
 | Phase 4 报告 | Phase 1–3 结论 | 成品 Markdown + 同名 HTML | 复制 [04-report-skeleton.md](phases/04-report-skeleton.md) 只填空；SOP [04-report.md](phases/04-report.md)。标题/表头锁定（#27）。填完先 `python scripts/check-report-skeleton.py`，通过后再 `python scripts/render-report-html.py`。HTML 是交出的文件；对话只回该 Markdown 里的 Executive Summary 和 HTML 路径。检查或渲染失败则不写 HTML，也不在对话里另写一版。探查型不走本行。**ES 先业务导语、六键人话**（[es-writing.md](docs/es-writing.md)）；后续动作编号只按 [es-cause-catalog.md](docs/es-cause-catalog.md) |
 

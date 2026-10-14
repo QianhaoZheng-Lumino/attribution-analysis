@@ -200,7 +200,7 @@ Step D3  按 10.3 打信号 → 写入 3d「D 线强度」
 
 | 粒度 | 做法 | 限制 |
 |------|------|------|
-| **国家（推荐默认）** | `npd_booking_view` join `dida_hotel_view.country_code` | 与 2c 对齐，MCP 稳定 |
+| **国家（推荐默认）** | 订单表 `dida_main_hotel_id` join `dida_hotel_view.hotel_id`，取 `country_code` | 与 2c 对齐 |
 | **城市（可选）** | 日历 `city_name_cn` ↔ 酒店 city **映射未标准化** | 易 504；仅 **Top 节 + 国别已≥30%** 时 BI 试跑 |
 
 ### 10.5 局限（必须写进报告）
@@ -297,11 +297,11 @@ Step D3  按 10.3 打信号 → 写入 3d「D 线强度」
 
 ### 10.9 未来优化：节日窗对齐 **checkoutdate**（待实现）
 
-> **讨论定稿方向（2026-08-18）：** 节日事件范围应对齐订单 **`checkoutdate`**（离店/消费发生），而非当前 MVP 的 **`channel_createdate`**（下单/create）。
+> **讨论定稿方向（2026-08-18）：** 节日事件范围应对齐离店日，而非当前的 **`channel_create_date`**（下单/create）。checkout 版还没落地，不要手改日期列。
 
 | 维度 | 当前 MVP（`02`） | 目标 |
 |------|------------------|------|
-| 时间字段 | `channel_createdate::date` | **`checkoutdate::date`** |
+| 时间字段 | `channel_create_date::date` | 离店日（尚未改 SQL） |
 | 与 Phase 1 关系 | 与 2c WoW **同口径**（create） | D2 **独立口径**；2c 仍可为 create |
 | 业务含义 | 「节前下单 rush」 | 「节中/节后实际入住离店」更贴近节日消费 |
 | 示例偏差 | MY 开斋节：create 见「节中凹陷」 | checkout 可能呈现不同 pre/during/post 形态（待 MCP 对比） |
@@ -314,4 +314,4 @@ Step D3  按 10.3 打信号 → 写入 3d「D 线强度」
 4. 可选敏感性：并列输出 `checkindate` 版（节前出发 vs 节中停留），默认 **仅 checkout**。  
 5. Agoda MY gold **保留 create 版** 至 checkout 版跑通后再二选一或并列脚注。
 
-**字段（MCP 已确认）：** `public.npd_booking_view.checkoutdate`（毫秒时间戳，用法同 `channel_createdate::date`）。
+**字段：** 当前 D2 用 `channel_create_date`。离店日口径还没改到 lite，不要按旧订单视图的 `checkoutdate` 手写 SQL。

@@ -17,30 +17,30 @@ SELECT
     (p.change_date + (p.compare_days - 1) * interval '1 day')::date AS after_end,
     sum(
         CASE
-            WHEN b.channel_createdate >= p.change_date - interval '7 days'
-             AND b.channel_createdate < p.change_date
+            WHEN b.channel_create_date >= p.change_date - interval '7 days'
+             AND b.channel_create_date < p.change_date
             THEN 1 ELSE 0
         END
     ) AS before_bks,
     sum(
         CASE
-            WHEN b.channel_createdate >= p.change_date
-             AND b.channel_createdate < p.change_date + p.compare_days * interval '1 day'
+            WHEN b.channel_create_date >= p.change_date
+             AND b.channel_create_date < p.change_date + p.compare_days * interval '1 day'
             THEN 1 ELSE 0
         END
     ) AS after_bks,
     round(
         100.0 * (
-            sum(CASE WHEN b.channel_createdate >= p.change_date AND b.channel_createdate < p.change_date + p.compare_days * interval '1 day' THEN 1 ELSE 0 END)
-            - sum(CASE WHEN b.channel_createdate >= p.change_date - interval '7 days' AND b.channel_createdate < p.change_date THEN 1 ELSE 0 END)
+            sum(CASE WHEN b.channel_create_date >= p.change_date AND b.channel_create_date < p.change_date + p.compare_days * interval '1 day' THEN 1 ELSE 0 END)
+            - sum(CASE WHEN b.channel_create_date >= p.change_date - interval '7 days' AND b.channel_create_date < p.change_date THEN 1 ELSE 0 END)
         )
-        / nullif(sum(CASE WHEN b.channel_createdate >= p.change_date - interval '7 days' AND b.channel_createdate < p.change_date THEN 1 ELSE 0 END), 0)
+        / nullif(sum(CASE WHEN b.channel_create_date >= p.change_date - interval '7 days' AND b.channel_create_date < p.change_date THEN 1 ELSE 0 END), 0)
     , 1) AS bks_change_pct
 FROM params AS p
-JOIN public.npd_booking_view AS b
-  ON b.clientid = p.client_id
-WHERE b.channel_status IN ('Confirmed', 'Canceled')
-  AND b.rebook_sequence = 1
-  AND b.channel_createdate >= p.change_date - interval '10 days'
-  AND b.channel_createdate <= p.change_date + interval '10 days'
+JOIN dwd.dwd_hotel_order_channel_supplier_booking_mf AS b
+  ON b.client_id = p.client_id
+WHERE b.channel_status_name_en IN ('Confirmed', 'Canceled')
+  AND b.supplier_rebook_sequence = 1
+  AND b.channel_create_date >= p.change_date - interval '10 days'
+  AND b.channel_create_date <= p.change_date + interval '10 days'
 GROUP BY p.client_id, p.change_date, p.compare_days;

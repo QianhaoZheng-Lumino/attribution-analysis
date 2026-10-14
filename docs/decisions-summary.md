@@ -56,7 +56,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 | `analysis_date` | 分析锚点，默认 7 天前 |
 | `parent_client_id` / `client_id` | 分析范围（如 Agoda、HBGPKG） |
 | `n_days` | 对比窗口；≥7 走新逻辑，`min_data_date = LEAST(analysis_date - GREATEST(14, n_days), analysis_date - 7)` |
-| 默认指标 | `npd_booking_view` 日预订量（create 口径） |
+| 默认指标 | `dwd.dwd_hotel_order_channel_supplier_booking_mf` 日预订量（create 口径） |
 
 ### 3.3 SQL vs 方法论分工
 
@@ -69,8 +69,8 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 ### 3.4 文件
 
 - `methodology.md` — 判定标准
-- `sql/anomaly-detection.sql` — 完整版（非 MCP）
-- `sql/anomaly-detection-lite/` — MCP 稳定版
+- `sql/anomaly-detection.sql` — 正文仍是旧订单表，不要执行，也不要抄列名
+- `sql/anomaly-detection-lite/` — Phase 1 执行文件
 - `phases/01-anomaly-detection.md` — SOP
 
 ---
@@ -81,9 +81,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 
 1. **贡献度 ≠ 责任**
 2. **交叉验证只用于定责**（C / Dida / S / CS），仅 **C×S 供应轴**
-3. **下钻不追加宽表交叉验证**（禁止 country×chain 等新 SQL）。执行分两条路径：
-   - **BI / 非 MCP：** `dimension-contribution.sql` **全量 1 次** → 2c **只过滤排序，0 额外 SQL**
-   - **MCP：** 必须用 `dimension-contribution-lite/` **分批**；`02-sid`（2b）+ 2c 路径文件（C/Dida **5/5** 或 S/CS country+chain+lt+los+nat）。**禁止**写「MCP 上 2c 0 额外 SQL」
+3. **下钻不追加宽表交叉验证**（禁止 country×chain 等新 SQL）。只跑 `dimension-contribution-lite/`：`02-sid`（2b）+ 2c 路径文件（C/Dida **5/5** 或 S/CS country+chain+lt+los+nat）。**禁止**用完整 `dimension-contribution.sql` 代替，也禁止写「2c 0 额外 SQL」。
 4. **定责后自动下钻**（2c），无需用户逐步点选
 
 ### 4.2 责任四方
@@ -122,12 +120,13 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 
 ### 4.5 贡献度 SQL 13 层 hierarchy
 
-`2_SID` → `3_SID+Account` → `4_Country` → … → `13_SID+Nationality`（见 `dimension-contribution.sql`）
+`2_SID` → `3_SID+Account` → `4_Country` → … → `13_SID+Nationality`（见 `dimension-contribution-lite/`）
 
 ### 4.6 文件
 
 - `responsibility-model.md` / `cross-validation-design.md`
-- `sql/dimension-contribution.sql` / `sql/cross-validation-b.sql`
+- `sql/dimension-contribution-lite/` / `sql/dimension-contribution-lite/14-sid-client-validation.sql`
+- `sql/dimension-contribution.sql` / `sql/cross-validation-b.sql` — 正文仍是旧订单表，不要执行
 - `phases/02-dimension-drilldown.md` / `02a` / `02c-drilldown.md`
 
 ---

@@ -46,7 +46,7 @@ Step 4  （可选 D2）D1 命中节 → seed 对齐 holiday_key
 
 ```json
 {
-  "tables": ["public.npd_booking_view", "content.dida_hotel_view"],
+  "tables": ["dwd.dwd_hotel_order_channel_supplier_booking_mf", "content.dida_hotel_view"],
   "timeout_seconds": 90
 }
 ```

@@ -1,3 +1,4 @@
+/* MCP 不要执行本文件。供应商用整数 supplier_id，酒店用 dida_main_hotel_id，列名以 lite 为准。正文留到和文档一起改 */
 /* 维度贡献度分析 SQL（来源：用户脚本） */
 /* 在指定 client 范围内，按多维度 GROUPING SETS 计算贡献占比 */
 /* 注意：本 SQL 不能判定 C/Dida/S/CS，需配合交叉验证（见 responsibility-model.md） */

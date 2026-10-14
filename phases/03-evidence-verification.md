@@ -84,7 +84,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
    - **Step A** 按 [02-dimension-drilldown.md](02-dimension-drilldown.md)「查数波次」W2 发送 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`（**禁止** 14 路 UNION；一次调用一个文件；同一轮最多 5 条）
    - **Step A'** `02-client-before-after-bks.sql` 与 Step A 同属 W2，不等 Step A 全部结束
    - **Step B** checklist 已返回后，按查数波次 W4 发送过线 detail。对 `event_count > 0` 的 level，按 `sql/config-change-detection-lite/README.md` Step 3 表跑列出的 detail 路径（**CBD 必跑** `detail/05-cbd-detail.sql`，**必须读 `remark` + 比 last_margin**；**S Bottom 必跑** `detail/13-s-bottom-detail.sql`，**禁止抄 C Bottom**）。10/11/04 必须 Read `detail/10-l2l-detail.sql`、`detail/11-cslrc-detail.sql`、`detail/04-csa-detail.sql`；禁止手写 last_level 列。同一轮最多 5 条。
-   - **Step B'（CDH/LCDH/SH 必跑）** CDH/LCDH：`event_count > 0` 跑 **`detail/07-cdh-hotel-bks-lite.sql`** / **`detail/09-lcdh-hotel-bks-lite.sql`**。SH：`event_count ≥ 10` 跑 **`detail/08-sh-hotel-bks-lite.sql`**（JOIN `supplierid`+`supplierhotelid`，禁止 `didahotelid` / `clientid` 滤日志；`<10` 不跑不解读；`>50000` 或 MCP 500 → BI）。均为 WITH 酒店清单 join 订单，按 SID/`didahotelid` 聚合 `before/after_hotel_bks`。
+   - **Step B'（CDH/LCDH/SH 必跑）** CDH/LCDH：`event_count > 0` 跑 **`detail/07-cdh-hotel-bks-lite.sql`** / **`detail/09-lcdh-hotel-bks-lite.sql`**。酒店家数只数日志，产量按订单 `dida_main_hotel_id` = 日志 `didahotelid` 汇总。SH：`event_count ≥ 10` 跑 **`detail/08-sh-hotel-bks-lite.sql`**（日志 `supplierid`+`supplierhotelid` 对订单 `supplier_id`+`supplier_hotel_id`；日志 `didahotelid` 恒为 0，禁止用 `dida_main_hotel_id` 或 `clientid` 滤日志；`<10` 不跑不解读；`>50000` 或 MCP 500 → BI）。解读优先 `before/after_hotel_bks`。
    - **Step C** 可选 `search/01-didabiz-pps-daily.sql` 查价（按日，比跨日 SUM 稳定）
 3. 完整 SQL 末尾有 `before/after_bks > 0` 过滤 → **无产量行的配置会消失**；以 Step A 为准补全清单，Step B 补产量证据。
 4. MCP 分步探测时，**按下面 14 行表逐条打勾**，不得合并为「其他无」。
@@ -115,7 +115,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 
 - 表无可用 `clientid`（加上会变成 0）。**禁止** `clientid` 过滤，**禁止**不带 SID 扫全表。
 - 跑 08 前必须已有 2b。`{sid_list}` = 锁定 SID 或占 \|ΔBKS\|≥10% 的 SID；没有则 02-sid \|change\| Top3。
-- **`event_count ≥ 10` 必跑** `detail/08-sh-hotel-bks-lite.sql`（映射 `supplierid`+`supplierhotelid`；日志 `didahotelid` 恒为 0，禁止抄 CDH）。
+- **`event_count ≥ 10` 必跑** `detail/08-sh-hotel-bks-lite.sql`（日志 `supplierid`+`supplierhotelid` 对订单 `supplier_id`+`supplier_hotel_id`；日志 `didahotelid` 恒为 0，禁止抄 CDH）。
 - `<10` 不跑 hotel_bks、**不解读**；不得把零散酒店行写成主因。
 - **解读优先 `before_hotel_bks` / `after_hotel_bks`**（仅变更酒店、且仅本 client）。平台 SH 打到本机构产量常为 0。
 - **after_hotel_bks ≈ 0** 且机构 BKS 大涨/大跌 → 信号 **弱 / inconclusive**，禁止写「SH 定责」。
@@ -233,10 +233,10 @@ C、CS、CSA、S、C Bottom、S Bottom 直接读 detail 里的上一条列，禁
 | 字段 | 粒度 | 用途 |
 |------|------|------|
 | `before_bks_compare_window` / `after_*` | Client 或 CS 全量 | 原逻辑，易被非变更酒店稀释 |
-| `before_hotel_bks` / `after_hotel_bks` | CDH/LCDH：**仅本次 didahotelid**；SH：**仅本次 supplierid+supplierhotelid 且本 client** | 解读时**优先看** |
+| `before_hotel_bks` / `after_hotel_bks` | CDH/LCDH：日志 `didahotelid` 对订单 `dida_main_hotel_id`；SH：日志 `supplierid`+`supplierhotelid` 对订单 `supplier_id`+`supplier_hotel_id`，且本 client | 解读时**优先看** |
 | `affected_hotel_count` | 变更酒店数 | 判断批量幅度；SH `<10` 不解读 |
 
-**SH** 映射用订单的 `supplierid`+`supplierhotelid`，禁止抄 CDH 的 `didahotelid`（SH 日志该列恒为 0）。lite：`detail/08-sh-hotel-bks-lite.sql`。
+**SH** 用日志 `supplierid`+`supplierhotelid` 对订单 `supplier_id`+`supplier_hotel_id`。禁止用 `dida_main_hotel_id`（SH 日志 `didahotelid` 恒为 0）。lite：`detail/08-sh-hotel-bks-lite.sql`。
 
 ---
 

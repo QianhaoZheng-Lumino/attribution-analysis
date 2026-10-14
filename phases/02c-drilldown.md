@@ -1,8 +1,7 @@
 # Phase 2c：定责后自动下钻
 
 > 2b 输出责任方向后**自动执行**。  
-> **MCP：** 2c **必须**按路径再跑 lite 文件（见 [02-dimension-drilldown.md](02-dimension-drilldown.md) 必跑表）；缺任一 → `2c_progress` 未达标。  
-> **BI：** 全量 `dimension-contribution.sql` 已含 13 层 → 2c **只过滤，0 额外 SQL**。
+> **MCP：** 2c **必须**按路径再跑 lite 文件（见 [02-dimension-drilldown.md](02-dimension-drilldown.md) 必跑表）；缺任一 → `2c_progress` 未达标。不要跑完整 `dimension-contribution.sql`。
 
 设计见 [cross-validation-design.md](../cross-validation-design.md)。
 
@@ -40,7 +39,7 @@
 |-----------|---------|
 | `5_SID+Country` | country_code |
 | `7_SID+Chain` | chain |
-| `3_SID+Account` | supplieraccountid（**\|占该 SID 变化\| ≥10%**，含新建/清零） |
+| `3_SID+Account` | supplier_account_id（**\|占该 SID 变化\| ≥10%**，含新建/清零） |
 | `9_SID+LT` | lt |
 | `11_SID+LOS` | los |
 | `13_SID+Nationality` | nationality |

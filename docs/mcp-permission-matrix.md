@@ -81,8 +81,8 @@
 | 在线时长 | **`03-window-avg.sql`**（`EXTRACT(EPOCH)` + CASE） | ✅ 等值 `client_id`；**禁止 AT TIME ZONE**（500）。2026-09-21 复测 SnapEBK / SnapTravel2B gold | 仍 500 → fetch + **`scripts/test-online-hours.py`**；日表勿默认 MCP `online-hours.sql`；禁止无 client 全表 |
 | 外部 D | `external-events-lite/01-single-country-window.sql` | ✅ | — |
 | Phase 1 | `anomaly-detection-lite/` 01–03 | ✅ | 勿跑完整 anomaly-detection.sql |
-| Phase 2a | `dimension-contribution-lite/02-sid.sql` | ✅ | 完整 dimension-contribution.sql → BI |
-| 2b 验证 B | `cross-validation-b.sql` | ✅ | `14-sid-client-validation.sql` |
+| Phase 2a | `dimension-contribution-lite/` | ✅ | 勿跑完整 dimension-contribution.sql |
+| 2b 验证 B | `14-sid-client-validation.sql` | ✅ | `{sid}` 是整数 `supplier_id`。勿跑 `cross-validation-b.sql` |
 
 ---
 

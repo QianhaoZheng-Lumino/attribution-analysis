@@ -8,6 +8,7 @@ Agent 在跑 lite SQL 前，先按 Phase 1 相同规则计算日期，填入占�
 |--------|------|------------|
 | `{client_id}` | 机构 client（Phase 2/3 必填） | `Agoda` |
 | `{sid_list}` | **SH**（`checklist/08-sh.sql`、`detail/08-sh-hotel-bks-lite.sql`）、**SS**（`search-attribution-lite/01-ss-supplier.sql`）、**限流**（`rate-limit-lite/01-ss-supplier-window.sql`）共用。结构 SID：2b 锁定，或占本案 \|ΔBKS\|≥10%。整数逗号分隔。无结构 SID 时用 02-sid \|change\| Top3。禁止空列表 `IN ()`。SH 禁止用 clientid | `26, 95, 61` |
+| `{sid}` | 整数 `supplier_id`，与 `{sid_list}` 里的同一个数。不是 `116-EPS[唐慧芳]` 这种展示串 | `131` |
 | `{parent_client_id}` | 父 client（仅 resolve 用） | 空或 `Agoda` |
 | `{analysis_date}` | 异动锚点 | `2026-03-20` |
 | `{w_start}` | 配置窗口起 = analysis_date - 1 | `2026-03-19` |
@@ -44,7 +45,7 @@ w_end          = analysis_date + 1 day
 ```json
 {
   "sql": "...",
-  "tables": ["public.npd_booking_view"],
+  "tables": ["dwd.dwd_hotel_order_channel_supplier_booking_mf"],
   "timeout_seconds": 60
 }
 ```

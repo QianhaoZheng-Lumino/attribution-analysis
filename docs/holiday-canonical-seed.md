@@ -73,8 +73,8 @@ MY / ID / SG / CN / US / TH / VN / JP / PH / GB / AU — 见 CSV。
 
 ## 未来优化：checkout 口径（§10.9）
 
-当前 D2 用 **`channel_createdate`**（与 Phase 1/2c create 对齐）。  
-**目标：** 节日 pre/during/post 改切 **`checkoutdate::date`** — 对齐实际离店/消费，而非下单日。  
+当前 D2 用 **`channel_create_date`**（与 Phase 1/2c create 对齐）。
+**目标：** 节日 pre/during/post 改切离店日。这一版还没落地，不要手改日期列。
 待建 `02-holiday-yoy-bks-checkout-lite.sql`；详见 [external-events-mapping.md §10.9](external-events-mapping.md)。
 
 ## 年更 SOP

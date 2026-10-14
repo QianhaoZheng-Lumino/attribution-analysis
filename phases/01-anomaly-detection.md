@@ -19,8 +19,8 @@
 ```
 
 **默认理解：**
-- 「掉产 / 预订量异常」→ 日预订量，`npd_booking_view`
-- 未指定客户 → 大盘（`clientgroup = 'Overseas API'`）
+- 「掉产 / 预订量异常」→ 日预订量，`dwd.dwd_hotel_order_channel_supplier_booking_mf`
+- 未指定客户 → 大盘（`client_group_name = 'Overseas API'`）
 - **「本周」** → `analysis_date` = **本周一**（北京时间），当前期到 `min(昨天, 本周日)`；仍是探查型。不是默认「7 天前」
 - **「上周」** → `analysis_date` = 上周一
 - 未指定日期（也没说本周/上周）→ `analysis_date = 7 天前`，原逻辑 7 天窗口
@@ -32,9 +32,9 @@
 
 | 项 | 值 |
 |----|-----|
-| 表 | `public.npd_booking_view` |
-| 过滤 | `channel_status IN ('Confirmed','Canceled')`, `rebook_sequence = 1` |
-| 时间 | `channel_createdate` |
+| 表 | `dwd.dwd_hotel_order_channel_supplier_booking_mf` |
+| 过滤 | `channel_status_name_en IN ('Confirmed','Canceled')`, `supplier_rebook_sequence = 1` |
+| 时间 | `channel_create_date` |
 | 截止 | 不含当天，最大 = 昨天 |
 
 ## Step 3：计算时间窗口
@@ -46,7 +46,7 @@
 
 ### 路径 A：Lite 三步 SQL（MCP 首选）
 
-**不要**在 MCP 上直接跑完整 `anomaly-detection.sql`（易 500）。
+**不要**跑完整 `anomaly-detection.sql`。正文仍是旧订单表，列名不能拿去填 lite。
 
 按顺序执行 [sql/anomaly-detection-lite/](../sql/anomaly-detection-lite/)：
 
@@ -56,11 +56,11 @@
 | 2 | `02-historical-baseline.sql` | hist_avg, hist_std |
 | 3 | `03-daily-series.sql` | 42 天日序列 → Agent 算 Q1/Q3 |
 
-每步替换占位符后 `execute_sql`，`tables: ["public.npd_booking_view"]`。表名已知，**禁止**先 `search_meta_data`。
+每步替换占位符后 `execute_sql`，`tables: ["dwd.dwd_hotel_order_channel_supplier_booking_mf"]`。表名已知，**禁止**先 `search_meta_data`。
 
-### 路径 B：完整 SQL（非 MCP 或本地 DB）
+### 路径 B：完整 SQL
 
-运行 [sql/anomaly-detection.sql](../sql/anomaly-detection.sql)，一次出结果。
+不要运行 [sql/anomaly-detection.sql](../sql/anomaly-detection.sql)。归因只用上面的 lite。
 
 ### 路径 C：analyse_query + 后处理
 
@@ -138,7 +138,7 @@
 | 归因型 | **否** | **结束**（或问一句要不要完整归因）。禁止因「为什么掉」就自动 2–4 |
 | 完整型 / gold | 任意 | **Phase 1→4**；门禁否须写「按完整归因执行」 |
 
-Phase 2 入口：`phases/02-dimension-drilldown.md`（MCP lite / BI 全量见该文）。
+Phase 2 入口：`phases/02-dimension-drilldown.md`（只跑 lite）。
 
 ## 禁止在此阶段
 

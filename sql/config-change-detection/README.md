@@ -37,7 +37,7 @@
 ## CDH / LCDH / SH 酒店级产量
 
 - `before_bks_compare_window` / `after_bks_compare_window`：机构或 CS 全量对比（原逻辑）
-- `before_hotel_bks` / `after_hotel_bks`：CDH/LCDH **仅 didahotelid**；SH **仅 supplierid+supplierhotelid 且本 client**
+- `before_hotel_bks` / `after_hotel_bks`：CDH/LCDH 用日志 `didahotelid` 对订单 `dida_main_hotel_id`；SH 用日志 `supplierid`+`supplierhotelid` 对订单 `supplier_id`+`supplier_hotel_id`，且本 client
 - SH MCP：`../config-change-detection-lite/detail/08-sh-hotel-bks-lite.sql`（n≥10 必跑）。完整 `config-change-detection.sql` 仍无 SH 酒店 join
 
 ## MCP 注意
