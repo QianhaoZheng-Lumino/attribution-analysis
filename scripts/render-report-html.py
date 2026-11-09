@@ -591,14 +591,20 @@ def _series_label(prefix: str) -> str:
     return cleaned.strip(" ；;，,。:：")
 
 
+_DAILY_PAIR = re.compile(rf"({_NUM})\s+/\s+({_NUM})")
+
+
 def daily_chart(table: dict) -> str:
-    """日均格里每一对「当前 / 对比」画一组条。历史日均、标准差不参与。"""
+    """日均格里每一对「当前 / 对比」画一组条。历史日均、标准差不参与。
+
+    斜杠两侧必须有空格。日期写成 8/25、10/5，没有空格，不能画成另一组条。
+    """
     raw = ""
     for row in table["rows"]:
         if row and plain(row[0]) == "日均" and len(row) > 1:
             raw = plain(row[1])
             break
-    matches = list(_PAIR.finditer(raw))
+    matches = list(_DAILY_PAIR.finditer(raw))
     if not matches:
         return ""
     rows: list[str] = []

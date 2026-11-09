@@ -61,6 +61,7 @@ description: >-
 | 归因型门禁是但大盘 / 仅 parent、无 focus `client_id` | 停。列出异动 | 🔴 CHECKPOINT 问指定 `client_id`；禁止自动 3a / 在线 / 限流 |
 | SH / SS / 限流 `{sid_list}` 为空 | 用 2b 锁定 SID，或 `02-sid` \|change\| Top3 | 禁止空 `IN ()`，该查询标「未验」 |
 | 准备手写 SQL 或 14 路 UNION | 停。改 Read **一个** lite 原文 | 已发出的结果作废，不得写入报告 |
+| 归因型 / 完整型已进 Phase 2，却要在对话里给终局归因，且骨架未过 `check-report-skeleton.py` / 未出 HTML | 停对话结论。继续查数或填 [04-report-skeleton.md](phases/04-report-skeleton.md) → check → `render-report-html.py` | 只回「进行中：已完成 X，缺 Y」。禁止 ES 六键或等价主因/已排除；禁止用「部分未验」顶替报告 |
 
 ## 快速开始
 
