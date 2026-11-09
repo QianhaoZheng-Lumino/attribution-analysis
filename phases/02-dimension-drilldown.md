@@ -116,9 +116,9 @@
 
 1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额。
 2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个文件，含结果为 0 的也要发。
-3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`。
+3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`；`{sid_list}` 已填时再加 `sql/csa-online-hours-lite/03-window-avg.sql`、`sql/csa-online-hours-lite/02-account-bks.sql`（Autoline；与限流同一套 SID；两文件拆开，禁止拼成一条）。
 
-`{sid_list}` 仍空时，从本波拿掉 `checklist/08-sh.sql`、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window.sql`。其余 checklist 照发。W2 不包含 2c 路径文件，也不包含任何 detail。`01-ss-supplier` 不等 `00-client-total`。`03-window-avg.sql` 在本波发送，不必等查价 WoW。
+`{sid_list}` 仍空时，从本波拿掉 `checklist/08-sh.sql`、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window.sql`、`csa-online-hours-lite/03-window-avg.sql`、`csa-online-hours-lite/02-account-bks.sql`。其余 checklist 照发。W2 不包含 2c 路径文件，也不包含任何 detail。`01-ss-supplier` 不等 `00-client-total`。渠道 `online-hours-lite/03-window-avg.sql` 在本波发送，不必等查价 WoW。
 
 ### W3 2b 方向已经写出
 

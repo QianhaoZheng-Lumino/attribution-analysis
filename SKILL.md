@@ -26,7 +26,7 @@ description: >-
 | **归因型** | 同上 | **否** | 🛑 STOP 停在 Phase 1。须用户再要「完整归因 / gold」才继续 |
 | **完整型** | 「完整归因」「按 gold 回归」「Phase 1→4」 | 任意 | **Phase 1→4 全跑**；门禁否须声明「按完整归因执行」 |
 
-**范围硬约束：** Phase 2–4（含 3a、在线时长、限流）**必须有 `client_id`**（或 parent 下已锁定的 focus client）。**大盘 Phase 1 不得自动进 3a / 在线 / 限流。** 归因型门禁过但范围仍是大盘 → 🔴 CHECKPOINT：列出异动，**问指定 client 后再 2–4**。
+**范围硬约束：** Phase 2–4（含 3a、在线时长、限流、CSA 自动上下线）**必须有 `client_id`**（或 parent 下已锁定的 focus client）。**大盘 Phase 1 不得自动进 3a / 在线 / 限流 / CSA 自动上下线。** 归因型门禁过但范围仍是大盘 → 🔴 CHECKPOINT：列出异动，**问指定 client 后再 2–4**。
 
 禁止把「确认参数后默认只跑 Phase 1」套到归因型（门禁过）或完整型。
 
@@ -59,7 +59,7 @@ description: >-
 | Phase 1 lite 任一步失败 | **串行**重跑该步（必须 01→02→03，禁止三步并行） | 缺哪步就缺哪项分数；禁止用单一环比凑结论 |
 | 探查型却准备进 2–4 | 停。输出 Phase 1 报告 | 🔴 CHECKPOINT 问是否继续；用户未明确同意 → 结束 |
 | 归因型门禁是但大盘 / 仅 parent、无 focus `client_id` | 停。列出异动 | 🔴 CHECKPOINT 问指定 `client_id`；禁止自动 3a / 在线 / 限流 |
-| SH / SS / 限流 `{sid_list}` 为空 | 用 2b 锁定 SID，或 `02-sid` \|change\| Top3 | 禁止空 `IN ()`，该查询标「未验」 |
+| SH / SS / 限流 / CSA 自动上下线 `{sid_list}` 为空 | 用 2b 锁定 SID，或 `02-sid` \|change\| Top3 | 禁止空 `IN ()`，该查询标「未验」 |
 | 准备手写 SQL 或 14 路 UNION | 停。改 Read **一个** lite 原文 | 已发出的结果作废，不得写入报告 |
 | 归因型 / 完整型已进 Phase 2，却要在对话里给终局归因，且骨架未过 `check-report-skeleton.py` / 未出 HTML | 停对话结论。继续查数或填 [04-report-skeleton.md](phases/04-report-skeleton.md) → check → `render-report-html.py` | 只回「进行中：已完成 X，缺 Y」。禁止 ES 六键或等价主因/已排除；禁止用「部分未验」顶替报告 |
 
@@ -166,10 +166,10 @@ Phase 1 进度:
 | 阶段 | 输入 | 输出 | 文件与硬规则 |
 |------|------|------|----------------|
 | Phase 2 定责 | Phase 1 报告、日期窗、`client_id` | 2b 定责 C/S/CS + 2c 结构 | [02-dimension-drilldown.md](phases/02-dimension-drilldown.md) → `sql/dimension-contribution-lite/`。只跑 lite。`{sid}` 是整数 `supplier_id`。不要跑 `dimension-contribution.sql`、`cross-validation-b.sql`。**2b 双门：** ≥10% 必跑 `14-sid-client-validation.sql`；写死 C/Dida 须家数≥70% 且无单 SID≥50%（[responsibility-model.md](responsibility-model.md)） |
-| Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite**：Read 对应 `checklist/` 或 `detail/` 原文只填占位符。3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
+| Phase 3 证据 | 2b 倾向 + `{sid_list}` | 3a/3b/3c/3d + 限流 + CSA 自动上下线；缺表标「未验」 | [03-evidence-verification.md](phases/03-evidence-verification.md)。**一次调用 = 一个 lite**：Read 对应 `checklist/` 或 `detail/` 原文只填占位符。3a 须填操作枚举+作用域；倾向 C 须出门禁（#26）。在线时长见 [online-hours-mapping.md](docs/online-hours-mapping.md)；CSA Autoline 见 [csa-online-hours-lite/README.md](sql/csa-online-hours-lite/README.md)；3d 见 [external-events-mapping.md](docs/external-events-mapping.md) + `sql/external-events-lite/` |
 | Phase 4 报告 | Phase 1–3 结论 | 成品 Markdown + 同名 HTML | 复制 [04-report-skeleton.md](phases/04-report-skeleton.md) 只填空；SOP [04-report.md](phases/04-report.md)。标题/表头锁定（#27）。填完先 `python scripts/check-report-skeleton.py`，通过后再 `python scripts/render-report-html.py`。HTML 是交出的文件；对话只回该 Markdown 里的 Executive Summary 和 HTML 路径。检查或渲染失败则不写 HTML，也不在对话里另写一版。探查型不走本行。**ES 先业务导语、六键人话**（[es-writing.md](docs/es-writing.md)）；后续动作编号只按 [es-cause-catalog.md](docs/es-cause-catalog.md) |
 
-SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（2b 锁定或 \|ΔBKS\|≥10%；无则 `02-sid` Top3）。
+SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` / CSA 自动上下线 `csa-online-hours-lite/03`·`02` **必填 `{sid_list}`**（2b 锁定或 \|ΔBKS\|≥10%；无则 `02-sid` Top3）。
 
 ## 查数波次
 
@@ -178,7 +178,7 @@ SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`*
 1. 一次 `execute_sql` = 一个 lite 文件。SQL 必须来自上一轮已经返回的 Read 原文，只替换占位符。语句里不出现 `--` 或 `#`。
 2. 同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。同一轮可以发送已经 Read 过的查询，并 Read 下一批最多 5 个文件。同一轮刚 Read 的文件，这一轮不能发。上一轮已经返回、还没发的查询，这一轮必须先发，凑满 5 条或发完为止。禁止为了算分、写定责或只 Read 文件而单独开一轮。算分和写定责放在发查询的同一轮。没有待发查询时，才可以只 Read。
 3. 某一条返回 500：只重试这一条。先按现有规则判断本轮是否已探活；探活成功则用同一文件原文、`timeout_seconds=30` 再跑一次。同批已经成功的结果保留，不重发。仍失败则这一条标「未验」，禁止写成 0。
-4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这三条标「未验」，禁止空 `IN ()`。
+4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`、`csa-online-hours-lite/03-window-avg`、`csa-online-hours-lite/02-account-bks`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这些标「未验」，禁止空 `IN ()`。
 5. Phase 1 失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
 
 ## 归因口径（Phase 3–4 必读）

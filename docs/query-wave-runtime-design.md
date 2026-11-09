@@ -41,7 +41,7 @@
 1. 一次 `execute_sql` = 一个 lite 文件。SQL 必须来自上一轮已经返回的 Read 原文，只替换占位符。语句里不出现 `--` 或 `#`。
 2. 同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。同一轮可以发送已经 Read 过的查询，并 Read 下一批最多 5 个文件。同一轮刚 Read 的文件，这一轮不能发。
 3. 某一条返回 500：只重试这一条。先按现有规则判断本轮是否已探活；探活成功则用同一文件原文、`timeout_seconds=30` 再跑一次。同批已经成功的结果保留，不重发。仍失败则这一条标「未验」，禁止写成 0。
-4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这三条标「未验」，禁止空 `IN ()`。
+4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`、`csa-online-hours-lite/03-window-avg`、`csa-online-hours-lite/02-account-bks`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这些标「未验」，禁止空 `IN ()`。
 5. Phase 1 失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
 
 ## 波次
@@ -70,9 +70,9 @@
 
 1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额，好让 W3 少等。
 2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个文件，含结果为 0 的也要发。
-3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`。
+3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`；`{sid_list}` 已填时再加 `sql/csa-online-hours-lite/03-window-avg.sql`、`sql/csa-online-hours-lite/02-account-bks.sql`（Autoline；两文件拆开）。
 
-`{sid_list}` 仍空时，从本波拿掉 SH（`checklist/08-sh.sql`）、`01-ss-supplier`、限流那一条。其余 checklist 照发。
+`{sid_list}` 仍空时，从本波拿掉 SH（`checklist/08-sh.sql`）、`01-ss-supplier`、限流那一条、CSA 自动上下线两条。其余 checklist 照发。
 
 W2 不包含 2c 路径文件，也不包含任何 detail。
 

@@ -127,7 +127,7 @@ Expected: FAIL，并指出 SKILL.md 与 Phase 2 缺「查数波次」。
 1. 一次 `execute_sql` = 一个 lite 文件。SQL 必须来自刚 Read 的原文，只替换占位符。语句里不出现 `--` 或 `#`。
 2. 同一轮 `execute_sql` 最多 5 条。Read 不计入这 5 条。一轮要么 Read 下一批最多 5 个文件，要么发送已经 Read 过的最多 5 条查询。
 3. 某一条返回 500：只重试这一条。先按现有规则判断本轮是否已探活；探活成功则用同一文件原文、`timeout_seconds=30` 再跑一次。同批已经成功的结果保留，不重发。仍失败则这一条标「未验」，禁止写成 0。
-4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这三条标「未验」，禁止空 `IN ()`。
+4. `{sid_list}` 为空时，不发 SH checklist、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window`、`csa-online-hours-lite/03-window-avg`、`csa-online-hours-lite/02-account-bks`。用现有规则补 SID（2b 锁定，或 `02-sid` 的 `|change|` Top3）。补不出来则这些标「未验」，禁止空 `IN ()`。
 5. Phase 1 失败重试必须 `01 → 02 → 03` 串行，禁止三步并行。
 ```
 
@@ -162,9 +162,9 @@ Expected: FAIL，并指出 SKILL.md 与 Phase 2 缺「查数波次」。
 
 1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额。
 2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个文件，含结果为 0 的也要发。
-3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`。
+3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`；`{sid_list}` 已填时再加 `sql/csa-online-hours-lite/03-window-avg.sql`、`sql/csa-online-hours-lite/02-account-bks.sql`（Autoline；两文件拆开）。
 
-`{sid_list}` 仍空时，从本波拿掉 `checklist/08-sh.sql`、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window.sql`。其余 checklist 照发。W2 不包含 2c 路径文件，也不包含任何 detail。`01-ss-supplier` 不等 `00-client-total`。`03-window-avg.sql` 在本波发送，不必等查价 WoW。
+`{sid_list}` 仍空时，从本波拿掉 `checklist/08-sh.sql`、`01-ss-supplier`、`rate-limit-lite/01-ss-supplier-window.sql`、`csa-online-hours-lite/03-window-avg.sql`、`csa-online-hours-lite/02-account-bks.sql`。其余 checklist 照发。W2 不包含 2c 路径文件，也不包含任何 detail。`01-ss-supplier` 不等 `00-client-total`。渠道 `online-hours-lite/03-window-avg.sql` 在本波发送，不必等查价 WoW。
 
 ### W3 2b 方向已经写出
 
@@ -369,6 +369,7 @@ SOP 第 6b 步整行换成：
 
 ```markdown
 6b. 辅助（在线时长）：`online-hours-lite/03-window-avg.sql` 在查数波次 W2 发送，不必等查价 WoW（**必填 client_id**；窗口 = Phase 1；**禁止 `AT TIME ZONE`**）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥1.5h**。source/remark 用 `04-window-source.sql`（`TIMESTAMPTZ '...+08'` 直接比较）。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
+6c. 辅助（CSA 自动上下线）：与 [03-evidence-verification.md](../phases/03-evidence-verification.md) §6c 同文；`csa-online-hours-lite/03`+`02` 拆开；结构 `{sid_list}` 必出；因果见 catalog **D6**；不得改 14→13
 ```
 
 MCP 注意里这条：

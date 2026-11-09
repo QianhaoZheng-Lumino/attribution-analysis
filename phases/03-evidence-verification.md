@@ -1,6 +1,6 @@
 # Phase 3：内部证据验证
 
-> 状态：SQL 已定稿；**14 类逐项必查**为强制 SOP。Phase 2 完成后执行。**无 `client_id`（大盘）禁止进入** 3a / 在线 / 限流。  
+> 状态：SQL 已定稿；**14 类逐项必查**为强制 SOP。Phase 2 完成后执行。**无 `client_id`（大盘）禁止进入** 3a / 在线 / 限流 / CSA 自动上下线。  
 > **MCP 硬规则：** 禁止手写 SQL 替代 checklist/detail；禁止 14 路 / 多表 UNION。一次 MCP = 一个文件原文。原文说明是 `/* */`；送出的语句里不要有 `--` 或 `#`，块注释内部也不要有。
 
 ## 目标
@@ -414,6 +414,7 @@ Lite：`sql/external-events-lite/`
 5. 【3c 准确率】**每案**先 `rate-accuracy-contribution-lite/01-total.sql`。`\|item_accuracy_delta_pp\| ≥ 5`（pp）→ 按 2c 路径跑维 + `issue/01` + `issue/02`；未过线写「已探测、未启动」。禁止用 precheck 量代替。独立，不混配置。见 [accuracy-issue-mapping.md](../docs/accuracy-issue-mapping.md)
 6. 辅助（限流/缓存）：**结构 SID 必出数**（2b 锁定或占 \|ΔBKS\|≥10%）→ `rate-limit-lite/01-ss-supplier-window.sql` **必填 `{sid_list}`**。`{sid_list}` 已填时该文件属于查数波次 W2。禁止全表 `ORDER BY`+`LIMIT 50` 代替结构 SID。SS 有价/请求 \|WoW\|>10% 只决定解读档。见 §5.10（涨方向/请求↓产量↑ **待研究**，仅报数；未过 10% 仍出表作排除）
 6b. 辅助（在线时长）：`online-hours-lite/03-window-avg.sql` 在查数波次 W2 发送，不必等查价 WoW；此发送规则覆盖 online-hours-mapping §6 旧的「等查价 WoW」触发（**必填 client_id**；窗口 = Phase 1；**禁止 `AT TIME ZONE`**）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥1.5h**。source/remark 用 `04-window-source.sql`（`TIMESTAMPTZ '...+08'` 直接比较）。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
+6c. 辅助（CSA 自动上下线 / Autoline）：**结构 SID 必出数**（与限流同一套 `{sid_list}`）→ `csa-online-hours-lite/03-window-avg.sql` + `02-account-bks.sql` **拆开各发一条**（禁止与订单表 JOIN；曾 43019）。`{sid_list}` 已填时属查数波次 W2。窗口 = Phase 1。**保留 JobAPI**（禁止抄 3a CSA detail 的 JobAPI 排除）。**异动：高产账号（过渡：对比窗 BKS≥5）上 \|Δh\|≥3h（双向）**；死号两窗日均都&lt;1h 不参与 3h。**因果（已拍）：** Autoline 开闭 → 同 SID **SS 请求与有价请求同向变、有价率大致不变** → **可解释产量同向变**（**涨跌对称**）。与限流（常打有价率）不同；与渠道在线 A5（只解释查价、不定产量）不同。**禁止**抄 A5。**时长与产量同向**（掉线+跌产，或上线+涨产，\|Δh\|≥3h）→ **可倾向作主因**（CS 链路；与平台共向并存时按 2b）。见 catalog **D6**。**不得**因此删除 3a CSA 或改 14→13。见 [csa-online-hours-lite/README.md](../sql/csa-online-hours-lite/README.md)
 7. 【3d 外部事件 D】若 [external-events-mapping.md](../docs/external-events-mapping.md) §5 触发（**A/B 已强 → 跳过，写「未查」**）：
    - **取国：** C/Dida → 2c `4_Country` Top1–3；**S/CS → `5_SID+Country`**（锁定 2b 主 SID，该 SID 内 Top1–3）。禁止 S/CS 用 `4_Country`。
    - 一国一调用 `external-events-lite/01-single-country-window.sql`
