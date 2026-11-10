@@ -47,7 +47,7 @@ MCP：Cursor Settings → MCP，或自己的 `~/.cursor/mcp.json`。URL / `agent
 4. 「为什么掉 / 归因」且门禁过，**并且有 `client_id`**（或 parent 下已锁定 focus）才自动 Phase 2–4。大盘禁止自动 3a / 在线时长 / 限流。
 5. 报告：复制 `phases/04-report-skeleton.md` 只填空。先跑 `python scripts/check-report-skeleton.py 报告.md`，通过后再跑 `python scripts/render-report-html.py 报告.md`，得到同名 HTML。检查或渲染失败则不写 HTML。ES 人话见 `docs/es-writing.md`；后续动作编号见 `docs/es-cause-catalog.md`。不要抄 gold 的旧 3a 表头。
 6. `execute_sql` 只 Read lite 原文填占位符；一次调用一个文件。语句里不要出现 `--` 或 `#`（`/* */` 内部也不要）。禁止 14 路 UNION。SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（结构 SID；禁止空 `IN ()`）。SH 禁止 `clientid`。禁止全表 LIMIT 50 写结构 SID「未覆盖/未返回」。
-7. 未支持：#23 机构供应商白名单快照禁止当 3a 证据；#3 DidaBase 没有，CS 查价用 SS 近似。LCDH 叫击穿兜底名单，不是白名单。
+7. CS 含供应商白名单日志（与开关同一行，不新开 level）。只统计 I/D，不计算 U。#3 DidaBase 没有，CS 查价用 SS 近似。LCDH 叫击穿兜底名单，不是白名单。
 8. 口径入口是 `SKILL.md`，不是 backlog。回归只用 `examples/gold-*.md`。
 9. **装完先做「权限自测」**（下一节）。不同账号表权限不同；缺表就缺对应证据线，不要等跑到 Phase 3 才发现。
 
@@ -65,7 +65,7 @@ MCP：Cursor Settings → MCP，或自己的 `~/.cursor/mcp.json`。URL / `agent
 | MCP 500 / 超时 | **≠ 没权限**（SQL 太重或网关超时） | 必须用下面的轻量探测；仍 500 再报平台 |
 | 查询成功但 0 行 | 表权限多半有，行级过滤把 client 滤掉了 | 换一个你有权限的 client 再试 |
 
-`search_meta_data` 搜不到 ≠ 没权限。`configuration.wolf_rateadjust_hotel_log`、`rateaccuracy.channel_online_states_new` 元数据常为 0 条，以 `execute_sql` 为准。
+`search_meta_data` 搜不到 ≠ 没权限。`configuration.wolf_rateadjust_hotel_log`、`rateaccuracy.channel_online_states_new`、`ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i` 元数据常为 0 条，以 `execute_sql` 为准。
 
 **探测 SQL（每张表只跑这一句）：**
 
@@ -77,7 +77,7 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 
 **最低可用（只能看有没有掉产）：** `dwd.dwd_hotel_order_channel_supplier_booking_mf`
 
-**完整归因建议一次测完（P0+P1，17 张）：**
+**完整归因建议一次测完（P0+P1，18 张）：**
 
 | 优先级 | 表 | 缺了会怎样 |
 |--------|-----|------------|
@@ -90,6 +90,7 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 | P1 | `configuration.wolfl2lconfiglog` | CSLRC 未验 |
 | P1 | `configuration.bottom_margin_log` | C/S Bottom 未验 |
 | P1 | `configuration.client_configuration_change_log` | Configuration 未验 |
+| P1 | `ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i` | CS 供应商白名单未验（开关清单仍可单独查） |
 | P1 | `ads.ads_hotel_monitor_rate_search_statistic_by_client_id` | 机构级 DidaBiz 查价走 funnel fallback |
 | P1 | `public.clientsupplierhotelcallcountsummary` | SS 查价（CS 近似）看不了 |
 | P1 | `data_ovs.didamonitor_funnel_client_country` | ads 失败时国家 PPS 没退路 |
@@ -99,7 +100,7 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 | P1 | `public.clientleadtimecallcount` | QPS × leadtime 次要下钻 |
 | P1 | `public.clientnationalitycallcount` | QPS × nationality 次要下钻 |
 
-三张 QPS 表是次要下钻，可后测。核心不要漏：P0 两张 + 配置 7 张 + 查验订 5 张（共 14 张）。
+三张 QPS 表是次要下钻，可后测。核心不要漏：P0 两张 + 配置 8 张 + 查验订 5 张（共 15 张）。
 
 **覆盖在线 / 限流 / 节假日再加 3 张（P2）：**
 
@@ -109,7 +110,7 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 | `dws.dws_hotel_flow_didamonitor_supplier_csa_di` | SS 限流 / 缓存做不了 |
 | `ads.ads_marketing_calendar_event_wide_d_f` | Phase 3d 节假日外部事件做不了 |
 
-**一次性复制（20 张）：**
+**一次性复制（21 张）：**
 
 ```
 dwd.dwd_hotel_order_channel_supplier_booking_mf
@@ -121,6 +122,7 @@ configuration.wolfl2lclientlevelconfiglog
 configuration.wolfl2lconfiglog
 configuration.bottom_margin_log
 configuration.client_configuration_change_log
+ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i
 ads.ads_hotel_monitor_rate_search_statistic_by_client_id
 public.clientsupplierhotelcallcountsummary
 data_ovs.didamonitor_funnel_client_country

@@ -35,7 +35,7 @@
 
 | # | Level | lite 文件 | MCP 稳定性 | 典型 fallback | 报告措辞（500 时） |
 |---|-------|-----------|------------|---------------|-------------------|
-| 1 | CS | `checklist/01-cs.sql` | ✅ 稳定 | — | — |
+| 1 | CS | `checklist/01-cs.sql`；白名单 `checklist/01-cs-whitelist.sql` | ✅ 开关稳定；白名单 2026-11-10 可读 | `detail/01-cs-whitelist-detail.sql`（仅 I/D） | 白名单 500 则 CS 这一类未验，禁止只凭开关写成已排除 |
 | 2 | C | `checklist/02-c.sql` | ✅ 稳定 | — | — |
 | 3 | S | `checklist/03-s.sql` | ✅ 稳定 | `detail/03-s-detail.sql` | 全局 LIMIT 30；默认弱/背景 |
 | 4 | CSA | `checklist/04-csa.sql` | ✅ 稳定 | `detail/04-csa-detail.sql` | detail 500 → BI |

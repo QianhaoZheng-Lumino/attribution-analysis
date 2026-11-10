@@ -49,7 +49,7 @@ Phase 1/2 订单产量用上一张 `dwd` 表 + `execute_sql`。不要改回旧�
 | configuration.wolfl2lconfiglog | 机构特殊配置 | CSLRC |
 | configuration.bottom_margin_log | 兜底 margin | C Bottom, S Bottom |
 | configuration.client_configuration_change_log | Wolf2.0 系统参数 | Configuration |
-| （待建日志）机构供应商白名单 | client × supplier 供给开关 | **#23** | **现为当前配置快照，不是 log**。窗口内无法 before/after，**禁止**当 3a 证据。用户将与技术改日志表后再写入表名/字段 |
+| ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i | CS 供应商白名单操作。只统计 I 新增、D 删除，不计算 U。与开关同一 Level | CS |
 | crm.client_info_ods | client 范围 pid | — |
 | public.clientsupplierhotelcallcountsummary | **CS 级查价（SS 层近似 CS 视角）** | clientid, supplierid, date, hotelcallamount（total_search）, availcallamount（avail_search） | 已嵌入 config SQL；请求量大于 DidaBiz |
 | ads.ads_hotel_monitor_rate_search_statistic_by_client_id | **C 级 DidaBiz 查价** | client_id, **dt（text YYYY-MM-DD）**, client_pps, available_client_pps；另有 biz_type / qps。MCP：字符串滤 `dt`，勿 `stat_date`、勿 `dt::date` | 已嵌入 `00-client-total.sql` |

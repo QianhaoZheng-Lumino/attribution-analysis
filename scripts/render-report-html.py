@@ -334,7 +334,7 @@ def build_mast(blocks: list[dict], h1: str, quote: str) -> tuple[str, str, str]:
 
 TAG_COLUMNS = {"信号", "强度", "置信度"}
 LEVEL_LABELS = {
-    "CS": "机构供应商",
+    "CS": "机构供应商CS / 供应商加白",
     "C": "机构",
     "S": "供应商",
     "CSA": "机构供应商账号",
@@ -371,6 +371,9 @@ def level_html(cell: str) -> str:
     label = LEVEL_LABELS.get(code)
     if not label:
         return ""
+    # CS 标签已含代号，不再追加「 CS」
+    if code == "CS":
+        return html.escape(label)
     return f"{html.escape(label)} {inline(cell)}"
 
 
@@ -765,6 +768,9 @@ def without_level_labels(rows: list[list[str]]) -> list[list[str]]:
         if col < len(copied):
             text = copied[col]
             for code, label in labels:
+                if code == "CS" and text == label:
+                    copied[col] = code
+                    break
                 prefix = f"{label} "
                 if text.startswith(prefix) and text[len(prefix):] == code:
                     copied[col] = code

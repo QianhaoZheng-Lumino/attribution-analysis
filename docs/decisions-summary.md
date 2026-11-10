@@ -138,9 +138,9 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - **不是「看到配置变了就定责」**，要 **变更前后产量/查价验证**
 - **输出配置证据清单 + 信号强度解读**，**不做**单一「30% 自动确认 Dida」公式
 - MCP 大 SQL 易 500 → 用 **`config-change-detection-lite/`** 分批查
-- **机构供应商白名单（#23）：** 现为当前配置、非日志 → **不进 3a**；等改成 log 后再纳入
+- **供应商白名单（#23，2026-11-10）：** 日志表已可读，**并进第 1 行 CS**，不新开 Level。表 `ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i`。只统计 I 和 D，不计算 U。同一秒又新增的删除不是操作。请求和产量从操作次日看。见 [03-evidence-verification.md](../phases/03-evidence-verification.md)
 - **3a CSA vs Autoline（2026-11-09）：** **不删** 3a CSA、不改 14→13。3a CSA 排除 JobAPI（人工账号开关房/调价）；`csa-online-hours-lite` 保留 JobAPI（自动上下线时长，D6）。双轨互补，禁止互相否定。见 [csa-online-hours-lite/README.md](../sql/csa-online-hours-lite/README.md)
-- **Autoline 报告节（2026-11-09）：** 对齐限流 **必留节**；checker 硬要求 H4 + 证据行。无 `{sid_list}` / 未跑用写法 1（表头保留、一行 `—`、解读写未查）。禁止删整节。
+- **Autoline 报告节（2026-11-09 / 2026-11-10）：** 对齐限流 **必留节**；checker 硬要求 H4 + 证据行。无 `{sid_list}` / 未跑用写法 1（表头保留、一行 `—`、解读写未查）。禁止删整节。**不要**再写「CSA 自动上下线备注」段落。
 
 ### 5.2 14 类 Level（查优先级顺序）
 
@@ -153,7 +153,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 
 | Level | 数据源 | 含义 |
 |-------|--------|------|
-| CS/C/S/CSA | wolf_rateadjust_log | 开关房、调价、提前天数、新上线 |
+| CS/C/S/CSA | wolf_rateadjust_log；CS 另含供应商白名单日志 | 开关房、调价、提前天数、新上线；白名单只认窗口内 I/D |
 | CBD/SBD | wolf_rateadjust_log | 预订日期窗口。**CBD = C**（机构窗上的加减价/开关）；detail 必读 `remark` |
 | CDH/LCDH | wolf_rateadjust_hotel_log | 机构侧酒店批量调整 / 击穿兜底 |
 | SH | wolf_rateadjust_hotel_log | 供应商侧酒店批量（≥10 家） |

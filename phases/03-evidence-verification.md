@@ -42,7 +42,7 @@
 
 | Level | 含义 | 数据源 |
 |-------|------|--------|
-| CS | ClientSupplier 链路：开关房/调价/新 supplier | wolf_rateadjust_log |
+| CS | ClientSupplier 链路：开关房/调价/新 supplier，以及供应商白名单 I/D | wolf_rateadjust_log；白名单日志见下文 |
 | C | Client 机构 | wolf_rateadjust_log |
 | S | Supplier 全局 | wolf_rateadjust_log |
 | CSA | ClientSupplierAccount | wolf_rateadjust_log |
@@ -71,9 +71,9 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 |------|--------|--------|
 | **Wolf2.0配置** | Configuration 这 14 个 key | 白名单 |
 | **击穿兜底名单** | LCDH 新增/删除的 hotel | 白名单 |
-| **机构供应商白名单** | #23，client×supplier 供给快照，未纳入 3a | —（仅此项可用「白名单」） |
+| **供应商白名单** | CS 的另一张日志：这条 client×supplier 能否售卖 | LCDH、Wolf2.0配置、Skill 权限白名单 |
 
-**机构供应商白名单（#23 · 未纳入）：** 可能影响 CS 供给/产量，但库里目前是 **当前配置快照，不是变更日志**，窗口内无法 before/after。**禁止**查快照当 3a 证据。等用户与技术落成日志表后再加 checklist。勿与 LCDH 击穿兜底名单、勿与 Wolf2.0配置、勿与 Skill 权限白名单混称。
+**供应商白名单并进 CS（2026-11-10）：** 不新开 Level。清单是 `checklist/01-cs-whitelist.sql`，和 `checklist/01-cs.sql` 一起发，结果填进第 1 行。细则见下面「CS 供应商白名单特别提示」。
 
 ### ⚠️ 14 类逐项必查（强制，不可省略）
 
@@ -81,7 +81,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 
 1. Phase 3 **必须输出 14 行清单**，每一 level **一行**；`event_count=0` 也要写「无」并标 ✓，**禁止只报 CS/C/CDH**。
 2. **执行顺序（MCP 分批）：**
-   - **Step A** 按 [02-dimension-drilldown.md](02-dimension-drilldown.md)「查数波次」W2 发送 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`（**禁止** 14 路 UNION；一次调用一个文件；同一轮最多 5 条）
+   - **Step A** 按 [02-dimension-drilldown.md](02-dimension-drilldown.md)「查数波次」W2 发送 `sql/config-change-detection-lite/checklist/01-cs.sql` … `14-configuration.sql`，并发送 `checklist/01-cs-whitelist.sql`（**禁止** 14 路 UNION；一次调用一个文件；同一轮最多 5 条）。白名单仍算第 1 行 CS
    - **Step A'** `02-client-before-after-bks.sql` 与 Step A 同属 W2，不等 Step A 全部结束
    - **Step B** checklist 已返回后，按查数波次 W4 发送过线 detail。对 `event_count > 0` 的 level，按 `sql/config-change-detection-lite/README.md` Step 3 表跑列出的 detail 路径（**CBD 必跑** `detail/05-cbd-detail.sql`，**必须读 `remark` + 比 last_margin**；**S Bottom 必跑** `detail/13-s-bottom-detail.sql`，**禁止抄 C Bottom**）。10/11/04 必须 Read `detail/10-l2l-detail.sql`、`detail/11-cslrc-detail.sql`、`detail/04-csa-detail.sql`；禁止手写 last_level 列。同一轮最多 5 条。
    - **Step B'（CDH/LCDH/SH 必跑）** CDH/LCDH：`event_count > 0` 跑 **`detail/07-cdh-hotel-bks-lite.sql`** / **`detail/09-lcdh-hotel-bks-lite.sql`**。酒店家数只数日志，产量按订单 `dida_main_hotel_id` = 日志 `didahotelid` 汇总。SH：`event_count ≥ 10` 跑 **`detail/08-sh-hotel-bks-lite.sql`**（日志 `supplierid`+`supplierhotelid` 对订单 `supplier_id`+`supplier_hotel_id`；日志 `didahotelid` 恒为 0，禁止用 `dida_main_hotel_id` 或 `clientid` 滤日志；`<10` 不跑不解读；`>50000` 或 MCP 500 → BI）。解读优先 `before/after_hotel_bks`。
@@ -96,7 +96,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 
 | # | Level | 必查数据源 | 清单字段 |
 |---|-------|-----------|----------|
-| 1 | CS | wolf_rateadjust_log | 条数 / 开关房·调价 / before→after bks |
+| 1 | CS | wolf_rateadjust_log；`ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i` | 开关条数 + 白名单 I/D / 开关房·调价或白名单新增·删除 / before→after bks |
 | 2 | C | wolf_rateadjust_log | 同上 |
 | 3 | S | wolf_rateadjust_log | 同上 |
 | 4 | CSA | wolf_rateadjust_log | 同上 |
@@ -110,6 +110,20 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 | 12 | **C Bottom** | bottom_margin_log (Client) | **margin 变化（机构全量）** |
 | 13 | S Bottom | bottom_margin_log (Supplier) | margin 变化 |
 | 14 | Configuration | client_configuration_change_log | 14 key |
+
+**CS 供应商白名单特别提示：**
+
+- 与开关同一行 CS。`checklist/01-cs.sql` 和 `checklist/01-cs-whitelist.sql` 都要发。报告不增加第 15 行。
+- 表 `ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i`。只用 `update_time`、`op_type`、`client_id`、`supplier_id`。无 `{sid_list}`。`snapshot_dt` 不参与过滤。
+- 源数据 `update_time` 是毫秒。入库后这一列是 timestamptz，接口返回时又显示成毫秒。SQL 用 `update_time::date`，禁止再除以 1000。
+- 这是强制 CS：只有配了白名单，这条链路才能卖。只看 I 和 D，不计算 U。I 新增会增加该链路 SS 请求量，产量可能增加；D 删除会减少 SS 请求量，也会减少产量。
+- 同一 `client_id` + `supplier_id` 在同一 `update_time` 既有 D 又有 I：不当删除，也不当新增。不计入删除家数、新增家数。
+- 操作多在下午或傍晚，当天请求还在。从操作次日看该 SID 的 SS 请求和产量。当天没按方向变，不写成反向。
+- `event_count` 是窗口内 I 和 D 的行数。大于 0 才跑 `detail/01-cs-whitelist-detail.sql`。再用这些 `supplier_id` 跑 `detail/cs-supplier-bks.sql`。不在已查 `{sid_list}` 里的，用这些 id 再跑 `search-attribution-lite/01-ss-supplier.sql`。同一秒成对的 I/D 不拿去对请求和产量。
+- 次日起 I 且该 SID 的 SS 请求上升、产量上升 → 强，操作写「白名单新增」。次日起 D 且 SS 请求下降、产量下降 → 强，操作写「白名单删除」。请求量没有按这个方向变，不把白名单写成主因。
+- 第 1 行 `n` 写成「开关 {开关条数}；白名单新增 {n_sid_insert} 删除 {n_sid_delete}」。同一秒成对的供应商从这两个家数里去掉。
+- 两张清单有一张 500，CS 这一类未验。禁止用另一张的 0 写成整格已排除。
+- 不要叫 LCDH、Wolf2.0配置、Skill 权限白名单。
 
 **SH 特别提示：**
 
@@ -142,7 +156,7 @@ Configuration 监控 **14** 个 **Wolf2.0配置** key（`created_at`；mandatory
 - 窗口内 **连续多次调整**（如 5.4→5.6→5.5→5.4）仍算 **一条强线索**，需在清单单独列出每次变更时间与方向。
 - 信号强度：时间吻合 + margin 变动 + 机构产量/查价同向 → **强～中**（与仅 CS 小 supplier 关房但 0 单不同）。
 
-Lite 扫描脚本：`sql/config-change-detection-lite/checklist/`（14 个单文件，见该目录 README）
+Lite 扫描脚本：`sql/config-change-detection-lite/checklist/`（14 个 level 文件，另加 `01-cs-whitelist.sql`，见该目录 README）
 
 ---
 
@@ -167,8 +181,8 @@ Lite 扫描脚本：`sql/config-change-detection-lite/checklist/`（14 个单文
 
 ```
 Phase 3a 进度:
-- [ ] 14/14 checklist（Read 原文；**SH 必填 {sid_list}**）
-- [ ] n>0 跑 detail（CBD=05-cbd-detail；CS/C 含 remark）
+- [ ] 14/14 checklist（Read 原文；CS 含 `01-cs` 与 `01-cs-whitelist`；**SH 必填 {sid_list}**）
+- [ ] n>0 跑 detail（CBD=05-cbd-detail；CS 开关含 remark；CS 白名单 I/D 跑 `01-cs-whitelist-detail`）
 - [ ] CDH/LCDH n>0、SH n≥10 跑 hotel_bks；≈0 不得定责
 - [ ] 14 行填满：操作枚举 + 作用域 + Δmargin/remark + 信号
 - [ ] 倾向 C 出门禁打勾；不通过则主因不得写 C
@@ -183,7 +197,7 @@ Phase 3a 进度:
 | **供应商** | S、SBD、S Bottom、SH | 验证 B 多 client 才定 S；**SH 看 hotel_bks**，≈0 → 弱 |
 | **酒店批** | CDH、LCDH | 看 `hotel_bks`，≈0 → 弱 |
 
-**操作枚举（必填，只许这些词）：** `关房 | 开房 | 加价 | 降价 | 等级变 | 限售 | 其他 | 无 | 未验`
+**操作枚举（必填，只许这些词）：** `关房 | 开房 | 加价 | 降价 | 等级变 | 限售 | 白名单新增 | 白名单删除 | 其他 | 无 | 未验`
 
 **操作怎么认（同一条日志只取一个，按序）：**
 
@@ -194,7 +208,8 @@ Phase 3a 进度:
 5. L2L：`last_level（LAG(level)）` ≠ `level` → **等级变**；相等 → **其他**。数字变大 = 降级（如 2→3，跌产同向）；数字变小 = 升级（如 3→2，涨产同向）
 6. CSLRC：detail 按 SID 聚合。`n_limit>0` → **限售**；仅 `n_open>0` → **其他**。条数以 checklist COUNT 为准
 7. Configuration 监控 key 有变更 → **其他**（信号按 PPS/QPS mapping）
-8. 对不上 → **其他**；n=0 → **无**；MCP 500 → **未验**
+8. 供应商白名单：窗口内该 supplier 有 I → **白名单新增**；有 D → **白名单删除**。同一 `update_time` 既有 I 又有 D → 不是操作。不计算 U。请求和产量从操作次日看
+9. 对不上 → **其他**；n=0 → **无**；MCP 500 → **未验**
 
 `status=1` **不是**操作名。开着的窗上调 margin = 加价/降价。禁止信号列写「开窗/调价」。
 
@@ -209,12 +224,13 @@ Phase 3a 进度:
 
 C、CS、CSA、S、C Bottom、S Bottom 直接读 detail 里的上一条列，禁止再查历史。结果里没有该列或值为空，都算空：先走第 4 条 remark，再不行写未验。禁止用备注里的减点反推上一条数值。CBD 的 detail 仍只有当前 margin，按上表比。**不要**把 LAG 写进 checklist。
 
-**一行 level 多条日志：** 跌产填最狠的（关房 > 加价 > 其它）；涨产填开房 > 降价 > 其它。其余 footnote。相对对比期仍贵的「回撤」**禁止**主操作写成降价。
+**一行 level 多条日志：** 跌产填最狠的（关房 > 白名单删除 > 加价 > 其它）；涨产填开房 > 白名单新增 > 降价 > 其它。其余 footnote。相对对比期仍贵的「回撤」**禁止**主操作写成降价。
 
 **B 同向（方向表，不钉 +10%/−2pp/0.5）：** 见 [config-search-precheck-mapping.md](../docs/config-search-precheck-mapping.md)。  
 跌产：加价兑现 = 查验比↑或验价↓；关房兑现 = 有价率↓；等级变兑现 = BKS 同向。  
 涨产：降价兑现 = 查验比↓或验价↑；开房兑现 = 有价率↑。  
-同向 → 强（可主因）。反向 → inconclusive / 「降价未拉回」，**禁止**「已确认」也**禁止**假装无配置。
+同向 → 强（可主因）。反向 → inconclusive / 「降价未拉回」，**禁止**「已确认」也**禁止**假装无配置。  
+白名单新增：从操作次日看，该 supplier 的 SS 请求↑，产量可↑；请求↑且产量↑ → 强。白名单删除：次日起 SS 请求↓且产量↓ → 强。同一秒又新增的删除不是操作。请求量未按这个方向变 → 不把白名单写成主因。
 
 **3a 14 行必填列：** `# / Level / n / 操作(枚举) / 作用域 / Δmargin 或 remark / 信号`（**7 列**，不写 SQL 路径）  
 缺一列 = 3a 未收口。`n>0` 必跑 detail；wolf **必须读 remark**。执行按 checklist 原文，路径不进成品报告。
@@ -226,6 +242,7 @@ C、CS、CSA、S、C Bottom、S Bottom 直接读 detail 里的上一条列，禁
 - [ ] 若有降价（**C / CBD / C Bottom**）：B **未**按降价兑现（查验比未↓ 且 验价未↑）
 - [ ] 若有关房：B **未**按关房兑现（有价率未↓）
 - [ ] 链路关房/加价要么零单，要么已写入并列（不得写「无配置」）
+- [ ] 链路白名单新增/删除若已与该 SID 的 SS 请求和产量同向，不得写「无配置」
 
 有机构加价且查验比↑（或验价↓）→ 走合成序号 3，**出门禁不通过**。  
 有机构降价（**含 C Bottom**）且查验比↓（或验价↑）→ 走合成序号 3 涨产对称，**出门禁不通过**；主因写 **Dida（竞争力改善）**，**禁止**因 Δmargin 点数小标弱，**禁止**再写「倾向 C」。
@@ -259,6 +276,8 @@ Phase 3 **不自动改写成「确认 Dida」**，而是输出**配置证据清�
 | 信号 | 强度 | 说明 |
 |------|------|------|
 | CS/C/CSA **关房** + 时间吻合 + after 产量/查价明显下降 | **强** | 链路中断，优先怀疑 Dida 配置 |
+| **白名单新增** + 次日起该 SID 的 SS 请求↑ + 产量↑ | **强** | 这条 CS 从不能卖变成能卖 |
+| **白名单删除** + 次日起该 SID 的 SS 请求↓ + 产量↓ | **强** | 这条 CS 被移出可售范围。同一秒又新增的不算 |
 | **C / CBD / C Bottom 加价** + 时间吻合 + 机构 **查验比↑**（avail 稳、rp↓）+ BKS↓ | **强** | **Dida 价劣**，可作主因。**禁止标弱**。`status=1` 不是「开窗所以弱」 |
 | **C / CBD / C Bottom 降价** + 验价↑ / 查验比↓ | **强** | **与 C 同级**，涨产可作主因（竞争力改善）。**禁止**仅因点数小标弱。跌产则「降价未拉回」 |
 | **Configuration** PPS/映射类变更 + DidaBiz 查价结构变化 | **强** | 系统性，影响整个 client |
@@ -273,6 +292,7 @@ Phase 3 **不自动改写成「确认 Dida」**，而是输出**配置证据清�
 - 2b = **C 或 Dida** + **CBD/C/C Bottom 加价** + 查验比同向 → **Dida（价劣）主因**，**禁止**再走「倾向 C」
 - 2b = **C 或 Dida** + **C/CBD/C Bottom 降价** + 验价↑或查验比↓ → **Dida（竞争力改善）主因**，**禁止**再走「倾向 C」，**禁止**因点数小改并列/弱
 - 2b = **CS** + Phase 3 发现 **CS 关房或加价** → **确认 Dida（CS 链路配置）**
+- 2b = **CS** + **白名单新增或删除**且该 SID 的 SS 请求、产量同向 → **确认 Dida（CS 链路配置）**
 
 不需要统一「30%」阈值。关房与加价/降价 **同等**；**C Bottom 与 C 同级**。禁止把调价默认成弱。
 

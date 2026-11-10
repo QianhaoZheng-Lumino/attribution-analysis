@@ -9,9 +9,9 @@
 ## 推荐流程
 
 ```
-Step 0  填占位符（client_id, analysis_date, w_start/w_end, 产量窗口；**SH 必填 {sid_list}**；SS/限流用同一套，见 params-template）
+Step 0  填占位符（client_id, analysis_date, w_start/w_end, 产量窗口；**SH 必填 {sid_list}**；SS/限流用同一套，见 params-template）。供应商白名单只用 client_id + 配置窗，无 sid_list
 Step 1  02-client-before-after-bks.sql     → 机构级 before/after（必做）
-Step 2  checklist/01-cs.sql … 14-*.sql     → 14 行清单（按查数波次 W2，同一轮最多 5 条，含 0 也要跑；**Read 文件原文执行，禁止手写**）
+Step 2  checklist/01-cs.sql … 14-*.sql，外加 checklist/01-cs-whitelist.sql → 仍是 14 行清单（白名单并进第 1 行 CS；按查数波次 W2，同一轮最多 5 条，含 0 也要跑；**Read 文件原文执行，禁止手写**）
 Step 3  event_count > 0 的 level           → 按下表跑明细
 Step 3' CDH/LCDH event_count > 0           → detail/07-cdh-hotel-bks-lite.sql / 09-lcdh-hotel-bks-lite.sql
         SH event_count ≥ 10                → detail/08-sh-hotel-bks-lite.sql（<10 不跑；>50000 → BI）
@@ -22,6 +22,7 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 | COUNT 文件 | n>0 跑 |
 |------------|--------|
 | 01-cs | detail/01-cs-detail.sql（含 `last_status` / `last_margin`） |
+| 01-cs-whitelist | detail/01-cs-whitelist-detail.sql（仅 I/D；仍填进第 1 行 CS，不新开 Level） |
 | 02-c | detail/02-c-detail.sql（含 `last_status` / `last_margin`） |
 | 03-s | detail/03-s-detail.sql（全局 LIMIT 30；含上一条；同一天多条都保留；默认弱/背景） |
 | 04-csa | detail/04-csa-detail.sql（含 `last_status` / `last_margin`） |
@@ -43,6 +44,7 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 | `00-resolve-clients.sql` | parent_client_id → client_id 列表 |
 | `02-client-before-after-bks.sql` | 机构产量对比 |
 | `checklist/01–14-*.sql` | **14 类逐项 COUNT**（简化，无 LAG） |
+| `checklist/01-cs-whitelist.sql` | CS 供应商白名单 COUNT。与 01-cs 合成第 1 行，不单列 Level |
 | `detail/` | 有条目时按 Step 3 表读取对应明细；并非每个 level 都有配对文件 |
 | `detail/cs-supplier-bks.sql` | CS 链路 before/after 产量 |
 | `search/01-didabiz-pps-daily.sql` | DidaBiz 查价按日 |
@@ -54,7 +56,7 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 
 ```
 Phase 3 checklist 进度:
-- [ ] 01 CS          checklist/01-cs.sql
+- [ ] 01 CS          checklist/01-cs.sql + checklist/01-cs-whitelist.sql（仍是第 1 类）
 - [ ] 02 C           checklist/02-c.sql
 - [ ] 03 S           checklist/03-s.sql
 - [ ] 04 CSA         checklist/04-csa.sql
@@ -108,6 +110,8 @@ lite 的 `event_count` 可能**略高于**真实变更数（含重复快照）�
 | category | 产量 after 明显低于 before | 信号 |
 |----------|---------------------------|------|
 | 开关房（CS/C/CSA） | 是 | **强** → Dida |
+| 白名单新增 I，该 SID 的 SS 请求↑且产量↑ | 是 | **强** → Dida（CS） |
+| 白名单删除 D，该 SID 的 SS 请求↓且产量↓ | 是 | **强** → Dida（CS） |
 | **C/CBD 加价** + 查验比↑ | 是 | **强** → Dida 价劣；detail 读 `remark` |
 | Configuration（PPS 等） | 查价结构也变 | **强** |
 | C Bottom margin + 机构产量同向 | 是 | **强～中** |

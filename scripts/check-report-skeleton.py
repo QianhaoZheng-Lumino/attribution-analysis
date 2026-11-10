@@ -389,11 +389,11 @@ def check_file(path: Path) -> list[str]:
     elif re.search(r"\{A#", es_follow):
         pass
     elif not re.search(
-        r"目录\s+\*?\*?(?:A[1-7]|B[1-4]|C[1-3]|D[1-5]|E1)\*?\*?",
+        r"目录\s+\*?\*?(?:A[1-7]|B[1-4]|C[1-3]|D[1-7]|E1)\*?\*?",
         es_follow,
     ):
         errs.append(
-            "ES 后续动作须含「目录」+ 编号（A1–A7 / B1–B4 / C1–C3 / D1–D5 / E1）；"
+            "ES 后续动作须含「目录」+ 编号（A1–A7 / B1–B4 / C1–C3 / D1–D7 / E1）；"
             "先 Read docs/es-cause-catalog.md"
         )
 

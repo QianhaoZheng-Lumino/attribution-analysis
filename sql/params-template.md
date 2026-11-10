@@ -12,7 +12,7 @@ Agent 在跑 lite SQL 前，先按 Phase 1 相同规则计算日期，填入占�
 | `{parent_client_id}` | 父 client（仅 resolve 用） | 空或 `Agoda` |
 | `{analysis_date}` | 异动锚点 | `2026-03-20` |
 | `{w_start}` | 配置窗口起 = analysis_date - 1 | `2026-03-19` |
-| `{w_end}` | 配置窗口止 = analysis_date + 1 | `2026-03-21` |
+| `{w_end}` | 配置窗口止 = analysis_date + 1。CS 供应商白名单用同一对 `{w_start}` / `{w_end}`，无 `{sid_list}` | `2026-03-21` |
 | `{lag_start}` | L2L detail 专用 = w_start − 30 天 | `2026-06-10`（SnapEBK w_start=07-10） |
 | `{current_start}` | 当前期起 | `2026-03-20` |
 | `{current_end}` | 当前期止 | `2026-03-26` |
