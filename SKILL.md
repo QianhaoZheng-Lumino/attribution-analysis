@@ -42,6 +42,7 @@ description: >-
 - `{sid_list}` 留空 `IN ()`；只靠全表 `ORDER BY`+`LIMIT 50` 写结构 SID「未覆盖涨尾 / 未返回」
 - MCP 500 写成 event_count=0 或「已排除」；权限未证就把 0 行当成业务 0
 - 统计供应商白名单的 U；把 LCDH 叫白名单；当已有 #3 DidaBase 专用表
+- 用 `bottom_margin_log` 代替订单兜底命中率；C/CDH 降价前段命中率≥70% 且降幅不到 15pp 仍把该行标强
 - 抄 gold / case 的旧 3a 表头；ES 后续动作不按 [es-cause-catalog.md](docs/es-cause-catalog.md) 自编
 - ES 导语堆 `parent`/`WoW`/`SID`/`验证 B`/`CS`/`PPS`；或把机构查价 `|WoW|>10%` 从 ES 删掉。写法见 [docs/es-writing.md](docs/es-writing.md)
 - 把 `mcp.json`、对话导出、真实 key 写入仓库

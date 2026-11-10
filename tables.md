@@ -47,7 +47,8 @@ Phase 1/2 订单产量用上一张 `dwd` 表 + `execute_sql`。不要改回旧�
 | configuration.wolf_rateadjust_hotel_log | 酒店批量变更 | CDH, SH, LCDH |
 | configuration.wolfl2lclientlevelconfiglog | L2L 面纱 | L2L |
 | configuration.wolfl2lconfiglog | 机构特殊配置 | CSLRC |
-| configuration.bottom_margin_log | 兜底 margin | C Bottom, S Bottom |
+| configuration.bottom_margin_log | 兜底 margin **配置**变更日志 | C Bottom, S Bottom |
+| booking.channel_booking_reate_adjust | 订单各层调价；`bottom_margin` 非空且 ≠0 = **命中兜底**（与配置日志不同） | C/CDH 降价时的兜底命中率 |
 | configuration.client_configuration_change_log | Wolf2.0 系统参数 | Configuration |
 | ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i | CS 供应商白名单操作。只统计 I 新增、D 删除，不计算 U。与开关同一 Level | CS |
 | crm.client_info_ods | client 范围 pid | — |

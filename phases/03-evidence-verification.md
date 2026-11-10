@@ -184,6 +184,7 @@ Phase 3a 进度:
 - [ ] 14/14 checklist（Read 原文；CS 含 `01-cs` 与 `01-cs-whitelist`；**SH 必填 {sid_list}**）
 - [ ] n>0 跑 detail（CBD=05-cbd-detail；CS 开关含 remark；CS 白名单 I/D 跑 `01-cs-whitelist-detail`）
 - [ ] CDH/LCDH n>0、SH n≥10 跑 hotel_bks；≈0 不得定责
+- [ ] **C 或 CDH 操作=降价** → 跑兜底命中率（C：`detail/02-c-bottom-hit-rate.sql`；CDH：`detail/07-cdh-bottom-hit-rate.sql`）；按下文阈值改该行信号
 - [ ] 14 行填满：操作枚举 + 作用域 + Δmargin/remark + 信号
 - [ ] 倾向 C 出门禁打勾；不通过则主因不得写 C
 ```
@@ -232,6 +233,23 @@ C、CS、CSA、S、C Bottom、S Bottom 直接读 detail 里的上一条列，禁
 同向 → 强（可主因）。反向 → inconclusive / 「降价未拉回」，**禁止**「已确认」也**禁止**假装无配置。  
 白名单新增：从操作次日看，该 supplier 的 SS 请求↑，产量可↑；请求↑且产量↑ → 强。白名单删除：次日起 SS 请求↓且产量↓ → 强。同一秒又新增的删除不是操作。请求量未按这个方向变 → 不把白名单写成主因。
 
+**兜底命中率（仅 C / CDH 降价）：**
+
+- **含义：** 订单最终总 margin 被 C/S Bottom 下限抬高时，`booking.channel_booking_reate_adjust.bottom_margin` 非空且 ≠0 → 命中。命中率 = 命中单 / 总单。
+- **为何查：** 命中率高时，CDH/C 再降价也常被下限兜回，价格落不下去。
+- **触发：** 该行操作已判定为 **降价** 才跑。C → `detail/02-c-bottom-hit-rate.sql`（机构全量）。CDH → `detail/07-cdh-bottom-hit-rate.sql`（与 hotel_bks 同一批 `didahotelid`，池化命中/总单）。**不加价、不关房、不跑 CBD/LCDH/C Bottom 行。** CDH 无法判定是否降价 → 本校验标未验，不得用本条把信号改强。
+- **窗口：** 复用 `{compare_start/end}` / `{current_start/end}`（与 hotel_bks、Phase 1 相同）。
+- **算法（pp = 百分点）：** `before_rate = before_hit / before_total`；`after_rate = after_hit / after_total`；`delta_pp = (after_rate - before_rate) * 100`。任一段 `total=0` → 本校验未验。
+- **判定（只改有降价的那一行 C 或 CDH 的「信号」列）：**
+
+| 条件 | 该行信号 |
+|------|----------|
+| `before_rate` **&lt; 70%** | 本校验不降权；继续按 B 同向原规则 |
+| `before_rate` **≥ 70%** 且 `delta_pp` **≤ −15**（降幅够） | 降价有落地；继续按 B 同向原规则 |
+| `before_rate` **≥ 70%** 且 `delta_pp` **&gt; −15**（降幅不到 15pp） | **弱 / 未兑现**（视为无效）。**覆盖**「C 降价禁止因点数小标弱」；remark 写前后命中率与 Δpp |
+
+- **禁止：** 用配置表 `bottom_margin_log` 代替订单命中率；把 LCDH/供应商白名单叫兜底命中；因本条改写其他 level 的信号或直接改修正后主因（主因是否仍写该降价，另按出门禁与合成规则）。
+
 **3a 14 行必填列：** `# / Level / n / 操作(枚举) / 作用域 / Δmargin 或 remark / 信号`（**7 列**，不写 SQL 路径）  
 缺一列 = 3a 未收口。`n>0` 必跑 detail；wolf **必须读 remark**。执行按 checklist 原文，路径不进成品报告。
 
@@ -279,7 +297,7 @@ Phase 3 **不自动改写成「确认 Dida」**，而是输出**配置证据清�
 | **白名单新增** + 次日起该 SID 的 SS 请求↑ + 产量↑ | **强** | 这条 CS 从不能卖变成能卖 |
 | **白名单删除** + 次日起该 SID 的 SS 请求↓ + 产量↓ | **强** | 这条 CS 被移出可售范围。同一秒又新增的不算 |
 | **C / CBD / C Bottom 加价** + 时间吻合 + 机构 **查验比↑**（avail 稳、rp↓）+ BKS↓ | **强** | **Dida 价劣**，可作主因。**禁止标弱**。`status=1` 不是「开窗所以弱」 |
-| **C / CBD / C Bottom 降价** + 验价↑ / 查验比↓ | **强** | **与 C 同级**，涨产可作主因（竞争力改善）。**禁止**仅因点数小标弱。跌产则「降价未拉回」 |
+| **C / CBD / C Bottom 降价** + 验价↑ / 查验比↓ | **强** | **与 C 同级**，涨产可作主因（竞争力改善）。**禁止**仅因点数小标弱。跌产则「降价未拉回」。**例外：** C（及 CDH）降价若兜底命中率前段≥70% 且降幅不到 15pp → 该行必须 **弱 / 未兑现** |
 | **Configuration** PPS/映射类变更 + DidaBiz 查价结构变化 | **强** | 系统性，影响整个 client |
 | S Bottom / LCDH 变更 + 产量方向一致 | **中** | 需结合 markup 方向 |
 | 仅 **小幅**调价 **且** B 不同向（查验比/验价无明显变） | **弱** | 记录但不单独定责。**B 已同向时禁止因幅度标弱** |
@@ -290,7 +308,7 @@ Phase 3 **不自动改写成「确认 Dida」**，而是输出**配置证据清�
 - 2b = **C 或 Dida** + Phase 3 发现 **C/CBD/CS/Configuration** 等内部配置 → 报告写 **「证据支持 Dida（配置）」**，从「C 或 Dida」中排除纯 C
 - 2b = **C 或 Dida** + Phase 3 **无任何配置** + 查价正常 → 报告写 **「证据支持 C（渠道侧）」**，移交报告收口
 - 2b = **C 或 Dida** + **CBD/C/C Bottom 加价** + 查验比同向 → **Dida（价劣）主因**，**禁止**再走「倾向 C」
-- 2b = **C 或 Dida** + **C/CBD/C Bottom 降价** + 验价↑或查验比↓ → **Dida（竞争力改善）主因**，**禁止**再走「倾向 C」，**禁止**因点数小改并列/弱
+- 2b = **C 或 Dida** + **C/CBD/C Bottom 降价** + 验价↑或查验比↓ → **Dida（竞争力改善）主因**，**禁止**再走「倾向 C」，**禁止**因点数小改并列/弱。若 **C 降价** 兜底命中率判为 **弱 / 未兑现** → **不得**据此写竞争力改善主因
 - 2b = **CS** + Phase 3 发现 **CS 关房或加价** → **确认 Dida（CS 链路配置）**
 - 2b = **CS** + **白名单新增或删除**且该 SID 的 SS 请求、产量同向 → **确认 Dida（CS 链路配置）**
 

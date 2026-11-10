@@ -36,12 +36,12 @@
 | # | Level | lite 文件 | MCP 稳定性 | 典型 fallback | 报告措辞（500 时） |
 |---|-------|-----------|------------|---------------|-------------------|
 | 1 | CS | `checklist/01-cs.sql`；白名单 `checklist/01-cs-whitelist.sql` | ✅ 开关稳定；白名单 2026-11-10 可读 | `detail/01-cs-whitelist-detail.sql`（仅 I/D） | 白名单 500 则 CS 这一类未验，禁止只凭开关写成已排除 |
-| 2 | C | `checklist/02-c.sql` | ✅ 稳定 | — | — |
+| 2 | C | `checklist/02-c.sql` | ✅ 稳定 | 降价再跑 `detail/02-c-bottom-hit-rate.sql`（`booking.channel_booking_reate_adjust`） | 命中率 500 → 该校验未验，禁止仅凭降价标强 |
 | 3 | S | `checklist/03-s.sql` | ✅ 稳定 | `detail/03-s-detail.sql` | 全局 LIMIT 30；默认弱/背景 |
 | 4 | CSA | `checklist/04-csa.sql` | ✅ 稳定 | `detail/04-csa-detail.sql` | detail 500 → BI |
 | 5 | CBD | `checklist/05-cbd.sql` | ✅ 稳定 | — | — |
 | 6 | SBD | `checklist/06-sbd.sql` | ✅ 稳定 | `detail/06-sbd-detail.sql` | 全局 LIMIT 30；n=0 跳过 |
-| 7 | CDH | `checklist/07-cdh.sql` | ⚠️ 条件可用 | **`detail/07-cdh-hotel-bks-lite.sql`** | event_count>0 **必跑 hotel_bks**；仍 500 → BI |
+| 7 | CDH | `checklist/07-cdh.sql` | ⚠️ 条件可用 | **`detail/07-cdh-hotel-bks-lite.sql`**；降价再跑 `detail/07-cdh-bottom-hit-rate.sql` | event_count>0 **必跑 hotel_bks**；仍 500 → BI；命中率 500 → 该校验未验 |
 | 8 | SH | `checklist/08-sh.sql` | ⚠️ 大表；**必填 `{sid_list}`** | **`detail/08-sh-hotel-bks-lite.sql`** | 禁止 `clientid`；无 SID → 未跑；**n≥10 必跑 hotel_bks**；MCP 冒烟 ✅ 最大 6082 酒店；n>50000 或 500 → BI |
 | 9 | LCDH | `checklist/09-lcdh.sql` | ⚠️ 大表 | **`detail/09-lcdh-hotel-bks-lite.sql`** | 同 CDH |
 | 10 | L2L | `checklist/10-l2l.sql` | COUNT ✅ | `detail/10-l2l-detail.sql` | 明细走 `detail/10-l2l-detail.sql` |

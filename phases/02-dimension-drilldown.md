@@ -133,7 +133,7 @@
 
 ### W4 checklist 已返回
 
-只跑过线的 detail，每批最多 5 条。一般 level：`event_count > 0` 才跑配对 detail。SH：`event_count ≥ 10` 才跑 `detail/08-sh-hotel-bks-lite.sql`；`<10` 不跑；`>50000` 或 MCP 500 走现有 BI 兜底。CDH / LCDH：`event_count > 0` 才跑 `detail/07-cdh-hotel-bks-lite.sql` / `detail/09-lcdh-hotel-bks-lite.sql`。`event_count = 0` 不发 detail。S Bottom 只用 `detail/13-s-bottom-detail.sql`，禁止抄 C Bottom。CS 白名单：`checklist/01-cs-whitelist.sql` 的 `event_count > 0`（只含 I/D）才跑 `detail/01-cs-whitelist-detail.sql`，再用这些 `supplier_id` 跑 `detail/cs-supplier-bks.sql`。不在本波已查 `{sid_list}` 里的，用这些 id 再跑 `sql/search-attribution-lite/01-ss-supplier.sql`。
+只跑过线的 detail，每批最多 5 条。一般 level：`event_count > 0` 才跑配对 detail。SH：`event_count ≥ 10` 才跑 `detail/08-sh-hotel-bks-lite.sql`；`<10` 不跑；`>50000` 或 MCP 500 走现有 BI 兜底。CDH / LCDH：`event_count > 0` 才跑 `detail/07-cdh-hotel-bks-lite.sql` / `detail/09-lcdh-hotel-bks-lite.sql`。`event_count = 0` 不发 detail。S Bottom 只用 `detail/13-s-bottom-detail.sql`，禁止抄 C Bottom。CS 白名单：`checklist/01-cs-whitelist.sql` 的 `event_count > 0`（只含 I/D）才跑 `detail/01-cs-whitelist-detail.sql`，再用这些 `supplier_id` 跑 `detail/cs-supplier-bks.sql`。不在本波已查 `{sid_list}` 里的，用这些 id 再跑 `sql/search-attribution-lite/01-ss-supplier.sql`。**C 或 CDH 操作=降价**再跑 `detail/02-c-bottom-hit-rate.sql` / `detail/07-cdh-bottom-hit-rate.sql`（窗=compare/current；判定见 03）。
 
 ### 其余查询
 

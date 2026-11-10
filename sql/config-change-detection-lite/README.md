@@ -15,6 +15,7 @@ Step 2  checklist/01-cs.sql … 14-*.sql，外加 checklist/01-cs-whitelist.sql 
 Step 3  event_count > 0 的 level           → 按下表跑明细
 Step 3' CDH/LCDH event_count > 0           → detail/07-cdh-hotel-bks-lite.sql / 09-lcdh-hotel-bks-lite.sql
         SH event_count ≥ 10                → detail/08-sh-hotel-bks-lite.sql（<10 不跑；>50000 → BI）
+Step 3'' **C 或 CDH 操作=降价**           → detail/02-c-bottom-hit-rate.sql / detail/07-cdh-bottom-hit-rate.sql（窗口=compare/current；见 03 兜底命中率）
 Step 4  search/01-didabiz-pps-daily.sql     → 查价（可选，按日）
 Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 ```
@@ -23,12 +24,12 @@ Step 5  Agent 按 phases/03-evidence-verification.md 打信号强度
 |------------|--------|
 | 01-cs | detail/01-cs-detail.sql（含 `last_status` / `last_margin`） |
 | 01-cs-whitelist | detail/01-cs-whitelist-detail.sql（仅 I/D；仍填进第 1 行 CS，不新开 Level） |
-| 02-c | detail/02-c-detail.sql（含 `last_status` / `last_margin`） |
+| 02-c | detail/02-c-detail.sql（含 `last_status` / `last_margin`）；**操作=降价**再跑 `detail/02-c-bottom-hit-rate.sql` |
 | 03-s | detail/03-s-detail.sql（全局 LIMIT 30；含上一条；同一天多条都保留；默认弱/背景） |
 | 04-csa | detail/04-csa-detail.sql（含 `last_status` / `last_margin`） |
 | 05-cbd | detail/05-cbd-detail.sql（读 remark） |
 | 06-sbd | detail/06-sbd-detail.sql（全局 LIMIT 30；n=0 则跳过） |
-| 07-cdh | detail/07-cdh-hotel-bks-lite.sql（不是行 dump） |
+| 07-cdh | detail/07-cdh-hotel-bks-lite.sql（不是行 dump）；**操作=降价**再跑 `detail/07-cdh-bottom-hit-rate.sql` |
 | 08-sh | `detail/08-sh-hotel-bks-lite.sql`（不是行 dump）；event_count ≥ 10 必跑；<10 不解读；>50000 → BI |
 | 09-lcdh | detail/09-lcdh-hotel-bks-lite.sql |
 | 10-l2l | detail/10-l2l-detail.sql |
@@ -115,6 +116,7 @@ lite 的 `event_count` 可能**略高于**真实变更数（含重复快照）�
 | **C/CBD 加价** + 查验比↑ | 是 | **强** → Dida 价劣；detail 读 `remark` |
 | Configuration（PPS 等） | 查价结构也变 | **强** |
 | C Bottom margin + 机构产量同向 | 是 | **强～中** |
+| **C/CDH 降价** 且前段兜底命中率≥70%、降幅不到 15pp | — | **弱 / 未兑现**（该行无效） |
 | 小幅调价 **且** B 不同向 | 产量无明显变化 | **弱** |
 | MCP 500 / 无数据 | — | 标「BI 补查」，不单定责 |
 

@@ -139,6 +139,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - **输出配置证据清单 + 信号强度解读**，**不做**单一「30% 自动确认 Dida」公式
 - MCP 大 SQL 易 500 → 用 **`config-change-detection-lite/`** 分批查
 - **供应商白名单（#23，2026-11-10）：** 日志表已可读，**并进第 1 行 CS**，不新开 Level。表 `ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i`。只统计 I 和 D，不计算 U。同一秒又新增的删除不是操作。请求和产量从操作次日看。见 [03-evidence-verification.md](../phases/03-evidence-verification.md)
+- **兜底命中率（2026-11-10）：** 仅 **C / CDH 降价**。订单 `booking.channel_booking_reate_adjust.bottom_margin` 非空且 ≠0 为命中；率=命中/总单。窗=compare/current。C=机构全量；CDH=变更酒店池池化。前段≥70% 且 Δpp&gt;−15 → 该行 **弱 / 未兑现**。前段&lt;70% 不降权。见 [03-evidence-verification.md](../phases/03-evidence-verification.md)
 - **3a CSA vs Autoline（2026-11-09）：** **不删** 3a CSA、不改 14→13。3a CSA 排除 JobAPI（人工账号开关房/调价）；`csa-online-hours-lite` 保留 JobAPI（自动上下线时长，D6）。双轨互补，禁止互相否定。见 [csa-online-hours-lite/README.md](../sql/csa-online-hours-lite/README.md)
 - **Autoline 报告节（2026-11-09 / 2026-11-10）：** 对齐限流 **必留节**；checker 硬要求 H4 + 证据行。无 `{sid_list}` / 未跑用写法 1（表头保留、一行 `—`、解读写未查）。禁止删整节。**不要**再写「CSA 自动上下线备注」段落。
 
@@ -172,6 +173,7 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 | **L2L 升级或降级**（`last_level`（LAG(level)）≠ `level`） | **中～强** → Dida 面纱主因候选；**禁止标弱**。数字变大 = 降级（2→3，跌产同向），数字变小 = 升级（2026-10-08） |
 | L2L 等级未变（3→3 / 仅刷新惩罚） | **弱** / 背景 |
 | 仅小幅调价 **且** B 不同向 | **弱** → 记录，不单定责 |
+| **C/CDH 降价** + 前段兜底命中率≥70% + 降幅不到 15pp | 该行 **弱 / 未兑现** |
 | 2b=C/Dida，Phase 3 **无任何配置**、查价正常 | → 支持 **C**，交报告收口。**有 CBD/C 加价不得走本条** |
 
 ### 5.4 CDH/LCDH/SH 酒店级对比

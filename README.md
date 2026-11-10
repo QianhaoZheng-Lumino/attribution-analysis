@@ -47,7 +47,7 @@ MCP：Cursor Settings → MCP，或自己的 `~/.cursor/mcp.json`。URL / `agent
 4. 「为什么掉 / 归因」且门禁过，**并且有 `client_id`**（或 parent 下已锁定 focus）才自动 Phase 2–4。大盘禁止自动 3a / 在线时长 / 限流。
 5. 报告：复制 `phases/04-report-skeleton.md` 只填空。先跑 `python scripts/check-report-skeleton.py 报告.md`，通过后再跑 `python scripts/render-report-html.py 报告.md`，得到同名 HTML。检查或渲染失败则不写 HTML。ES 人话见 `docs/es-writing.md`；后续动作编号见 `docs/es-cause-catalog.md`。不要抄 gold 的旧 3a 表头。
 6. `execute_sql` 只 Read lite 原文填占位符；一次调用一个文件。语句里不要出现 `--` 或 `#`（`/* */` 内部也不要）。禁止 14 路 UNION。SH / SS `01-ss-supplier` / 限流 `01-ss-supplier-window` **必填 `{sid_list}`**（结构 SID；禁止空 `IN ()`）。SH 禁止 `clientid`。禁止全表 LIMIT 50 写结构 SID「未覆盖/未返回」。
-7. CS 含供应商白名单日志（与开关同一行，不新开 level）。只统计 I/D，不计算 U。#3 DidaBase 没有，CS 查价用 SS 近似。LCDH 叫击穿兜底名单，不是白名单。
+7. CS 含供应商白名单日志（与开关同一行，不新开 level）。只统计 I/D，不计算 U。#3 DidaBase 没有，CS 查价用 SS 近似。LCDH 叫击穿兜底名单，不是白名单。**C/CDH 降价**要查订单兜底命中率（`bottom_margin`）；前段≥70% 且降幅不到 15pp → 该行弱/未兑现。
 8. 口径入口是 `SKILL.md`，不是 backlog。回归只用 `examples/gold-*.md`。
 9. **装完先做「权限自测」**（下一节）。不同账号表权限不同；缺表就缺对应证据线，不要等跑到 Phase 3 才发现。
 
@@ -121,6 +121,7 @@ configuration.wolf_rateadjust_hotel_log
 configuration.wolfl2lclientlevelconfiglog
 configuration.wolfl2lconfiglog
 configuration.bottom_margin_log
+booking.channel_booking_reate_adjust
 configuration.client_configuration_change_log
 ods.ods_hotel_configuration_client_supplier_whitelist_log_d_i
 ads.ads_hotel_monitor_rate_search_statistic_by_client_id
