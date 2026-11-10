@@ -369,7 +369,7 @@ SOP 第 6b 步整行换成：
 
 ```markdown
 6b. 辅助（在线时长）：`online-hours-lite/03-window-avg.sql` 在查数波次 W2 发送，不必等查价 WoW（**必填 client_id**；窗口 = Phase 1；**禁止 `AT TIME ZONE`**）。禁止手算。MCP 500 才 fallback 拉 log + `scripts/test-online-hours.py`。**异动：日均少 ≥1.5h**。source/remark 用 `04-window-source.sql`（`TIMESTAMPTZ '...+08'` 直接比较）。**邮件解析** 可信；**数据库分析** 仅辅助。**因果：在线↓→查价↓ only**。见 [online-hours-mapping.md](../docs/online-hours-mapping.md)
-6c. 辅助（CSA 自动上下线）：与 [03-evidence-verification.md](../phases/03-evidence-verification.md) §6c 同文；`csa-online-hours-lite/03`+`02` 拆开；结构 `{sid_list}` 必出；因果见 catalog **D6**；不得改 14→13
+6c. 辅助（CSA 自动上下线）：与 [03-evidence-verification.md](../phases/03-evidence-verification.md) §6c 同文；`csa-online-hours-lite/03`+`02` 拆开；结构 `{sid_list}` 必出；因果见 catalog **D6**；**已拍不删** 3a CSA / 14→13
 ```
 
 MCP 注意里这条：

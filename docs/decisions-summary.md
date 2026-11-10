@@ -139,6 +139,8 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - **输出配置证据清单 + 信号强度解读**，**不做**单一「30% 自动确认 Dida」公式
 - MCP 大 SQL 易 500 → 用 **`config-change-detection-lite/`** 分批查
 - **机构供应商白名单（#23）：** 现为当前配置、非日志 → **不进 3a**；等改成 log 后再纳入
+- **3a CSA vs Autoline（2026-11-09）：** **不删** 3a CSA、不改 14→13。3a CSA 排除 JobAPI（人工账号开关房/调价）；`csa-online-hours-lite` 保留 JobAPI（自动上下线时长，D6）。双轨互补，禁止互相否定。见 [csa-online-hours-lite/README.md](../sql/csa-online-hours-lite/README.md)
+- **Autoline 报告节（2026-11-09）：** 对齐限流 **必留节**；checker 硬要求 H4 + 证据行。无 `{sid_list}` / 未跑用写法 1（表头保留、一行 `—`、解读写未查）。禁止删整节。
 
 ### 5.2 14 类 Level（查优先级顺序）
 

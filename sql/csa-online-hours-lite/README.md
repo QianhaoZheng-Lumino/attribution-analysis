@@ -5,7 +5,7 @@
 
 **业务含义：** Autoline——准确率等指标触发账号自动下线，过一段时间再上线。本指标量开闭折成的小时数。  
 **与渠道「在线时长」不同：** 渠道用 `rateaccuracy.channel_online_states_new`（整渠）；本节用 CSA 日志（client × supplier × account）。  
-**与 3a CSA 行的关系：** 现行 3a CSA detail **外层排除 JobAPI**，偏向人工/非自动操作；Autoline 时长**必须保留 JobAPI 行**（自动上下线常记在 JobAPI 下）。二者读法不同；**本目录挂接不得删改 3a CSA / 不得改 14→13**（见文末）。
+**与 3a CSA 行的关系：** 现行 3a CSA detail **外层排除 JobAPI**，偏向人工/非自动操作；Autoline 时长**必须保留 JobAPI 行**（自动上下线常记在 JobAPI 下）。二者读法不同；**已拍不删 3a CSA / 不改 14→13**（见文末）。
 
 ## 何时查（出数，与限流同一套）
 
@@ -36,7 +36,7 @@
 ## 报告位置
 
 `### 3b 查价` 下：`#### 限流/缓存` / `#### 在线时长`（渠道）旁 → **`#### CSA 自动上下线`**。  
-证据对照表可加一行同名（checker：**有证据结果才强制 H4**；不强制旧案必有该行）。
+证据对照表**必有**同名一行（checker：成品**必有** H4，对齐限流；无 `{sid_list}` / 未跑用写法 1：一行 `—` + 解读「未查」）。
 
 ## 文件
 
@@ -92,11 +92,10 @@ Step D  需要日形时再跑 01-daily-account（series_start/end = 对比或当
 | `04-report` / `03` 追加出数与解读 | ✅ 追加条目 | 不改 14/14、不删 CSA level |
 | `02` W2 列表追加本目录文件 | ✅ 追加 | 不改 W2 五条上限语义 |
 | `params-template` `{sid_list}` 用途加本目录 | ✅ 追加 | 不改 SH/SS/限流定义 |
-| `check-report-skeleton.py` | ✅ 条件强制 | 证据行已有 Autoline 结果 → 必须有 H4；有 H4 → 校验表头；**不**把该行加入全局必填 `EVIDENCE_ROWS`（旧案无行仍 PASS） |
-| 3a CSA checklist/detail、14→13 | ❌ | 单独开一轮 |
+| `check-report-skeleton.py` | ✅ **硬门**（对齐限流） | 成品必有 H4 + 证据对照表「CSA 自动上下线」行；有 H4 → 校验表头；无 SID/未跑用写法 1，禁止删节 |
+| 3a CSA checklist/detail、14→13 | ❌ | **已拍不删**（见下） |
 | 80% Pareto SQL | ❌ | 过渡仍用 BKS≥5 |
 
-## 待拍板 / 高风险：删除 3a CSA（14→13）
+## 已拍：不删 3a CSA（保持 14 类 + Autoline 双轨）
 
-若删 checklist 第 4 行 CSA，会动：`phases/03` / skeleton 3a / checker「14 行」硬锁 / 全部 gold·case / 出门禁文案。  
-**不要与本目录挂骨架同一提交。** 先 Autoline 出数稳定，再单独开一轮并抽查历史案 3a 非 JobAPI 行是否仍有业务价值。
+2026-11-09 摸底后否决 14→13。理由：3a CSA **排除 JobAPI**，抓人工账号开关房/调价；Autoline **保留 JobAPI**，抓自动上下线时长。二者互补，不可互相否定。历史案（如 HopperCap1TPS 2026-08-04 CSA「LTB差」关账号约占掉量 10%）证明人工 CSA 仍有定责价值。删除会动 skeleton/checker/全部 gold·case，且系统性漏人工变更。**保持 14/14；不再重开删 CSA。**

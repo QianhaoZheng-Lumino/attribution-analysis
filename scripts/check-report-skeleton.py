@@ -59,6 +59,7 @@ EVIDENCE_ROWS = [
     "B SS",
     "限流",
     "在线时长",
+    "CSA 自动上下线",
     "D 外部",
     "C 准确率",
 ]
@@ -251,24 +252,6 @@ def col0(rows: list[list[str]]) -> list[str]:
 def has_daily_hours(value: str) -> bool:
     """22.07h 与 22.07小时 都算可比较日均。"""
     return bool(re.search(r"\d+(?:\.\d+)?\s*(?:h|小时)", value, re.I))
-
-
-def csa_autoline_has_result(note: str) -> bool:
-    """证据行已写出 Autoline 结果（有数）才算；未查/未验不算。
-
-    认：±N.h / Nh、Δh 数字、Autoline/自动上下线 + 异动。
-    不把证据对照表行名本身当成结果。
-    """
-    text = strip_md(note).replace("−", "-").replace("－", "-")
-    if "未查" in text or "未验" in text:
-        return False
-    if re.search(r"[+-]?\d+(?:\.\d+)?\s*h\b", text, re.I):
-        return True
-    if re.search(r"Δh\s*[+-]?\d+(?:\.\d+)?", text, re.I):
-        return True
-    if re.search(r"(?:Autoline|自动上下线)", text) and ("异动" in text):
-        return True
-    return False
 
 
 def row_value(rows: list[list[str]], label: str) -> str:
@@ -489,10 +472,11 @@ def check_file(path: Path) -> list[str]:
                 if strip_md(req) not in got_oh:
                     errs.append(f"在线时长缺行：{req}")
 
-    # CSA Autoline：条件强制（有证据结果才要求 H4；旧案无行/未查仍 PASS）
-    # 出数门与限流同属 sid_list；checker 第一刀不硬要求每案都有节。
+    # CSA Autoline：对齐限流，成品必有 H4（无 sid_list / 未跑用写法 1 占位，禁止删节）
     h_csa = find_heading_line(text, "#### CSA 自动上下线", 4)
-    if h_csa:
+    if not h_csa:
+        errs.append("缺 H4：#### CSA 自动上下线（结构 SID 必出数；与限流同必留节）")
+    else:
         expect_header(h_csa, "CSA 自动上下线")
 
     rows3c = expect_header("### 3c 准确率", "3c 准确率")
@@ -558,14 +542,6 @@ def check_file(path: Path) -> list[str]:
                 break
         if has_daily_hours(online_note):
             errs.append("在线时长证据里有日均，缺 H4：#### 在线时长")
-    if not h_csa:
-        csa_note = ""
-        for row in rows_ev:
-            if row and strip_md(row[0]) == "CSA 自动上下线" and len(row) > 1:
-                csa_note = strip_md(" ".join(row[1:]))
-                break
-        if csa_autoline_has_result(csa_note):
-            errs.append("CSA 自动上下线证据里已有结果，缺 H4：#### CSA 自动上下线")
     if not has_external:
         external_note = ""
         for row in rows_ev:
