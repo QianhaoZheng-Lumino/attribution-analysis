@@ -377,13 +377,16 @@ def check_file(path: Path) -> list[str]:
     if extra_es:
                 errs.append(f"ES 多余键（禁止改成「并列 S」「后续动作 P0」等）: {extra_es}")
 
-    # #5：ES 后续动作须目录编号；skeleton 占位符豁免
+    # #5：ES 后续动作须极简目录编号；禁止在 ES 展开箭头原因链
     es_follow = ""
+    es_exclude = ""
     for line in es.splitlines():
         m = re.match(r"^-\s+\*\*后续动作：\*\*\s*(.*)$", line.strip())
         if m:
             es_follow = m.group(1).strip()
-            break
+        m2 = re.match(r"^-\s+\*\*已排除：\*\*\s*(.*)$", line.strip())
+        if m2:
+            es_exclude = m2.group(1).strip()
     if not es_follow:
         errs.append("ES 缺「后续动作」内容")
     elif re.search(r"\{A#", es_follow):
@@ -393,9 +396,23 @@ def check_file(path: Path) -> list[str]:
         es_follow,
     ):
         errs.append(
-            "ES 后续动作须含「目录」+ 编号（A1–A7 / B1–B4 / C1–C3 / D1–D7 / E1）；"
-            "先 Read docs/es-cause-catalog.md"
+            "ES 后续动作须含极简「目录」+ 编号（A1–A7 / B1–B4 / C1–C3 / D1–D7 / E1）；"
+            "先 Read docs/es-cause-catalog.md；业务句在前，不要在 ES 展开原因链"
         )
+    if es_follow and not re.search(r"\{A#", es_follow):
+        if re.search(r"禁止写成已确认|→\s*(供应商|渠道|对内|主因|并列)", es_follow):
+            errs.append(
+                "ES 后续动作禁止展开「→ 原因链」或「禁止写成已确认」；"
+                "只保留问谁问什么 + 末尾「目录 **A#**」。详见 docs/es-writing.md"
+            )
+    if es_exclude and not re.search(r"^\{", es_exclude):
+        # 一句人话：分号/句号分段过多则偏清单
+        parts = [p for p in re.split(r"[；;]", es_exclude) if p.strip()]
+        if len(parts) >= 4:
+            errs.append(
+                "ES「已排除」须一句人话（最多挡 1～2 个误判点）；"
+                "不要写成黑话清单。详见 docs/es-writing.md"
+            )
 
     # Table headers + required row labels
     def expect_header(section_heading: str, key: str) -> list[list[str]]:
