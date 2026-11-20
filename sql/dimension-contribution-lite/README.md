@@ -13,7 +13,7 @@ lite 是 2b 定责和 2c 下钻的依据。
 Step 0  按 ../params-template.md 计算日期 → 填入占位符
 Step 1  01-total.sql           → 总量变化（可选，不挡 W1）
 Step 2  02-sid.sql             → 【必做】W1。回来之前不发 W2、W3
-Step 2b 14-sid-client-validation.sql → W2：门 1，过线 SID（≥10%）每家一次，优先占批次名额
+Step 2b 14-sid-client-validation.sql + 14-sid-client-validation-rise.sql → W2：门 1，过线 SID（≥10%）跌尾+涨尾各一次，优先占批次名额
 Step 3  2b 方向写出后按 W3 发送该方向文件（C/Dida 或 S/CS，禁止两个方向一起发）
 Step 4  Agent 本地算贡献%（分母见下，禁止一律 / total_change）
 ```
@@ -26,7 +26,8 @@ Step 4  Agent 本地算贡献%（分母见下，禁止一律 / total_change）
 
 统计 `previous_bookings >= 5` 的 supplier。占比分母 = 本 client `|ΔBKS|`。
 
-- **门 1：** 任一 SID 占 `|ΔBKS|` **≥10%** → **必跑** `14-sid-client-validation.sql`（过线 SID 每家一次）。**禁止**因家数 ≥70% 跳过 B。无 SID ≥10% 才可跳过 B。
+- **门 1：** 任一 SID 占 `|ΔBKS|` **≥10%** → **必跑** 跌尾 `14-sid-client-validation.sql` **与** 涨尾 `14-sid-client-validation-rise.sql`（过线 SID 各一次，共两文件）。**禁止**因家数 ≥70% 跳过 B。无 SID ≥10% 才可跳过 B。
+- **验证 B 截断：** 跌尾 ASC / 涨尾 DESC 各 `LIMIT 100`。两结果合并后仍不含 focus `client_id` → 该 SID 写「截断未覆盖 / 结构待验证」，**禁止**写「已验」或「平台无变化」。只跑跌尾不算已验。
 - **门 2：** 写死 C/Dida 须家数同向 **≥70%** 且 **没有** 单 SID ≥50%。否则禁止写死，用 B 判 S 或 CS。
 - 写死 C/Dida 后 B 可并列 S/CS，不翻主因。禁止用「某 SID 的 B 是 CS」否决门 2。
 
@@ -43,7 +44,7 @@ Account 行当 **占该 SID 变化** `|contribution_pct| >= 10%` 写入报告（
 
 | 层 | 文件 | 留行规则 |
 |----|------|---------|
-| **定责** | `02-sid`、`14-sid-client-validation` | **对比期 ≥ 5**，不动 |
+| **定责** | `02-sid`、`14-sid-client-validation`（跌尾）、`14-sid-client-validation-rise`（涨尾） | **对比期 ≥ 5**，不动 |
 | **2c 结构** | `03/05/07/13` | 当前 ≥3 **或** 对比 ≥3 |
 | **2c 结构** | `04/06/12` | 当前 ≥10 **或** 对比 ≥10 |
 | **LT / LOS** | `08/09/10/11` | 不按对比期卡新建 |
@@ -76,7 +77,8 @@ SQL：`ORDER BY ABS(SUM(当前窗) - SUM(对比窗)) DESC`。**禁止** `ORDER B
 | 11-sid-los.sql | 11_SID+LOS | S/CS 结构 |
 | 12-nationality.sql | 12_Nationality | 结构 |
 | 13-sid-nationality.sql | 13_SID+Nationality | S/CS 结构 |
-| 14-sid-client-validation.sql | — | cross-validation B lite |
+| 14-sid-client-validation.sql | — | cross-validation B lite（跌尾 ASC） |
+| 14-sid-client-validation-rise.sql | — | cross-validation B lite（涨尾 DESC） |
 
 ## 已知限制
 

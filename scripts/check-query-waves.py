@@ -51,6 +51,7 @@ def main() -> int:
         "### W3",
         "### W4",
         "14-sid-client-validation.sql",
+        "14-sid-client-validation-rise.sql",
         "禁止两个方向一起投机跑",
         "同一轮最多 5 条",
     ):

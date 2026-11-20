@@ -82,7 +82,7 @@
 | 外部 D | `external-events-lite/01-single-country-window.sql` | ✅ | — |
 | Phase 1 | `anomaly-detection-lite/` 01–03 | ✅ | 勿跑完整 anomaly-detection.sql |
 | Phase 2a | `dimension-contribution-lite/` | ✅ | 勿跑完整 dimension-contribution.sql |
-| 2b 验证 B | `14-sid-client-validation.sql` | ✅ | `{sid}` 是整数 `supplier_id`。勿跑 `cross-validation-b.sql` |
+| 2b 验证 B | `14-sid-client-validation.sql` + `14-sid-client-validation-rise.sql` | ✅ | `{sid}` 是整数 `supplier_id`。跌尾 ASC + 涨尾 DESC 各 `LIMIT 100`；合并后无 focus → 截断未覆盖，勿写已验。勿跑 `cross-validation-b.sql` |
 
 ---
 

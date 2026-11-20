@@ -26,7 +26,7 @@ Phase 3    配置 / 查价验价 / 外部事件 D（`external-events-lite/`）�
 | 验证 | 数据 | 何时需要 |
 |------|------|---------|
 | **A** | 2a 结果中 `2_SID` 层级 | 总是 |
-| **B** | `dimension-contribution-lite/14-sid-client-validation.sql`。`{sid}` 是整数 `supplier_id`。不要跑 `cross-validation-b.sql` | **门 1：** 任一 SID 占本 client `|ΔBKS|` ≥10%（每家一次）。无 SID ≥10% 才跳过 |
+| **B** | `dimension-contribution-lite/14-sid-client-validation.sql`（跌尾）+ `14-sid-client-validation-rise.sql`（涨尾）。`{sid}` 是整数 `supplier_id`。不要跑 `cross-validation-b.sql` | **门 1：** 任一 SID 占本 client `|ΔBKS|` ≥10%（每家跌尾+涨尾各一次）。无 SID ≥10% 才跳过 |
 
 ### 判定（双门，见 responsibility-model.md）
 
@@ -90,7 +90,7 @@ Country（酒店国）与 Nationality（客源国）**并列展示**；同时异
 | 步骤 | SQL |
 |------|------|
 | 2a + 2c | `dimension-contribution-lite/` 按路径分批，不是完整 SQL 一次 |
-| 验证 B | `14-sid-client-validation.sql`，过线供应商每家一次 |
+| 验证 B | `14-sid-client-validation.sql` + `14-sid-client-validation-rise.sql`，过线供应商跌尾+涨尾各一次 |
 
 ## 明确不做
 

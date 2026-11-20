@@ -68,7 +68,7 @@
 
 下列文件互不依赖。按优先级每批 5 条，直到发完：
 
-1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额，好让 W3 少等。
+1. `14-sid-client-validation.sql` + `14-sid-client-validation-rise.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家跌尾+涨尾各一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额，好让 W3 少等。
 2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个 level 文件，另加 `checklist/01-cs-whitelist.sql`（并进第 1 行 CS，不新开 level）。含结果为 0 的也要发。白名单不因 `{sid_list}` 为空而跳过。
 3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`；`{sid_list}` 已填时再加 `sql/csa-online-hours-lite/03-window-avg.sql`、`sql/csa-online-hours-lite/02-account-bks.sql`（Autoline；两文件拆开）。
 

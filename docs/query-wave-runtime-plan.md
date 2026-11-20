@@ -88,6 +88,7 @@ def main() -> int:
         "### W3",
         "### W4",
         "14-sid-client-validation.sql",
+        "14-sid-client-validation-rise.sql",
         "禁止两个方向一起投机跑",
         "同一轮最多 5 条",
         "04-country.sql",
@@ -160,7 +161,7 @@ Expected: FAIL，并指出 SKILL.md 与 Phase 2 缺「查数波次」。
 
 下列文件互不依赖。按优先级每批 5 条，直到发完。同一轮最多 5 条：
 
-1. `14-sid-client-validation.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额。
+1. `14-sid-client-validation.sql` + `14-sid-client-validation-rise.sql`：只对占 `|ΔBKS| ≥ 10%` 的 SID，每家跌尾+涨尾各一条。没有这样的 SID 就跳过，并写「无 SID≥10%，跳过」。这些验证 B 优先占用前面批次的名额。
 2. `sql/config-change-detection-lite/checklist/01-cs.sql` 到 `14-configuration.sql`，共 14 个 level 文件，另加 `checklist/01-cs-whitelist.sql`（并进第 1 行 CS，不新开 level）。含结果为 0 的也要发。白名单不因 `{sid_list}` 为空而跳过。
 3. 其余各一条：`02-client-before-after-bks.sql`、`sql/online-hours-lite/03-window-avg.sql`、`sql/rate-limit-lite/01-ss-supplier-window.sql`、`sql/search-attribution-lite/01-ss-supplier.sql`；`{sid_list}` 已填时再加 `sql/csa-online-hours-lite/03-window-avg.sql`、`sql/csa-online-hours-lite/02-account-bks.sql`（Autoline；两文件拆开）。
 
@@ -191,7 +192,7 @@ Expected: FAIL，并指出 SKILL.md 与 Phase 2 缺「查数波次」。
 ```markdown
 ```
 - [ ] W1：dimension-contribution-lite/02-sid.sql（回来之前不发 W2、W3）
-- [ ] W2：验证 B（过线 SID 每家一次；无则写「无 SID≥10%，跳过」）+ checklist 与「查数波次」W2 其余文件
+- [ ] W2：验证 B（过线 SID 跌尾+涨尾各一次；无则写「无 SID≥10%，跳过」）+ checklist 与「查数波次」W2 其余文件
 - [ ] W3：2b 方向写出后，只发该方向的 2c 文件（C/Dida 5 个或 S/CS 6 个）— 缺任一 → 2c_progress 未达标
 - [ ] 2b-A 读 2_SID → 定责方向
 - [ ] 2c 写入报告（Country+Chain 表；LT/LOS/Nationality 段落）
@@ -273,6 +274,7 @@ def main() -> int:
         "### W3",
         "### W4",
         "14-sid-client-validation.sql",
+        "14-sid-client-validation-rise.sql",
         "禁止两个方向一起投机跑",
         "同一轮最多 5 条",
     ):
@@ -393,7 +395,7 @@ MCP 注意里这条：
 Step 0  按 ../params-template.md 计算日期 → 填入占位符
 Step 1  01-total.sql           → 总量变化（可选，不挡 W1）
 Step 2  02-sid.sql             → 【必做】W1。回来之前不发 W2、W3
-Step 2b 14-sid-client-validation.sql → W2：门 1，过线 SID（≥10%）每家一次，优先占批次名额
+Step 2b 14-sid-client-validation.sql + 14-sid-client-validation-rise.sql → W2：门 1，过线 SID（≥10%）跌尾+涨尾各一次，优先占批次名额
 Step 3  2b 方向写出后按 W3 发送该方向文件（C/Dida 或 S/CS，禁止两个方向一起发）
 Step 4  Agent 本地算贡献%（分母见下，禁止一律 / total_change）
 ```

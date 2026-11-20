@@ -15,14 +15,14 @@
 
 ```
 验证 A（总是）：Client C 下各 supplier → 2a 的 2_SID 层级
-验证 B（门 1）：MCP 只跑 `14-sid-client-validation.sql`，`{sid}` 是整数 `supplier_id`。不要跑 `cross-validation-b.sql`。
+验证 B（门 1）：MCP 跑跌尾 `14-sid-client-validation.sql` + 涨尾 `14-sid-client-validation-rise.sql`，`{sid}` 是整数 `supplier_id`。不要跑 `cross-validation-b.sql`。
 ```
 
 **有效 SID：** `previous_bookings >= 5`。占比分母 = 本 client `|ΔBKS|`（与 2a `02-sid` 贡献% 相同）。跌产/涨产同一套门（同向 = 降或涨）。
 
 | 门 | 观测 | 动作 |
 |----|------|------|
-| **门 1 必跑 B** | 任一有效 SID 占本 client `|ΔBKS|` **≥10%** | **必跑验证 B**（过线 SID 每家各一次；MCP 一家一次 lite） |
+| **门 1 必跑 B** | 任一有效 SID 占本 client `|ΔBKS|` **≥10%** | **必跑验证 B**（过线 SID 跌尾+涨尾各一次 lite） |
 | **门 1 跳过 B** | **没有** SID ≥10% | 才可跳过 B |
 | **门 2 写死 C/Dida** | 家数同向 **≥70%** 且 **没有** 单 SID ≥50% | 才允许写 **C 或 Dida** |
 | **门 2 禁止写死** | 家数 <70%，或单 SID ≥50% | **禁止**写死 C/Dida；用验证 B 判 **S** 或 **CS** |
@@ -75,6 +75,6 @@
 | 步骤 | 文件 |
 |------|------|
 | 2a 贡献度 | sql/dimension-contribution-lite/ |
-| 2b 验证 B | sql/dimension-contribution-lite/14-sid-client-validation.sql |
+| 2b 验证 B | sql/dimension-contribution-lite/14-sid-client-validation.sql（跌尾）+ 14-sid-client-validation-rise.sql（涨尾） |
 | 2c 下钻 SOP | phases/02c-drilldown.md |
 | 全流程 | phases/02-dimension-drilldown.md |
