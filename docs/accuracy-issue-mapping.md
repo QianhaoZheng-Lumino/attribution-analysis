@@ -6,7 +6,7 @@
 
 1. **配置变更不影响验价准确率。** 不得用 14 类配置清单、限流表、在线时长表去「解释」准确率变化。
 2. **准确率反映接口问题 / 技术指标**，不是 Dida 配置定责线。
-3. 验价（precheck / RP / Prebook）**只有一张表**，1:1 发 supplier；按 `supplier_id` 等维度区分。见用户 SQL2。
+3. 验价（precheck / RP / Prebook）按 `supplier_id` 等维度区分；**准确率贡献**与 **issue 下钻**分表，禁止混用字段。见用户 SQL2。
 
 ---
 
@@ -14,16 +14,21 @@
 
 | 表 | 用途 |
 |----|------|
-| `data_ovs.rate_accuracy_channel_multi_dimension` | 验价多维明细 + issue 字段 |
+| `data_ovs.rate_accuracy_channel_multi_dimension` | 准确率贡献（`01-total`～`13-*`）：`precheck` / `success_precheck` |
+| `rateaccuracy.rate_accuracy_channel` | **issue 下钻专用**（`issue/01`、`issue/02`）：请求级明细 |
 | 用户 SQL2 | 准确率贡献度（13 层 GROUPING SETS） |
-| `sql/rate-accuracy-contribution.sql` | BI 完整版 |
-| `sql/rate-accuracy-contribution-lite/` | MCP 分批 + `issue/` 下钻 |
+| `sql/rate-accuracy-contribution.sql` | BI 完整版（贡献，不跑 issue） |
+| `sql/rate-accuracy-contribution-lite/` | MCP 分批；`issue/` 走明细表 |
 
-字段：
+**贡献表字段：** `precheck` / `success_precheck` → total_rp / success_rp。汇总表**没有** `is_request_chain` / `issue_type` / `issue_id`。
 
-- `precheck` / `success_precheck` → total_rp / success_rp
-- `is_request_chain = True` → 用 `issue_type_chain` / `issue_id_chain`
-- 否则 → `issue_type` / `issue_id`
+**issue 明细字段：**
+
+- `is_request_chain = True` → 用 `issue_type_chain` / `issue_id_chain` / `issue_desc_chain`
+- 否则 → `issue_type` / `issue_id` / `issue_desc`
+- 按请求计数（`SUM(1)`，输出列仍名 `current_precheck` / `previous_precheck` 以兼容报告读数）
+- 北京时间窗：`log_time` 与 `TIMESTAMPTZ '...+08'` 比较；**禁止**对 `log_time` 写 `AT TIME ZONE`
+- 明细表**没有** `issue_id_channel_cn`；报告中文优先按下表码表映射 `issue_id`，`issue_desc` 仅辅助
 
 **下钻优先级：`issue_type`（粗）→ `issue_id`（细）。** `error_type` 为渠道/API 错误码，辅助参考。
 
@@ -41,7 +46,7 @@
 
 ---
 
-## issue_id（细，中文报告用 issue_id_channel_cn）
+## issue_id（细，中文报告用本码表；勿依赖不存在的 issue_id_channel_cn）
 
 ### 1xxx — 超时/异常（≈ issue_type 10）
 
@@ -134,7 +139,8 @@ Read 01-total.sql 原文 → MCP（必填 client_id，同 Phase 1 窗）
 
 ③ issue 细因
    issue/02-issue-id.sql（建议 AND issue_type = 上步 Top）
-   → 用 issue_id_channel_cn 写报告（见上文码表）
+   → **硬规则：** 报告/ES 中文**只用**上文码表映射 `issue_id`
+   → **禁止**依赖不存在的 `issue_id_channel_cn`；**禁止**把 `issue_desc` 整段贴进报告/ES（仅排障看）
 
 ④ 合成
    准确率↓ + Timeout/30xx↑ → 并列技术指标（不推翻 2b/3a/3b）
@@ -172,5 +178,5 @@ BKS 异动
 
 ## MCP 注意
 
-`rate_accuracy_channel_multi_dimension` 大表；完整 GROUPING SETS 易 500。  
-**MCP：** `sql/rate-accuracy-contribution-lite/` 按 hierarchy 分批；issue 用 `issue/01-issue-type.sql`（仍可能需更窄过滤）。
+贡献走 `rate_accuracy_channel_multi_dimension`（完整 GROUPING SETS 易 500）；issue 走 `rateaccuracy.rate_accuracy_channel`（请求级，大 client 全窗也可能 500）。  
+**MCP：** `sql/rate-accuracy-contribution-lite/` 按 hierarchy 分批；issue 用 `issue/01-issue-type.sql` / `issue/02-issue-id.sql`。issue 仍 500 → 缩到锁定 SID + 更短窗。

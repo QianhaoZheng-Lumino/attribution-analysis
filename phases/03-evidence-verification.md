@@ -418,10 +418,10 @@ BKS 降
 | 资源 | 用途 |
 |------|------|
 | `sql/rate-accuracy-contribution.sql` | BI 完整版（13 层 + within_contribution_pp） |
-| `sql/rate-accuracy-contribution-lite/` | **MCP 分批** |
-| `rate-accuracy-contribution-lite/issue/` | issue_type → issue_id |
+| `sql/rate-accuracy-contribution-lite/` | **MCP 分批**（贡献仍走汇总表） |
+| `rate-accuracy-contribution-lite/issue/` | issue_type → issue_id（**明细表** `rateaccuracy.rate_accuracy_channel`） |
 
-验价 1:1 发 supplier。**准确率不受配置影响**，见 [accuracy-issue-mapping.md](../docs/accuracy-issue-mapping.md)。
+验价 1:1 发 supplier。**准确率不受配置影响**。issue 禁止再查汇总表无字段。见 [accuracy-issue-mapping.md](../docs/accuracy-issue-mapping.md)。
 
 ---
 

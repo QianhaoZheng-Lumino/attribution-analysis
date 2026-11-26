@@ -89,8 +89,9 @@ Phase 1/2 订单产量用上一张 `dwd` 表 + `execute_sql`。不要改回旧�
 
 | 表名 | 用途 | 关键字段 |
 |------|------|---------|
-| `data_ovs.rate_accuracy_channel_multi_dimension` | 验价多维 + issue 下钻 | precheck, success_precheck, issue_type, issue_id, supplier_id, log_date, dt |
-| `sql/rate-accuracy-contribution.sql` | BI 完整版 | within_contribution_pp |
+| `data_ovs.rate_accuracy_channel_multi_dimension` | 准确率贡献（lite `01`～`13`） | precheck, success_precheck, supplier_id, log_date, dt（**无** issue 字段） |
+| `rateaccuracy.rate_accuracy_channel` | issue 下钻（lite `issue/01`、`issue/02`） | log_time, client_id, is_request_chain, issue_type, issue_id, issue_*_chain, issue_desc |
+| `sql/rate-accuracy-contribution.sql` | BI 完整版（贡献） | within_contribution_pp |
 | `sql/rate-accuracy-contribution-lite/` | MCP 分批 | 见目录 README |
 
 验价 1:1 supplier，**无单独 supplier 验价表**。issue 映射见 [docs/accuracy-issue-mapping.md](docs/accuracy-issue-mapping.md)。

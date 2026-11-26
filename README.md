@@ -95,7 +95,8 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 | P1 | `public.clientsupplierhotelcallcountsummary` | SS 查价（CS 近似）看不了 |
 | P1 | `data_ovs.didamonitor_funnel_client_country` | ads 失败时国家 PPS 没退路 |
 | P1 | `data_ovs.didamonitor_funnel_client_chain` | 连锁查价下钻失败 |
-| P1 | `data_ovs.rate_accuracy_channel_multi_dimension` | **验价准确率整条断** |
+| P1 | `data_ovs.rate_accuracy_channel_multi_dimension` | 准确率贡献（01～13）断 |
+| P1 | `rateaccuracy.rate_accuracy_channel` | **issue 粗/细因断** |
 | P1 | `public.clientloscallcount` | QPS × LOS 次要下钻 |
 | P1 | `public.clientleadtimecallcount` | QPS × leadtime 次要下钻 |
 | P1 | `public.clientnationalitycallcount` | QPS × nationality 次要下钻 |
@@ -110,7 +111,7 @@ SELECT 1 AS ok FROM <schema.table> LIMIT 1
 | `dws.dws_hotel_flow_didamonitor_supplier_csa_di` | SS 限流 / 缓存做不了 |
 | `ads.ads_marketing_calendar_event_wide_d_f` | Phase 3d 节假日外部事件做不了 |
 
-**一次性复制（21 张）：**
+**一次性复制（22 张）：**
 
 ```
 dwd.dwd_hotel_order_channel_supplier_booking_mf
@@ -129,6 +130,7 @@ public.clientsupplierhotelcallcountsummary
 data_ovs.didamonitor_funnel_client_country
 data_ovs.didamonitor_funnel_client_chain
 data_ovs.rate_accuracy_channel_multi_dimension
+rateaccuracy.rate_accuracy_channel
 public.clientloscallcount
 public.clientleadtimecallcount
 public.clientnationalitycallcount

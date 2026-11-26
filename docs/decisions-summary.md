@@ -270,6 +270,13 @@ Phase 4  报告收口（合成报告；数据说不清 → 查 es-cause-catalog�
 - **禁止**用 precheck 量代替；MCP 失败标未验，不得写无异常
 - 启动后不推翻 2b/3a/3b；准确率↑禁止解释涨产。全文：[accuracy-issue-mapping.md](./accuracy-issue-mapping.md)
 
+### 5.12a issue 模板数据源纠正（2026-11-26）
+
+- **问题：** `issue/01`、`issue/02` 原从汇总表 `data_ovs.rate_accuracy_channel_multi_dimension` 读 `is_request_chain` / `issue_type` / `issue_id`，该表无这些字段，严格执行必失败
+- **定稿：** issue 改走 `rateaccuracy.rate_accuracy_channel`；按请求计数；保留查验链 CASE；北京窗 `TIMESTAMPTZ '...+08'`（禁止对 `log_time` 写 `AT TIME ZONE`）
+- **中文：** 明细无 `issue_id_channel_cn` → 报告用码表映射 `issue_id`；`issue_desc` 仅辅助
+- **贡献 SQL（01～13）仍用汇总表**，不变
+
 ### 5.9 SS 限流率 / 缓存命中率（2026-09-04 更新）
 
 - 表：`dws.dws_hotel_flow_didamonitor_supplier_csa_di`；lite：`sql/rate-limit-lite/`

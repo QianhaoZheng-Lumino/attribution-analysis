@@ -57,13 +57,21 @@ lite 各层文件输出 `item_accuracy_delta_pp` 与 `previous_precheck`，Agent
 | issue/01-issue-type.sql | — | issue_type 粗因 |
 | issue/02-issue-id.sql | — | issue_id 细因 |
 
+## issue 数据源（硬规则）
+
+- **贡献**（`01`～`13`）→ `data_ovs.rate_accuracy_channel_multi_dimension`
+- **issue**（`issue/01`、`issue/02`）→ `rateaccuracy.rate_accuracy_channel`（请求级；按请求计数；北京窗 `TIMESTAMPTZ '...+08'`）
+- 汇总表无 `is_request_chain` / `issue_type` / `issue_id`，禁止再对汇总表跑 issue
+- 明细无 `issue_id_channel_cn`；报告/ES 中文**只用** [accuracy-issue-mapping.md](../../docs/accuracy-issue-mapping.md) 码表；禁止贴 `issue_desc`
+
 ## MCP 实测
 
 | 案例 | 文件 | 结果 |
 |------|------|------|
 | HBGPKG 2026-07-06 | 01-total | ✅ current_accuracy ≈ 94.35% |
+| VioMember 2026-09-18 | issue/01、issue/02 | ✅ 明细表按请求计数出 issue_type / issue_id |
 
-issue 下钻仍可能 500，需更窄过滤（单 supplier + 单日）。
+issue 大 client 全窗仍可能 500，需更窄过滤（单 supplier + 更短窗）。
 
 ## 参考
 
